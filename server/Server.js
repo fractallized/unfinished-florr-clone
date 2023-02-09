@@ -8,7 +8,7 @@ export class GameServer {
         this.tick = 0;
 
         setInterval(() => {
-            for (const map of this.maps) if (map.entities.size) map.tick();
+            for (const map of this.maps) if (Object.keys(map.entities).length) map.tick();
             this.tick++;
         }, 25);
         this.wss.on("connection", (ws, req) => {

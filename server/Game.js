@@ -27,7 +27,8 @@ class Server {
 }
 const _server = new Server()
 .addGetReq("/","client/index.html","text/html")
-.addGetReq("/index.js","client/index.js","application/javascript");
+.addGetReq("/index.js","client/index.js","application/javascript")
+.addGetReq("/input.js","client/input.js","application/javascript");
 const HTTPServer = createServer(_server.app);
 HTTPServer.listen(3000);
 
