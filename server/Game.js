@@ -9,7 +9,6 @@ class Server {
       this.app = express();
     }
     addGetReq(path, file, type) {
-      console.log(path, file, type);
       this.app.get(path, (_, res) => {
         res.setHeader("Content-Type", `${type}; charset=utf-8`);
         if (file && existsSync(file)) {
@@ -28,9 +27,11 @@ class Server {
 const _server = new Server()
 .addGetReq("/","client/index.html","text/html")
 .addGetReq("/index.js","client/index.js","application/javascript")
-.addGetReq("/input.js","client/input.js","application/javascript");
+.addGetReq("/input.js","client/input.js","application/javascript")
+.addGetReq("/canvas-helpers.js","client/canvas-helpers.js","application/javascript")
+.addGetReq("/websocket.js","client/websocket.js","application/javascript");
 const HTTPServer = createServer(_server.app);
-HTTPServer.listen(3000);
+HTTPServer.listen(8080);
 
 const Socket = new WebSocketServer({ server: HTTPServer });
 const Game = new GameServer(Socket);

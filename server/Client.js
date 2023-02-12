@@ -1,27 +1,33 @@
-import { Vector } from "./object/Vector.js";
 import { Player } from "./object/player/Player.js";
 import { Reader } from "./coder/Reader.js";
 import { Writer } from "./coder/Writer.js";
 import { compileEnt } from "./coder/PacketMaker.js";
+import { COMPONENTS } from "./object/Components.js";
+import { Arena } from "./game/Arena.js";
 
 export class Client {
     constructor(server, ws) {
         this.server = server;
         this._arena = null;
         this.ws = ws;
-        this.map = 0;
 
+        this.map = 0;
         this.input = 0;
-        this.camera = new Vector(0,0);
-        this.camera.fov = 1;
-        this.camera.player = -1;
+        this.camera = new COMPONENTS.CameraComponent(0,0,1,-1);
+        this.equipped = new Uint8Array(40).fill(1);
+        this.numEquipped = 5;
+
+        this.inventory = {
+            0:5
+        }; //separate packet send
 
         this.ws.onmessage = (req) => this.onmessage(req);
         this.ws.onclose = () => {
+            console.log("client left")
             this.server.remove(this);
-            if (this._arena) {
-                this._arena.remove(this);
-                if (this.player) this._arena.remove(this.player);
+            if (this._arena instanceof Arena) {
+                this._arena.removeClient(this);
+                if (this.player instanceof Player) this._arena.removeFromActive(this.player);
             }
         }
     }
@@ -30,10 +36,11 @@ export class Client {
             if (this.player) this.camera.set(this.player.pos.x, this.player.pos.y);
             const p = new Writer();
             p.u8(1);
-            for (const id of this._arena.deletions) p.i32(id);
+            for (const id of Object.keys(this._arena.deletions)) p.i32(id);
             p.i32(-1);
             compileEnt(p, this._arena);
-            for (const entity of Object.values(this._arena.entities)) !entity.pendingDelete && compileEnt(p, entity);
+            compileEnt(p, this);
+            for (const entity of Object.values(this._arena.entities)) compileEnt(p, entity);
             p.i32(-1);
             this.ws.send(p.write()); //clientbound
         }

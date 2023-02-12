@@ -1,3 +1,12 @@
+let input = 0;
+window.onmousedown = async ({ button }) => {
+    if (button === 0) input |= 16;
+    else input |= 32;
+}
+window.onmouseup = async ({ button }) => {
+    if (button === 0) input &= ~16;
+    else input &= ~32; 
+}
 window.onkeydown = async ({ code }) => {
     switch(code) {
         case "KeyD":
@@ -11,6 +20,7 @@ window.onkeydown = async ({ code }) => {
             break;
         case "KeyW":
             input |= 8;
+            break;
         case "Enter":
             if (ws.readyState === 1) ws.send(new Uint8Array([0]));
     }

@@ -1,106 +1,79 @@
-let input = 0;
 let entities = {};
 const ws = window.ws = new WebSocket(`ws${location.protocol.slice(4)}//${location.host}`);
-ws.onopen = () => ws.send(new Uint8Array([0]));
-
-
-ws.onmessage = async (e) => {
-    const packet = new Uint8Array(await e.data.arrayBuffer());
-    const r = new Reader(packet);
-    if (r.u8() === 1) {
-        let id = r.i32();
-        while (id !== -1 && r.has()) {
-            if (entities.hasOwnProperty(id)) delete entities[id];
-            id = r.i32();
-        }
-        id = r.i32();
-        while (id !== -1 && r.has()) {
-            const ent = {}
-            while(r.ru8() !== 255) {
-                switch(r.u8()) {
-                    case 0:
-                        ent.pos = {
-                            x: r.f32(),
-                            y: r.f32(),
-                            angle: r.f32()
-                        }
-                        break;
-                    case 1:
-                        ent.camera = {
-                            x: r.f32(),
-                            y: r.f32(),
-                            fov: r.f32(),
-                            player: r.i32()
-                        }
-                        entities.camera = id;
-                        break;
-                    case 2:
-                        ent.radius = r.f32();
-                        break;
-                    case 3:
-                        ent.arena = {
-                            width: r.f32(),
-                            height: r.f32()
-                        }
-                        entities.arena = id;
-                        break;
-                    case 4:
-                        ent.style = {
-                            color: r.u8()
-                        }
-                        break;
-                    case 5:
-                        ent.health = {
-                            health: r.f32(),
-                            maxHealth: r.f32()
-                        }
-                        break;
-                }
-            }
-            r.u8();
-            entities[id] = ent;
-            id = r.i32();
-        }
-    }
-}
-
 const canvas = document.getElementById('canvas'); 
 const ctx = canvas.getContext('2d');
 const loop = _ => {
+    ctx.globalAlpha = 1;
     ctx.resetTransform();
     canvas.width = window.innerWidth * devicePixelRatio;
     canvas.height = window.innerHeight * devicePixelRatio;
     if (entities.hasOwnProperty('camera') && entities.hasOwnProperty('arena')) {
-        const scale = Math.max(canvas.width/1920,canvas.height/1080);
+        //init canvas draw, and draw arena
         const cameraEnt = entities[entities.camera];
         const arenaEnt = entities[entities.arena];
-        ctx.setTransform(scale*cameraEnt.camera.fov,0,0,scale*cameraEnt.camera.fov,canvas.width/(2*devicePixelRatio),canvas.height/(2*devicePixelRatio))
+        const scale = Math.max(canvas.width/1920,canvas.height/1080)*cameraEnt.camera.fov;
+        ctx.setTransform(scale,0,0,scale,canvas.width/(2*devicePixelRatio)-cameraEnt.camera.x*scale,canvas.height/(2*devicePixelRatio)-cameraEnt.camera.y*scale)
         ctx.lineCap = 'round';
-        ctx.strokeStyle = '#00ff00';
-        ctx.lineWidth = 10;
+        ctx.strokeStyle = '#ff00ff';
+        ctx.lineWidth = 5;
         ctx.beginPath()
-        ctx.rect(-cameraEnt.camera.x,-cameraEnt.camera.y,arenaEnt.arena.width,arenaEnt.arena.height);
+        ctx.rect(0,0,arenaEnt.arena.width,arenaEnt.arena.height);
         ctx.stroke();
         for (const ent of Object.values(entities)) {
             if (!ent.hasOwnProperty('pos')) continue;
-            const x = ent.pos.x-cameraEnt.camera.x, y = ent.pos.y-cameraEnt.camera.y;
-            ctx.fillStyle = COLORS[ent.style? ent.style.color: 0];
-            ctx.beginPath();
-            ctx.arc(x,y,ent.radius,0,2*Math.PI);
-            ctx.fill();
+            ctx.setTransform(scale,0,0,scale,canvas.width/(2*devicePixelRatio),canvas.height/(2*devicePixelRatio));
+            const {x, y} = ent.pos;
+            ctx.translate(x - cameraEnt.camera.x, y - cameraEnt.camera.y);
+            ctx.globalAlpha = ent.style.opacity;
+            ctx.scale(ent.pos.radius, ent.pos.radius);
             if (ent.health) {
-                ctx.strokeStyle = '#222222';
-                ctx.lineWidth = ent.radius / 5;
+                ctx.strokeStyle = '#111111';
+                ctx.lineWidth = 1/5;
                 ctx.beginPath();
-                ctx.moveTo(x - ent.radius * 0.8, y + ent.radius * 1.2);
-                ctx.lineTo(x + 0.8 * ent.radius, y + ent.radius * 1.2);
+                ctx.moveTo(-0.8,1.2);
+                ctx.lineTo(0.8,1.2);
                 ctx.stroke();
                 ctx.strokeStyle = '#00bb00';
-                ctx.lineWidth = ent.radius / 10;
+                ctx.lineWidth = 1/6;
                 ctx.beginPath();
-                ctx.moveTo(x - ent.radius * 0.8, y + ent.radius * 1.2);
-                ctx.lineTo(x + (1.6 * ent.health.health / ent.health.maxHealth - 0.8) * ent.radius, y + ent.radius * 1.2)
+                ctx.moveTo(-0.8,1.2);
+                ctx.lineTo(-0.8+1.6*ent.health.health/ent.health.maxHealth,1.2);
                 ctx.stroke();
+            }
+            ctx.rotate(ent.pos.angle);
+            if (ent.mob) drawMobAsEnt(ent);
+            else if (ent.petal) drawPetalAsEnt(ent);
+            else if (ent.drop) drawDrop(ent);
+            else drawPlayer(ent);
+        }
+        //draw inventory;
+        const playerEnt = entities[cameraEnt.camera.player];
+        if (playerEnt) {
+            ctx.setTransform(scale,0,0,scale,canvas.width/(2*devicePixelRatio),canvas.height/devicePixelRatio);
+            const equipped = playerEnt.playerInfo.petalsEquipped;
+            const len = playerEnt.playerInfo.numEquipped;
+            ctx.translate((1 - len) * 40, -80);
+            ctx.globalAlpha = 1;
+            ctx.scale(60,60);
+            for (let n = 0; n < len * 2; n += 2) {
+                ctx.lineWidth = 0.2;
+                if (equipped[n] !== 0) {
+                    const base = getColorByRarity(equipped[n+1]);               
+                    ctx.strokeStyle = base;
+                    ctx.fillStyle = getStroke(ctx.strokeStyle);
+                    ctx.beginPath();
+                    ctx.rect(-0.5,-0.5,1,1);
+                    ctx.stroke();
+                    ctx.fill();
+                    ctx.fillStyle = getStroke(base,4/3);
+                    const cdRatio = playerEnt.playerInfo.petalCooldowns[n/2] / 255; 
+                    ctx.beginPath();
+                    ctx.rect(-0.5*cdRatio,-0.5*cdRatio,cdRatio,cdRatio);
+                    ctx.fill();
+                    drawPetalAsStatic(equipped[n],0);
+                } else {
+                }
+                ctx.translate(4/3, 0);
             }
         }
     }

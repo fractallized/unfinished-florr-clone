@@ -4,13 +4,13 @@ export class GameServer {
     constructor(server) {
         this.wss = server;
         this.clients = new Set();
-        this.maps = [new Arena(this,1000,1000)];
+        this.maps = [new Arena(this,2000,2000)];
         this.tick = 0;
 
         setInterval(() => {
             for (const map of this.maps) if (Object.keys(map.entities).length) map.tick();
             this.tick++;
-        }, 25);
+        }, 40);
         this.wss.on("connection", (ws, req) => {
             this.add(ws);
         })
