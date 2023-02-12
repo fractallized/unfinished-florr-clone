@@ -13,8 +13,8 @@ export class Client {
 
         this.map = 0;
         this.input = 0;
-        this.camera = new COMPONENTS.CameraComponent(0,0,1,-1);
-        this.equipped = new Uint8Array(40).fill(1);
+        this.camera = new COMPONENTS.CameraComponent(0,0,0.4,-1);
+        this.equipped = new Uint8Array(40).fill(1).map((_,i) => i&1?Math.random() * 3: (4));
         this.numEquipped = 5;
 
         this.inventory = {
@@ -53,7 +53,7 @@ export class Client {
                 console.log("spawn");
                 this.map = 0;
                 this._arena = this.server.maps[this.map];
-                this.player = new Player(this._arena, 500, 500, 30, this); //client spawned, give it a player
+                this.player = new Player(this._arena, 500, 500, 25, this); //client spawned, give it a player
                 this._arena.addClient(this); //add the camera
                 this._arena.add(this.player); //add the player of the camera
                 this.camera.player = this.player.id;

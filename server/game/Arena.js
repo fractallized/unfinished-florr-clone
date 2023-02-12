@@ -29,11 +29,11 @@ export class Arena {
         for (const zone of this.zones) zone.tick();
     }
     calculateOpenHash() {
-        for (let n = 1; n < 16384; n++) if (!this.entities[n] && !this.deletions[n]) return n;
+        for (let n = 1; n < 16384; ++n) if (!this.entities[n] && !this.deletions[n]) return n;
         return 16384;
     }
     calculateClientHash() {
-        for (let n = 16384; n < 32768; n++) if (!this.clients[n]) return n;
+        for (let n = 16384; n < 32768; ++n) if (!this.clients[n]) return n;
         return 32768;
     }
     addClient(entity) {

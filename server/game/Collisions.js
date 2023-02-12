@@ -22,8 +22,8 @@ export class SpatialHash {
         const ret = []
         const lenW = 1 + (w >> (SpatialHash.GRID_SIZE - 1)), lenH = 1 + (h >> (SpatialHash.GRID_SIZE - 1));
         const startX = x >> SpatialHash.GRID_SIZE, startY = y >> SpatialHash.GRID_SIZE;
-        for (let Y = startY - lenH; Y <= startY + lenH; Y++) {
-            for (let X = startX - lenW; X <= startX + lenW; X++) {
+        for (let Y = startY - lenH; Y <= startY + lenH; ++Y) {
+            for (let X = startX - lenW; X <= startX + lenW; ++X) {
                 if (X < 0 || Y < 0) continue;
                 const hash = X | (Y << SpatialHash.GRID_SIZE);
                 if (!this.map.has(hash)) continue;

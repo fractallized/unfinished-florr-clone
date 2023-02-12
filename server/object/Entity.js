@@ -39,8 +39,6 @@ export class Entity {
     }
     getCollisions() { return this._arena.collisionGrid.getEntityCollisions(this) }
     collideWith(entity) {
-        //this.vel.add(dist.normalize().scale(ratio * Entity.BASE_KNOCKBACK));
-        //entity.vel.add(dist.scale(-1));
         this.onCollide(entity);
         entity.onCollide(this);
         if (this.pendingDelete || entity.pendingDelete) return;
@@ -50,6 +48,8 @@ export class Entity {
         if (_dist === 0) return;
         this.pos.add(dist.normalize().scale((this.pos.radius + entity.pos.radius - _dist + 0.5) * ratio)); //0.5 to prevent recollision
         entity.pos.add(dist.scale((ratio - 1) / ratio));
+        entity.vel.add(dist.normalize().scale(ratio * Entity.BASE_KNOCKBACK));
+        this.vel.add(dist.scale(-1));
     }
     onCollide(entity) {}
 }
@@ -63,7 +63,7 @@ class DeletionAnimation {
     }
     tick() {
         this._arena.collisionGrid.remove(this.entity);
-        this.pos++;
+        ++this.pos;
         if (this.pos === DeletionAnimation.DURATION) return this._arena.removeFromActive(this.entity);
         if (this.pos === DeletionAnimation.DURATION * 2) return this._arena.delete(this.entity);
         this.entity.pos.radius *= 1.1;

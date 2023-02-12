@@ -9,7 +9,7 @@ export class Mob extends Entity {
     constructor(arena, x, y, r, angle, rarity, mobDefinition) {
         super(arena, x, y, r, angle);
         this.style.color = 1;
-        this.health = new COMPONENTS.HealthComponent(mobDefinition.health,mobDefinition.health,-1);
+        this.health = new COMPONENTS.HealthComponent(mobDefinition.health);
         this.mob = new COMPONENTS.MobComponent(mobDefinition.id, rarity);
         this.damage = mobDefinition.damage;
         this.lastIdle = arena.server.tick - 100;
@@ -52,7 +52,7 @@ export class Mob extends Entity {
         const drops = [];
         for (const [id, table] of Object.entries(this.loot)) {
             let rand = Math.random();
-            for (let n = 0; n < table.length; n++) {
+            for (let n = 0; n < table.length; ++n) {
                 rand -= table[n];
                 if (rand < 0) {
                     if (n > 0) drops.push([id, n-1]);
@@ -60,7 +60,7 @@ export class Mob extends Entity {
                 }
             }
         }
-        for (let n = 0; n < drops.length; n++) {
+        for (let n = 0; n < drops.length; ++n) {
             this._arena.add(new Drop(this._arena, this.pos.x, this.pos.y, 25, 2 * n * Math.PI / drops.length, {
                 id: drops[n][0],
                 rarity: drops[n][1]

@@ -5,6 +5,7 @@ class PositionComponent extends Vector {
         super(x, y);
         this.angle = angle;
         this.radius = radius;
+        
     }
 }
 class CameraComponent extends Vector {
@@ -29,10 +30,9 @@ class StyleComponent {
     }
 }
 class HealthComponent {
-    constructor(health, maxHealth, lastDamaged) {
-        this.health = health;
-        this.maxHealth = maxHealth;
-        this.lastDamaged = lastDamaged;
+    constructor(health) {
+        this.health = this.maxHealth = health;
+        this.lastDamaged = -1;
     }
 }
 class DropComponent {

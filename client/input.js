@@ -1,12 +1,15 @@
 let input = 0;
-window.onmousedown = async ({ button }) => {
-    if (button === 0) input |= 16;
+canvas.onmousedown = async (e) => {
+    e.preventDefault();
+    if (e.button === 0) input |= 16;
     else input |= 32;
 }
-window.onmouseup = async ({ button }) => {
-    if (button === 0) input &= ~16;
+canvas.onmouseup = async (e) => {
+    e.preventDefault();
+    if (e.button === 0) input &= ~16;
     else input &= ~32; 
 }
+document.oncontextmenu = _ => false;
 window.onkeydown = async ({ code }) => {
     switch(code) {
         case "KeyD":

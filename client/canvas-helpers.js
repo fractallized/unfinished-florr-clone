@@ -8,6 +8,7 @@ function getColorByRarity(rarity) {
     if (rarity === 0) return '#0edb32';
     if (rarity === 1) return '#f2e338';
     if (rarity === 2) return '#3c41e6';
+    if (rarity === 3) return '#a420e6';
     else return '#999999';
 }
 function drawPlayer(player) {
@@ -44,6 +45,27 @@ function drawPetalAsEnt(petal) {
             ctx.stroke();
             ctx.fill();
             break;
+        case 3:
+            ctx.fillStyle = '#222222';
+            ctx.strokeStyle = getStroke(ctx.fillStyle);
+            ctx.lineWidth = 1/6;
+            ctx.beginPath();
+            ctx.moveTo(1, 0);
+            ctx.lineTo(-0.5, 0.8660254037);
+            ctx.lineTo(-0.5,-0.8660254037);
+            ctx.closePath();
+            ctx.stroke();
+            ctx.fill();
+            break;
+        case 4:
+            ctx.fillStyle = '#eeaaaa';
+            ctx.strokeStyle = getStroke(ctx.fillStyle);
+            ctx.lineWidth = 1/6;
+            ctx.beginPath();
+            ctx.arc(0,0,1,0,2*Math.PI);
+            ctx.stroke();
+            ctx.fill();
+            break;
     }
 }
 function drawPetalAsStatic(id, rarity) {
@@ -59,6 +81,27 @@ function drawPetalAsStatic(id, rarity) {
             break;
         case 2:
             ctx.fillStyle = '#eeeeee';
+            ctx.strokeStyle = getStroke(ctx.fillStyle);
+            ctx.lineWidth = 1/6;
+            ctx.beginPath();
+            ctx.arc(0,0,0.125,0,2*Math.PI);
+            ctx.stroke();
+            ctx.fill();
+            break;
+        case 3:
+            ctx.fillStyle = '#222222';
+            ctx.strokeStyle = getStroke(ctx.fillStyle);
+            ctx.lineWidth = 1/6;
+            ctx.beginPath();
+            ctx.moveTo(0.1, 0);
+            ctx.lineTo(-0.05, 0.08660254037);
+            ctx.lineTo(-0.05,-0.08660254037);
+            ctx.closePath();
+            ctx.stroke();
+            ctx.fill();
+            break;
+        case 4:
+            ctx.fillStyle = '#eeaaaa';
             ctx.strokeStyle = getStroke(ctx.fillStyle);
             ctx.lineWidth = 1/6;
             ctx.beginPath();
