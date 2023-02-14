@@ -4,24 +4,29 @@ import { Mob } from "../mob/Mob.js";
 import { COMPONENTS } from "../Components.js";
 import { Petal } from "./Petal.js";
 import { PETAL_DEFINITIONS } from "../../PetalDefinitions.js";
+import { HealPetal } from "./HealPetal.js";
 
 export class Player extends Entity {
     static BASE_ROTATION_SPEED = 0.1;
+
+    collectionRadius = 25;
+    damage = 25;
+    rotationAngle = 0;
+
     constructor(arena, x, y, r, camera) {
         super(arena, x, y, r, 0);
         this.owner = camera;
-        this.health = new COMPONENTS.HealthComponent(100);
-        this.playerInfo = new COMPONENTS.PlayerInfoComponent(this.owner.equipped); //finish this
+
+        this.health = new COMPONENTS.HealthComponent(this, 100);
+        this.playerInfo = new COMPONENTS.PlayerInfoComponent(this, [...this.owner.equipped]); 
+
         this.equipped = new Array(10).fill([]); //ACCOUNTS FOR PETALS THAT SPAWN MULTIPLE
-        this.collectionRadius = 25;
-        this.rotationAngle = 0;
         this.getAdjustedEquipped();
-        this.damage = 25;
     }
     getAdjustedEquipped() {
         this.playerInfo.numEquipped = this.owner.numEquipped;
         this.numSpacesAlloc = 0;
-        const equipped = this.owner.equipped;
+        const equipped = this.playerInfo.petalsEquipped;
         if (!equipped) return;
         for (let n = 0; n < this.owner.numEquipped; ++n) {
             this.equipped[n] = [];
@@ -42,13 +47,35 @@ export class Player extends Entity {
             }
         }
     }
+    changePetal(pos) {
+        if (pos >= this.numEquipped) return;
+        this.numSpacesAlloc -= this.equipped[pos].length | 0;
+        for (const petalInfo of this.equipped[pos]) if (petalInfo.petal) petalInfo.petal.delete();
+        this.equipped[pos] = [];
+        const equipped = this.playerInfo.petalsEquipped;
+        if (equipped[pos * 2]) {
+            this.equipped[pos].push({
+                id: equipped[pos * 2],
+                rarity: equipped[pos * 2 + 1],
+                petal: null,
+                cdTick: 0,
+                cooldown: PETAL_DEFINITIONS[equipped[pos * 2]].cooldown
+            });
+            ++this.numSpacesAlloc;
+        } else {
+            this.equipped[pos] = [{
+                id: 0,
+                petal: null
+            }];
+        }
+    }
     onPetalLoss(outerPos, innerPos) {
         this.equipped[outerPos][innerPos].petal = null;
         this.equipped[outerPos][innerPos].cdTick = 0;
     }
     petalHandle() {
         let rotPos = -1;
-        for (let outer = 0; outer < this.owner.numEquipped; ++outer) {
+        for (let outer = 0; outer < this.playerInfo.numEquipped; ++outer) {
             const innerLength = this.equipped[outer].length;
             let healthSum = 0, cdSum = 0;
             for (let inner = 0; inner < innerLength; ++inner) {
@@ -56,8 +83,10 @@ export class Player extends Entity {
                 if (petal.id === 0) continue;
                 ++rotPos;
                 if (petal.cdTick < petal.cooldown) ++petal.cdTick;
-                else if (!petal.petal) petal.petal = this._arena.add(new (PETAL_DEFINITIONS[petal.id].petal)(this._arena, this, this.pos.x, this.pos.y, outer, inner, rotPos, this.owner.equipped[2*outer+1], PETAL_DEFINITIONS[petal.id]))
-                else healthSum += petal.petal.health.health / petal.petal.health.maxHealth;
+                else if (!petal.petal) {
+                    if (PETAL_DEFINITIONS[petal.id].petal === 'Petal') petal.petal = this._arena.add(new Petal(this._arena, this, this.pos.x, this.pos.y, outer, inner, rotPos, this.playerInfo.petalsEquipped[2*outer+1], PETAL_DEFINITIONS[petal.id]))
+                    else if (PETAL_DEFINITIONS[petal.id].petal === 'HealPetal') petal.petal = this._arena.add(new HealPetal(this._arena, this, this.pos.x, this.pos.y, outer, inner, rotPos, this.playerInfo.petalsEquipped[2*outer+1], PETAL_DEFINITIONS[petal.id]))
+                } else healthSum += petal.petal.health.health / petal.petal.health.maxHealth;
                 cdSum += petal.cdTick / petal.cooldown;
             }
             this.playerInfo.petalHealths[outer] = (healthSum / innerLength) * 255;
@@ -91,12 +120,10 @@ export class Player extends Entity {
     getCollisions() { return this._arena.collisionGrid.getEntityCollisions(this, this.collectionRadius); }
     onCollide(ent) {
         if (ent instanceof Mob) {
-            if (this._arena.server.tick - this.health.lastDamaged > 0) {
+            if (this._arena.server.tick - this.health.lastDamaged > 2) {
                 this.health.health -= ent.damage;
                 this.health.lastDamaged = this._arena.server.tick;
             }
-        } else if (ent instanceof Drop) {
-            //add here, better to add here
         }
         if (this.health.health < 0.0001) {
             this.health.health = 0;
@@ -105,7 +132,13 @@ export class Player extends Entity {
     }
     delete() {
         this.owner.player = null;
+        this.owner.camera.player = -1;
         this.pendingDelete = true;
         super.delete();
+    }
+    wipeState() {
+        this.playerInfo.reset();
+        this.health.reset();
+        super.wipeState();
     }
 }

@@ -1,17 +1,10 @@
 let input = 0;
-canvas.onmousedown = async (e) => {
-    e.preventDefault();
-    if (e.button === 0) input |= 16;
-    else input |= 32;
-}
-canvas.onmouseup = async (e) => {
-    e.preventDefault();
-    if (e.button === 0) input &= ~16;
-    else input &= ~32; 
-}
 document.oncontextmenu = _ => false;
 window.onkeydown = async ({ code }) => {
     switch(code) {
+        case "KeyE":
+            if (ws.readyState === 1) ws.send(new Uint8Array([2,4,3,0]));
+            break;
         case "KeyD":
             input |= 1;
             break;
@@ -54,7 +47,39 @@ class Reader {
     i32() { return this.u8() | (this.u8() << 8) | (this.u8() << 16) | (this.u8() << 24) }
     f32() { return new Float32Array(this.p.slice(this.i, this.i += 4).buffer)[0] }
 }
-const COLORS = [
-    "#ff0000",
-    "#f0ff00"
-]
+canvas.onmousedown = async (e) => {
+    e.preventDefault();
+    if (e.button === 0) input |= 16;
+    else input |= 32;
+    if (clientSimulation.selected) {
+        clientSimulation.selected.selected = true;
+        clientSimulation.selected.targetX = e.clientX;
+        clientSimulation.selected.targetY = e.clientY;
+    } else {
+        for (const b of Object.values(clientSimulation.loadout)) {
+            if (Math.abs(b.x - e.clientX) / staticScale > 40) continue;
+            if (Math.abs(b.y - e.clientY) / staticScale > 40) continue;
+            b.selected = true;
+            b.targetX = e.clientX;
+            b.targetY = e.clientY;
+            return clientSimulation.selected = b;
+        }
+    }
+}
+canvas.onmousemove = async (e) => {
+    if (clientSimulation.selected) {
+        clientSimulation.selected.targetX = e.clientX;
+        clientSimulation.selected.targetY = e.clientY;
+    }
+}
+canvas.onmouseup = async (e) => {
+    e.preventDefault();
+    if (e.button === 0) input &= ~16;
+    else input &= ~32; 
+    if (clientSimulation.selected) {
+        clientSimulation.selected.selected = false;
+        clientSimulation.selected.targetX = clientSimulation.selected.baseX;
+        clientSimulation.selected.targetY = clientSimulation.selected.baseY;
+        delete clientSimulation.selected;
+    }
+}

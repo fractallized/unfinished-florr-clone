@@ -1,8 +1,6 @@
-import { COMPONENTS } from "../Components.js";
-import { OneDimensionalVector, Vector } from "../Vector.js";
-import { PETAL_RARITY_MULTIPLIER } from "../../MobDefinitions.js";
+import { Vector } from "../Vector.js";
+import { PETAL_RARITY_MULTIPLIER } from "../../PetalDefinitions.js";
 import { Petal } from "./Petal.js";
-
 //TODO: FIX UP FIELD GROUPS AND FINALIZE NECESSARY ONES
 
 export class HealPetal extends Petal {

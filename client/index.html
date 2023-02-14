@@ -4,32 +4,14 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width">
     <title>testing protocol</title>
-    <style>
-        html, body {
-            height: 100%;
-            width: 100%;
-        }
-        body {
-            position: absolute;
-            padding: 0px 0px;
-            left: 0px;
-            top: 0px;
-        }
-        #canvas {
-            position: fixed;
-            left: 0px;
-            top: 0px;
-        }
-        body::-webkit-scrollbar {
-            display: none;
-        }
-    </style>
+    <link rel="stylesheet" type="text/css" href="/fonts.css"/>
   </head>
   <body>
     <canvas id="canvas" width=1920 height=1080></canvas>
+    <script src="/client-render.js"></script>
+    <script src="/input.js"></script>
     <script src="/canvas-helpers.js"></script>
     <script src="/index.js"></script>
     <script src="/websocket.js"></script>
-    <script src="/input.js"></script>
   </body>
 </html>

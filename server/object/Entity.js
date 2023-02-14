@@ -3,22 +3,25 @@ import { COMPONENTS } from "./Components.js";
 import { SpatialHash } from "../game/Collisions.js";
 
 export class Entity {
-    static BASE_KNOCKBACK = 0.2;
+    static BASE_KNOCKBACK = 2;
     static BASE_FRICTION = 0.9;
     static BASE_WEIGHT = 1;
+
+    vel = new Vector(0,0);
+    accel = new Vector(0,0);
+    gridHash = -1;
+    pendingDelete = false;
+    state = 2; //create
+
     constructor(arena, x, y, r, angle) {
         this._arena = arena;
-        this.pos = new COMPONENTS.PositionComponent(x, y, angle, r);
-        this.vel = new Vector(0,0);
-        this.accel = new Vector(0,0);
 
-        this.style = new COMPONENTS.StyleComponent(0, 1);
+        this.pos = new COMPONENTS.PositionComponent(this, x, y, angle, r);
+        this.style = new COMPONENTS.StyleComponent(this, 0, 1);
 
-        this.gridHash = -1;
         this.friction = Entity.BASE_FRICTION;
         this.weight = Entity.BASE_WEIGHT;
         this.deleteAnimation = new DeletionAnimation(this);
-        this.pendingDelete = false;
     }
     tick() {
         if (this.pendingDelete) return this.deleteAnimation.tick();
@@ -52,6 +55,11 @@ export class Entity {
         this.vel.add(dist.scale(-1));
     }
     onCollide(entity) {}
+    wipeState() {
+        this.state &= ~3;
+        this.pos.reset();
+        this.style.reset();
+    }
 }
 
 class DeletionAnimation {

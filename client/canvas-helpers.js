@@ -11,24 +11,31 @@ function getColorByRarity(rarity) {
     if (rarity === 3) return '#a420e6';
     else return '#999999';
 }
+function getNameByRarity(rarity) {
+    if (rarity === 0) return 'Common';
+    if (rarity === 1) return 'Unusual';
+    if (rarity === 2) return 'Rare';
+    if (rarity === 3) return 'Epic';
+    else return 'Legendary';
+}
 function drawPlayer(player) {
     ctx.fillStyle = '#ddbb22';
     ctx.strokeStyle = getStroke(ctx.fillStyle);
-    ctx.lineWidth = 1 / 8;
+    ctx.lineWidth = 1/5;
     ctx.beginPath();
     ctx.arc(0,0,1,0,2*Math.PI);
     ctx.stroke();
     ctx.fill();
 }
 function drawDrop(drop) {
-    ctx.fillStyle = getColorByRarity(drop.drop.rar);
+    ctx.fillStyle = getColorByRarity(drop.drop.rarity);
     ctx.strokeStyle = getStroke(ctx.fillStyle);
     ctx.lineWidth = 1/5;
     ctx.beginPath();
     ctx.rect(-0.5,-0.5,1,1);
     ctx.stroke();
     ctx.fill();
-    drawPetalAsStatic(drop.drop.id,drop.drop.rar);
+    drawPetalAsStatic(drop.drop.id,drop.drop.rarity);
 }
 function drawPetalAsEnt(petal) {
     if (!petal.CLIENT_RENDER_TICK) petal.CLIENT_RENDER_TICK = 0;
@@ -105,7 +112,7 @@ function drawPetalAsStatic(id, rarity) {
             ctx.strokeStyle = getStroke(ctx.fillStyle);
             ctx.lineWidth = 1/6;
             ctx.beginPath();
-            ctx.arc(0,0,0.125,0,2*Math.PI);
+            ctx.arc(0,0,0.25,0,2*Math.PI);
             ctx.stroke();
             ctx.fill();
             break;
@@ -126,24 +133,25 @@ function drawMob(id, clientRenderTick) {
             ctx.lineWidth = 1 / 8;
             ctx.beginPath();
             path = new Path2D(MOBSVG[0][0]);
-            ctx.stroke(path);
             ctx.fill(path);
+            ctx.stroke(path);
             ctx.fillStyle = '#22bbdd33';
             ctx.strokeStyle = getStroke(ctx.fillStyle);
             ctx.translate(0.9,-0.1);
             ctx.rotate(secondaryAngle);
             path = new Path2D(MOBSVG[0][1]);
-            ctx.stroke(path);
             ctx.fill(path);
+            ctx.stroke(path);
             ctx.rotate(-2 * secondaryAngle);
             ctx.translate(0,0.2);
             path = new Path2D(MOBSVG[0][2]);
-            ctx.stroke(path);
             ctx.fill(path);
+            ctx.stroke(path);
             break;
         case 1:
             ctx.fillStyle = '#000000';
             ctx.strokeStyle = getStroke(ctx.fillStyle);
+            ctx.lineWidth = 1 / 8;
             path = new Path2D(MOBSVG[1][1]);
             ctx.stroke(path);
             ctx.fill(path);

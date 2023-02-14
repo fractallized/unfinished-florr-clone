@@ -2,7 +2,7 @@ import { COMPONENTS } from "../Components.js";
 import { Entity } from "../Entity.js";
 import { OneDimensionalVector, Vector } from "../Vector.js";
 import { Mob } from "../mob/Mob.js";
-import { PETAL_RARITY_MULTIPLIER } from "../../MobDefinitions.js";
+import { PETAL_RARITY_MULTIPLIER } from "../../PetalDefinitions.js";
 
 //TODO: FIX UP FIELD GROUPS AND FINALIZE NECESSARY ONES
 
@@ -10,11 +10,11 @@ export class Petal extends Entity {
     constructor(arena, player, x, y, outerPos, innerPos, pos, rarity, petalDefinition) {
         super(arena, x, y, petalDefinition.radius, 0);
 
-        this.petal = new COMPONENTS.PetalComponent(petalDefinition.id, rarity);
-        this.health = new COMPONENTS.HealthComponent(petalDefinition.health * PETAL_RARITY_MULTIPLIER[rarity]);
+        this.petal = new COMPONENTS.PetalComponent(this, petalDefinition.id, rarity);
+        this.health = new COMPONENTS.HealthComponent(this, petalDefinition.health * PETAL_RARITY_MULTIPLIER[rarity]);
+        
         this.damage = petalDefinition.damage * PETAL_RARITY_MULTIPLIER[rarity];
         this.weight = 0.5;
-
         this.player = player;
         this.rotationPos = pos;
         this.outerPos = outerPos;
@@ -22,7 +22,7 @@ export class Petal extends Entity {
         this.holdingRadius = new OneDimensionalVector(0,20,0);
         this.pos.add(Vector.fromPolar(this.holdingRadius.pos, this.player.rotationAngle + this.rotationPos * 2 * Math.PI / this.player.numSpacesAlloc))
         
-        this.petalDefinition = petalDefinition;
+        this.petalDefinition = {...petalDefinition};
         
         this.creationTick = this._arena.server.tick;
     }
@@ -42,7 +42,7 @@ export class Petal extends Entity {
     }
     onCollide(ent) {
         if (ent instanceof Mob) {
-            if (this._arena.server.tick - this.health.lastDamaged > 0) {
+            if (this._arena.server.tick - this.health.lastDamaged > 2) {
                 this.health.health -= ent.damage;
                 this.health.lastDamaged = this._arena.server.tick;
             }
@@ -55,5 +55,10 @@ export class Petal extends Entity {
     delete() {
         this.player.onPetalLoss(this.outerPos, this.innerPos);
         super.delete();
+    }
+    wipeState() {
+        this.health.reset();
+        this.petal.reset();
+        super.wipeState();
     }
 }

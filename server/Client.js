@@ -1,11 +1,14 @@
 import { Player } from "./object/player/Player.js";
 import { Reader } from "./coder/Reader.js";
 import { Writer } from "./coder/Writer.js";
-import { compileEnt } from "./coder/PacketMaker.js";
+import { compileEnt, compileInventory } from "./coder/PacketMaker.js";
 import { COMPONENTS } from "./object/Components.js";
 import { Arena } from "./game/Arena.js";
+import { Inventory } from "./game/Inventory.js";
 
 export class Client {
+    state = 2;
+    addedToArena = false;
     constructor(server, ws) {
         this.server = server;
         this._arena = null;
@@ -13,13 +16,12 @@ export class Client {
 
         this.map = 0;
         this.input = 0;
-        this.camera = new COMPONENTS.CameraComponent(0,0,0.4,-1);
-        this.equipped = new Uint8Array(40).fill(1).map((_,i) => i&1?Math.random() * 3: (4));
+        this.camera = new COMPONENTS.CameraComponent(this,0,0,1,-1);
+        this.equipped = new Uint8Array(40).fill(0).map((_,i) => i<10?1-(i&1):0);
         this.numEquipped = 5;
 
-        this.inventory = {
-            0:5
-        }; //separate packet send
+        this.inventory = new Inventory(this); //separate packet send
+        this.inventory[0] = 5; //init inv;
 
         this.ws.onmessage = (req) => this.onmessage(req);
         this.ws.onclose = () => {
@@ -38,12 +40,18 @@ export class Client {
             p.u8(1);
             for (const id of Object.keys(this._arena.deletions)) p.i32(id);
             p.i32(-1);
-            compileEnt(p, this._arena);
-            compileEnt(p, this);
-            for (const entity of Object.values(this._arena.entities)) compileEnt(p, entity);
+            compileEnt(p, this._arena, this.state);
+            compileEnt(p, this, this.state);
+            for (const entity of Object.values(this._arena.entities)) compileEnt(p, entity, this.state);
             p.i32(-1);
             this.ws.send(p.write()); //clientbound
+            p.reset();
+            p.u8(2);
+            compileInventory(p, this.inventory, this.state);
+            this.ws.send(p.write());
+            this.inventory.reset();
         }
+        this.wipeState();
     }
     onmessage(req) {
         const reader = new Reader(new Uint8Array(req.data));
@@ -54,7 +62,10 @@ export class Client {
                 this.map = 0;
                 this._arena = this.server.maps[this.map];
                 this.player = new Player(this._arena, 500, 500, 25, this); //client spawned, give it a player
-                this._arena.addClient(this); //add the camera
+                if (!this.addedToArena) {
+                    this._arena.addClient(this); //add the camera
+                    this.addedToArena = true;
+                }
                 this._arena.add(this.player); //add the player of the camera
                 this.camera.player = this.player.id;
                 break;
@@ -62,7 +73,23 @@ export class Client {
                 this.input = reader.u8();
                 break;
             case 2:
+                if (!this.player) return;
+                const index = reader.u8() << 1;
+                const id = reader.u8(), rarity = reader.u8();
+                if (this.player.playerInfo.petalsEquipped[index] === id && this.player.playerInfo.petalsEquipped[index + 1] === rarity) return;
+                let sameCt = 0;
+                for (let n = 0; n < 40; n += 2) if (this.equipped[n] === id && this.equipped[n + 1] === rarity) sameCt++;
+                if (sameCt >= this.inventory[id * 6 + rarity - 6]) return; //check if client has enough
+                this.player.playerInfo.petalsEquipped[index] = id;
+                this.player.playerInfo.petalsEquipped[index + 1] = rarity;
+                this.player.changePetal(index >> 1);
+                for (let n = 0; n < 40; n++) this.equipped[n] = this.player.playerInfo.petalsEquipped[n];
+                //change inv
                 break;
         }
+    }
+    wipeState() {
+        this.state = 0;
+        this.camera.reset();
     }
 }

@@ -1,17 +1,15 @@
 import { MOB_DEFINITIONS } from "../MobDefinitions.js";
+import { COMPONENTS } from "../object/Components.js";
 import { Mob } from "../object/mob/Mob.js";
 import { SpatialHash } from "./Collisions.js";
 
 export class Arena {
+    state = 2; // create
     constructor(server, x, y, name = '') {
         this.server = server;
         this.width = x;
         this.height = y;
-        this.arena = {
-            width: x,
-            height: y,
-            name: ''
-        }
+        this.arena = new COMPONENTS.ArenaComponent(this, x, y, name);
         this.id = 0;
         this.entities = {};
         this.clients = {};
@@ -20,11 +18,12 @@ export class Arena {
         this.zones = [new SpawnZone(this,0,0,1000,1000,{})]; //test
     }
     tick() {
+        this.state = 0;
         const entities = Object.values(this.entities);
         const clients = Object.values(this.clients);
         const deletions = Object.values(this.deletions);
-        for (const entity of entities) entity.tick();
         for (const client of clients) client.tick();
+        for (const entity of entities) { entity.wipeState(); entity.tick(); }
         for (const deletion of deletions) deletion.deleteAnimation.tick();
         for (const zone of this.zones) zone.tick();
     }
@@ -78,7 +77,7 @@ export class SpawnZone {
         if (Math.random() < 0.005 && Object.keys(this.arena.entities).length < 64) {
             const potentialX = this.x + Math.random() * this.width;
             const potentialY = this.y + Math.random() * this.height;
-            const ent = new Mob(this.arena, potentialX, potentialY, 20, 2 * Math.PI * Math.random(), 0, MOB_DEFINITIONS[Math.random() * 2 | 0]);
+            const ent = new Mob(this.arena, potentialX, potentialY, 2 * Math.PI * Math.random(), Math.random() * 3 | 0, MOB_DEFINITIONS[Math.random() * 2 | 0]);
             this.arena.add(ent);
         }
     }

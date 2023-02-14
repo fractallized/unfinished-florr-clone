@@ -1,5 +1,6 @@
 export class Vector {
     constructor(x,y) {
+        this.values = {}; //for fields
         this.x = x;
         this.y = y;
     }
@@ -22,6 +23,11 @@ export class Vector {
         this.x = x;
         this.y = y;
         return this;
+    }
+    setAngle(angle) {
+        const mag = this.magnitude;
+        this.x = mag * Math.cos(angle);
+        this.y = mag * Math.sin(angle);
     }
     scale(s) {
         this.x *= s;

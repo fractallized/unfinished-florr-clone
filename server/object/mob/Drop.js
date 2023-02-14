@@ -8,7 +8,7 @@ export class Drop extends Entity {
     constructor(arena, x, y, r, moveAngle, dropDefinition) {
         super(arena, x, y, r, 0);
         this.style.color = 1;
-        this.drop = new COMPONENTS.DropComponent(dropDefinition.id,dropDefinition.rarity); //id,rar
+        this.drop = new COMPONENTS.DropComponent(this,dropDefinition.id,dropDefinition.rarity); //id,rar
 
         this.angle = new OneDimensionalVector(0,3.2,0);
         this.friction = 0.8;
@@ -18,10 +18,14 @@ export class Drop extends Entity {
         this.vel.add(Vector.fromPolar(Drop.BASE_VELOCITY, moveAngle));
     }
     tick() {
+        if (this.pendingDelete) return super.tick();
         if (this.collectedBy) {
             //add to player now
             //diff delete animation
-            if (this.pos.distanceSq(this.collectedBy.pos) <= (this.pos.radius + this.collectedBy.pos.radius) ** 2) this.delete();
+            if (this.pos.distanceSq(this.collectedBy.pos) <= (this.pos.radius + this.collectedBy.pos.radius) ** 2) {
+                ++this.collectedBy.owner.inventory[(this.drop.id - 1) * 6 + this.drop.rarity];
+                this.delete();
+            }
             this.vel.add(Vector.sub(this.collectedBy.pos, this.pos).normalize().scale(16));
             this.pos.angle += 0.4;
             return super.tick();
@@ -30,5 +34,10 @@ export class Drop extends Entity {
         this.angle.vel *= 0.8;
         this.pos.angle = this.angle.pos;
         super.tick();
+    }
+    wipeState() {
+        this.state = 0;
+        this.drop.reset();
+        super.wipeState();
     }
 }
