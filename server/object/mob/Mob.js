@@ -21,12 +21,11 @@ export class Mob extends Entity {
         if (this._arena.server.tick - this.lastIdle > 100) {
             if (Math.random() < 0.05) {
                 this.angle = Math.random() * 2 * Math.PI;
-                this.vel.set(Math.cos(this.pos.angle) * 8, Math.sin(this.pos.angle) * 8);
                 this.lastIdle = this._arena.server.tick;
             }
         }
-        this.pos.angle = interpolate(this.pos.angle, this.angle, 0.03);
-        this.vel.setAngle(this.pos.angle);
+        this.pos.angle = interpolate(this.pos.angle, this.angle, 0.1);
+        if (this._arena.server.tick - this.lastIdle === 25) this.vel.set(Math.cos(this.pos.angle) * 8, Math.sin(this.pos.angle) * 8);
         const collisions = this.getCollisions();
         for (const ent of collisions) {
             if (ent === this) continue;

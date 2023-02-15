@@ -7,6 +7,9 @@ const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 let scale = 1; //global scaling
 let staticScale = 1; //doesn't count fov;
+let cameraEnt, arenaEnt, playerEnt;
+clientSimulation.inventory = new ClientEntity(150 * staticScale, canvas.height - 200 * staticScale)
+clientSimulation.inventory.initCanvas(400,800);
 const loop = _ => {
     ctx.globalAlpha = 1;
     ctx.resetTransform();
@@ -14,8 +17,8 @@ const loop = _ => {
     canvas.height = window.innerHeight * devicePixelRatio;
     if (entities.hasOwnProperty('camera') && entities.hasOwnProperty('arena')) {
         //init canvas draw, and draw arena
-        const cameraEnt = entities[entities.camera];
-        const arenaEnt = entities[entities.arena];
+        cameraEnt = entities[entities.camera];
+        arenaEnt = entities[entities.arena];
         staticScale = Math.max(canvas.width/1920,canvas.height/1080);
         scale = staticScale * cameraEnt.camera.fov;
         ctx.setTransform(scale,0,0,scale,canvas.width/(2*devicePixelRatio)-cameraEnt.camera.x*scale,canvas.height/(2*devicePixelRatio)-cameraEnt.camera.y*scale)
@@ -28,53 +31,28 @@ const loop = _ => {
         ctx.fill();
         ctx.stroke();
         for (const ent of Object.values(entities)) {
-            if (!ent.hasOwnProperty('pos')) continue;
-            ctx.setTransform(scale,0,0,scale,canvas.width/(2*devicePixelRatio),canvas.height/(2*devicePixelRatio));
-            const {x, y} = ent.pos;
-            ctx.translate(x - cameraEnt.camera.x, y - cameraEnt.camera.y);
-            ctx.globalAlpha = ent.style.opacity;
-            const r = ent.pos.radius;
-            if (ent.mob) {
-                ctx.fillStyle = getColorByRarity(ent.mob.rarity);
-                const text = getNameByRarity(ent.mob.rarity);
-                ctx.strokeStyle = '#000000';
-                ctx.textAlign = 'right';
-                ctx.font = '8px Ubuntu';
-                ctx.lineWidth = 1.6;
-                ctx.beginPath();
-                ctx.strokeText(text, r, 1.8*r+10);
-                ctx.fillText(text, r, 1.8*r+10);
-            }
-            if (ent.health) {
-                ctx.strokeStyle = '#111111';
-                ctx.lineWidth = 4;
-                ctx.beginPath();
-                ctx.moveTo(-r,1.8*r);
-                ctx.lineTo(r,1.8*r);
-                ctx.stroke();
-                ctx.strokeStyle = '#00bb00';
-                ctx.lineWidth = 3.2;
-                ctx.beginPath();
-                ctx.moveTo(-r,1.8*r);
-                ctx.lineTo(-r+2*ent.health.health/255*r,1.8*r);
-                ctx.stroke();
-            }
-            ctx.scale(ent.pos.radius, ent.pos.radius);
-            ctx.rotate(ent.pos.angle);
-            if (ent.mob) drawMobAsEnt(ent);
-            else if (ent.petal) drawPetalAsEnt(ent);
-            else if (ent.drop) drawDrop(ent);
-            else drawPlayer(ent);
+            drawEntity(ent);
         }
-        //draw inventory;
-        const playerEnt = entities[cameraEnt.camera.player];
+        //draw inventory and loadout;
+        playerEnt = entities[cameraEnt.camera.player];
         if (playerEnt) {
             ctx.globalAlpha = 1;
             const equipped = playerEnt.playerInfo.petalsEquipped;
             const count = playerEnt.playerInfo.numEquipped;
-            for (const [pos, val] of Object.entries(clientSimulation.loadout)) {
+            for (let pos = 0; pos < count; pos++) {
+                const val = clientSimulation.loadout[pos];
+                ctx.setTransform(staticScale,0,0,staticScale,canvas.width/(2*devicePixelRatio) + (1 - count + 2 * pos) * 40 * staticScale,
+                canvas.height/devicePixelRatio - 80 * staticScale);
+                ctx.fillStyle = '#aaaaaa';
+                ctx.strokeStyle = getStroke(ctx.fillStyle);
+                ctx.lineWidth = 8;
+                ctx.beginPath();
+                ctx.rect(-30,-30,60,60);
+                ctx.stroke();
+                ctx.fill();
+                if (!val) continue;
                 if (!val.selected) {
-                    val.set(canvas.width/(2*devicePixelRatio) - (1 - count + 2 * pos) * 40 * staticScale,
+                    val.set(canvas.width/(2*devicePixelRatio) + (1 - count + 2 * pos) * 40 * staticScale,
                     canvas.height/devicePixelRatio - 80 * staticScale);
                 }
                 val.tick();
@@ -82,7 +60,6 @@ const loop = _ => {
                 const base = getColorByRarity(equipped[pos*2+1]);               
                 ctx.strokeStyle = base;
                 ctx.fillStyle = getStroke(ctx.strokeStyle);
-                ctx.lineWidth = 12;
                 ctx.beginPath();
                 ctx.rect(-30,-30,60,60);
                 ctx.stroke();
@@ -93,43 +70,18 @@ const loop = _ => {
                 ctx.rect(-30*cdRatio,-30*cdRatio,60*cdRatio,60*cdRatio);
                 ctx.fill();
                 ctx.scale(60,60);
-                drawPetalAsStatic(equipped[pos * 2],equipped[pos * 2 + 1]);
+                drawPetalAsStatic(equipped[pos * 2],equipped[pos * 2 + 1], ctx);
             }
-            /*
-            ctx.setTransform(scale,0,0,scale,canvas.width/(2*devicePixelRatio),canvas.height/devicePixelRatio);
-            const equipped = playerEnt.playerInfo.petalsEquipped;
-            const len = playerEnt.playerInfo.numEquipped;
-            ctx.translate((1 - len) * 40, -80);
-            ctx.globalAlpha = 1;
-            ctx.scale(60,60);
-            for (let n = 0; n < len * 2; n += 2) {
-                ctx.lineWidth = 0.2;
-                if (equipped[n] !== 0) {
-                    const base = getColorByRarity(equipped[n+1]);               
-                    ctx.strokeStyle = base;
-                    ctx.fillStyle = getStroke(ctx.strokeStyle);
-                    ctx.beginPath();
-                    ctx.rect(-0.5,-0.5,1,1);
-                    ctx.stroke();
-                    ctx.fill();
-                    ctx.fillStyle = getStroke(base,4/3);
-                    const cdRatio = playerEnt.playerInfo.petalCooldowns[n/2] / 255; 
-                    ctx.beginPath();
-                    ctx.rect(-0.5*cdRatio,-0.5*cdRatio,cdRatio,cdRatio);
-                    ctx.fill();
-                    drawPetalAsStatic(equipped[n],0);
-                } else {
-                    ctx.fillStyle = '#aaaaaa';
-                    ctx.strokeStyle = getStroke(ctx.fillStyle);
-                    ctx.beginPath();
-                    ctx.rect(-0.5,-0.5,1,1);
-                    ctx.stroke();
-                    ctx.fill();
-                }
-                ctx.translate(4/3, 0);
-            }
-            */
             let pos = 0;
+            const invCtx = clientSimulation.inventory.ctx;
+            invCtx.canvas.width = invCtx.canvas.width; //reset state
+            invCtx.fillStyle = "#aaaaaa";
+            invCtx.strokeStyle = getStroke(invCtx.fillStyle);
+            invCtx.lineWidth = 12;
+            invCtx.beginPath();
+            invCtx.rect(100,100,240,480);
+            invCtx.stroke();
+            invCtx.fill();
             const _inventory = [...inventory];
             for (let n = 0; n < 20 * 2; n += 2) {
                 if (equipped[n] === 0) continue;
@@ -137,37 +89,78 @@ const loop = _ => {
             }
             for (let n = 0; n < 60; n++) {
                 if (_inventory[n] !== 0) {
-                    ctx.setTransform(scale,0,0,scale,0,canvas.height/devicePixelRatio);
-                    ctx.scale(60,60);
-                    const col = pos % 5;
-                    const row = (pos - col) / 5;
-                    ctx.translate(col * 4/3 + 3, row * 4/3 - 5);
+                    invCtx.setTransform(60,0,0,60,140,140);
+                    const col = pos % 3;
+                    const row  = (pos - col) / 3;
+                    invCtx.translate(col * 4/3, row * 4/3);
                     const base = getColorByRarity(n % 6);               
-                    ctx.strokeStyle = base;
-                    ctx.fillStyle = getStroke(ctx.strokeStyle, 4/3);
-                    ctx.lineWidth = 1/5;
-                    ctx.beginPath();
-                    ctx.rect(-0.5,-0.5,1,1);
-                    ctx.stroke();
-                    ctx.fill();
-                    drawPetalAsStatic(1 + ((n / 6) | 0),n % 6);
+                    invCtx.strokeStyle = base;
+                    invCtx.fillStyle = getStroke(invCtx.strokeStyle, 4/3);
+                    invCtx.lineWidth = 1/5;
+                    invCtx.beginPath();
+                    invCtx.rect(-0.5,-0.5,1,1);
+                    invCtx.stroke();
+                    invCtx.fill();
+                    drawPetalAsStatic(1 + ((n / 6) | 0),n % 6,invCtx);
                     ++pos;
                     if (_inventory[n] === 1) continue;
-                    ctx.translate(0.4,-0.4);
-                    ctx.rotate(0.5);
-                    ctx.textAlign = 'center';
-                    ctx.font = '0.2px Ubuntu';
-                    ctx.lineWidth = 0.04;
-                    ctx.fillStyle = '#ffffff';
-                    ctx.strokeStyle = '#000000';
-                    ctx.beginPath();
-                    ctx.strokeText(`x${_inventory[n]}`, 0, 0);
-                    ctx.fillText(`x${_inventory[n]}`, 0, 0);
+                    invCtx.translate(0.4,-0.4);
+                    invCtx.rotate(0.5);
+                    invCtx.textAlign = 'center';
+                    invCtx.font = '0.2px Ubuntu';
+                    invCtx.lineWidth = 0.04;
+                    invCtx.fillStyle = '#ffffff';
+                    invCtx.strokeStyle = '#000000';
+                    invCtx.beginPath();
+                    invCtx.strokeText(`x${_inventory[n]}`, 0, 0);
+                    invCtx.fillText(`x${_inventory[n]}`, 0, 0);
                 }
             }
+            ctx.globalAlpha = 0.8;
+            ctx.setTransform(staticScale,0,0,staticScale,0,canvas.height/devicePixelRatio);
+            ctx.drawImage(clientSimulation.inventory.canvas, -50, -600);
         }
     }
     if (ws.readyState === 1) window.ws.send(new Uint8Array([1,input]));
     requestAnimationFrame(loop);
+}
+const drawEntity = (ent) => {
+    if (!ent.hasOwnProperty('pos')) return;
+    ctx.setTransform(scale,0,0,scale,canvas.width/(2*devicePixelRatio),canvas.height/(2*devicePixelRatio));
+    const {x, y} = ent.pos;
+    ctx.translate(x - cameraEnt.camera.x, y - cameraEnt.camera.y);
+    ctx.globalAlpha = ent.style.opacity;
+    const r = ent.pos.radius;
+    if (ent.mob) {
+        ctx.fillStyle = getColorByRarity(ent.mob.rarity);
+        const text = getNameByRarity(ent.mob.rarity);
+        ctx.strokeStyle = '#000000';
+        ctx.textAlign = 'right';
+        ctx.font = '8px Ubuntu';
+        ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.strokeText(text, r, 1.8*r+10);
+        ctx.fillText(text, r, 1.8*r+10);
+    }
+    if (ent.health) {
+        ctx.strokeStyle = '#111111';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(-r,1.8*r);
+        ctx.lineTo(r,1.8*r);
+        ctx.stroke();
+        ctx.strokeStyle = '#00bb00';
+        ctx.lineWidth = 3.2;
+        ctx.beginPath();
+        ctx.moveTo(-r,1.8*r);
+        ctx.lineTo(-r+2*ent.health.health/255*r,1.8*r);
+        ctx.stroke();
+    }
+    ctx.scale(ent.pos.radius, ent.pos.radius);
+    ctx.rotate(ent.pos.angle);
+    if (ent.mob) drawMobAsEnt(ent);
+    else if (ent.petal) drawPetalAsEnt(ent);
+    else if (ent.drop) drawDrop(ent);
+    else drawPlayer(ent);
 }
 requestAnimationFrame(loop);

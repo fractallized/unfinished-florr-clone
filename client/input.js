@@ -51,35 +51,18 @@ canvas.onmousedown = async (e) => {
     e.preventDefault();
     if (e.button === 0) input |= 16;
     else input |= 32;
-    if (clientSimulation.selected) {
-        clientSimulation.selected.selected = true;
-        clientSimulation.selected.targetX = e.clientX;
-        clientSimulation.selected.targetY = e.clientY;
-    } else {
-        for (const b of Object.values(clientSimulation.loadout)) {
-            if (Math.abs(b.x - e.clientX) / staticScale > 40) continue;
-            if (Math.abs(b.y - e.clientY) / staticScale > 40) continue;
-            b.selected = true;
-            b.targetX = e.clientX;
-            b.targetY = e.clientY;
-            return clientSimulation.selected = b;
-        }
+    for (const b of Object.values(clientSimulation.loadout)) {
+        if (Math.abs(b.x - e.clientX) / staticScale > 40) continue;
+        if (Math.abs(b.y - e.clientY) / staticScale > 40) continue;
+        return b.onmousedown(e);
     }
 }
 canvas.onmousemove = async (e) => {
-    if (clientSimulation.selected) {
-        clientSimulation.selected.targetX = e.clientX;
-        clientSimulation.selected.targetY = e.clientY;
-    }
+    if (clientSimulation.selected) clientSimulation.selected.onmousemove(e);
 }
 canvas.onmouseup = async (e) => {
     e.preventDefault();
     if (e.button === 0) input &= ~16;
     else input &= ~32; 
-    if (clientSimulation.selected) {
-        clientSimulation.selected.selected = false;
-        clientSimulation.selected.targetX = clientSimulation.selected.baseX;
-        clientSimulation.selected.targetY = clientSimulation.selected.baseY;
-        delete clientSimulation.selected;
-    }
+    if (clientSimulation.selected) clientSimulation.selected.onmouseup(e);
 }
