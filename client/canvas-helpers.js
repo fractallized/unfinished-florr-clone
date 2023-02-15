@@ -35,7 +35,7 @@ function drawDrop(drop) {
     ctx.rect(-0.5,-0.5,1,1);
     ctx.stroke();
     ctx.fill();
-    drawPetalAsStatic(drop.drop.id,drop.drop.rarity);
+    drawPetalAsStatic(drop.drop.id,drop.drop.rarity, ctx);
 }
 function drawPetalAsEnt(petal) {
     if (!petal.CLIENT_RENDER_TICK) petal.CLIENT_RENDER_TICK = 0;
@@ -75,7 +75,7 @@ function drawPetalAsEnt(petal) {
             break;
     }
 }
-function drawPetalAsStatic(id, rarity) {
+function drawPetalAsStatic(id, rarity, ctx) {
     switch(id) {
         case 1:
             ctx.fillStyle = '#eeeeee';
@@ -131,8 +131,8 @@ function drawMob(id, clientRenderTick) {
             ctx.fillStyle = '#334433';
             ctx.strokeStyle = getStroke(ctx.fillStyle);
             ctx.lineWidth = 1 / 8;
-            ctx.beginPath();
             path = new Path2D(MOBSVG[0][0]);
+            ctx.beginPath();
             ctx.fill(path);
             ctx.stroke(path);
             ctx.fillStyle = '#22bbdd33';
@@ -140,11 +140,13 @@ function drawMob(id, clientRenderTick) {
             ctx.translate(0.9,-0.1);
             ctx.rotate(secondaryAngle);
             path = new Path2D(MOBSVG[0][1]);
+            ctx.beginPath();
             ctx.fill(path);
             ctx.stroke(path);
             ctx.rotate(-2 * secondaryAngle);
             ctx.translate(0,0.2);
             path = new Path2D(MOBSVG[0][2]);
+            ctx.beginPath();
             ctx.fill(path);
             ctx.stroke(path);
             break;
@@ -153,12 +155,14 @@ function drawMob(id, clientRenderTick) {
             ctx.strokeStyle = getStroke(ctx.fillStyle);
             ctx.lineWidth = 1 / 8;
             path = new Path2D(MOBSVG[1][1]);
+            ctx.beginPath();
             ctx.stroke(path);
             ctx.fill(path);
             ctx.fillStyle = '#662266';
             ctx.strokeStyle = getStroke(ctx.fillStyle);
             ctx.lineWidth = 1 / 8;
             path = new Path2D(MOBSVG[1][0]);
+            ctx.beginPath();
             ctx.stroke(path);
             ctx.fill(path);
             break;

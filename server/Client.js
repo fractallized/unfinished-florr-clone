@@ -44,9 +44,6 @@ export class Client {
             compileEnt(p, this, this.state);
             for (const entity of Object.values(this._arena.entities)) compileEnt(p, entity, this.state);
             p.i32(-1);
-            this.ws.send(p.write()); //clientbound
-            p.reset();
-            p.u8(2);
             compileInventory(p, this.inventory, this.state);
             this.ws.send(p.write());
             this.inventory.reset();
@@ -80,9 +77,9 @@ export class Client {
                 let sameCt = 0;
                 for (let n = 0; n < 40; n += 2) if (this.equipped[n] === id && this.equipped[n + 1] === rarity) sameCt++;
                 if (sameCt >= this.inventory[id * 6 + rarity - 6]) return; //check if client has enough
-                this.player.playerInfo.petalsEquipped[index] = id;
-                this.player.playerInfo.petalsEquipped[index + 1] = rarity;
-                this.player.changePetal(index >> 1);
+                //this.player.playerInfo.petalsEquipped[index] = id;
+                //this.player.playerInfo.petalsEquipped[index + 1] = rarity;
+                this.player.changePetal(index >> 1, id, rarity);
                 for (let n = 0; n < 40; n++) this.equipped[n] = this.player.playerInfo.petalsEquipped[n];
                 //change inv
                 break;

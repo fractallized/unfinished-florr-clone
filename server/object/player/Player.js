@@ -16,6 +16,7 @@ export class Player extends Entity {
     constructor(arena, x, y, r, camera) {
         super(arena, x, y, r, 0);
         this.owner = camera;
+        this.owner.player = this;
 
         this.health = new COMPONENTS.HealthComponent(this, 100);
         this.playerInfo = new COMPONENTS.PlayerInfoComponent(this, [...this.owner.equipped]); 
@@ -47,16 +48,16 @@ export class Player extends Entity {
             }
         }
     }
-    changePetal(pos) {
+    changePetal(pos, id, rarity) {
         if (pos >= this.numEquipped) return;
         this.numSpacesAlloc -= this.equipped[pos].length | 0;
         for (const petalInfo of this.equipped[pos]) if (petalInfo.petal) petalInfo.petal.delete();
         this.equipped[pos] = [];
         const equipped = this.playerInfo.petalsEquipped;
-        if (equipped[pos * 2]) {
+        if (id) {
             this.equipped[pos].push({
-                id: equipped[pos * 2],
-                rarity: equipped[pos * 2 + 1],
+                id,
+                rarity,
                 petal: null,
                 cdTick: 0,
                 cooldown: PETAL_DEFINITIONS[equipped[pos * 2]].cooldown
@@ -68,6 +69,8 @@ export class Player extends Entity {
                 petal: null
             }];
         }
+        this.playerInfo.petalsEquipped[pos << 1] = id;
+        this.playerInfo.petalsEquipped[(pos << 1) + 1] = rarity;
     }
     onPetalLoss(outerPos, innerPos) {
         this.equipped[outerPos][innerPos].petal = null;
@@ -131,9 +134,11 @@ export class Player extends Entity {
         }
     }
     delete() {
-        this.owner.player = null;
-        this.owner.camera.player = -1;
-        this.pendingDelete = true;
+        if (this.owner.player === this) {
+            this.owner.player = null;
+            this.owner.camera.player = -1;
+            this.pendingDelete = true;
+        }
         super.delete();
     }
     wipeState() {

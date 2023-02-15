@@ -5,14 +5,6 @@ ws.onmessage = async (e) => {
     r = new Reader(packet);
     switch(r.u8()) {
         case 1: parseEntPacket(); break;
-        case 2: parseInventory(); break;
-    }
-}
-function parseInventory() {
-    let pos = r.i32();
-    while(pos !== -1 && r.has()) {
-        inventory[pos] = r.i32();
-        pos = r.i32();
     }
 }
 function parseEntPacket() {
@@ -89,10 +81,8 @@ function parseEntPacket() {
                             faceFlags: r.u8()
                         }
                         const count = entities[id].playerInfo.numEquipped;
-                        for (let n = 0; n < count; n++) {
-                            clientSimulation.loadout[n] = new ClientEntity(canvas.width/(2*devicePixelRatio) - (1 - count + 2 * n) * 40 * staticScale,
-                            canvas.height/devicePixelRatio - 80 * staticScale);
-                        }
+                        getAdjustedEquipped(entities[id].playerInfo.petalsEquipped, count);
+                        getAdjustedInv();
                         break;
                 }
             }
@@ -141,7 +131,11 @@ function parseEntPacket() {
                     case 19:
                         entities[id].playerInfo.numEquipped = r.u8(); break;
                     case 20:
-                        entities[id].playerInfo.petalsEquipped = new Uint8Array(40).map(_ => r.u8()); break;
+                        entities[id].playerInfo.petalsEquipped = new Uint8Array(40).map(_ => r.u8());
+                        const count = entities[id].playerInfo.numEquipped;
+                        getAdjustedInv();
+                        getAdjustedEquipped(entities[id].playerInfo.petalsEquipped, count);
+                        break;
                     case 21:
                         entities[id].playerInfo.petalHealths = new Uint8Array(10).map(_ => r.u8()); break;
                     case 22:
@@ -153,5 +147,44 @@ function parseEntPacket() {
         }
         r.u8();
         id = r.i32();
+    }
+    if (!r.has()) return;
+    let pos = r.i32();
+    while(pos !== -1 && r.has()) {
+        inventory[pos] = r.i32();
+        pos = r.i32();
+    }
+    getAdjustedInv();
+}
+function getAdjustedEquipped(equipped, count) {
+    for (let n = 0; n < 20; n++) {
+        if (equipped[n*2] === 0) return delete clientSimulation.loadout[n];
+        if (!clientSimulation.loadout[n]) clientSimulation.loadout[n] = new ClientEntity(canvas.width/(2*devicePixelRatio) + (1 - count + 2 * n) * 40 * staticScale, canvas.height/devicePixelRatio - 80 * staticScale, n);
+    }
+}
+function getAdjustedInv() {
+    if (!entities.hasOwnProperty('camera') || !entities[entities.camera] || !entities[entities.camera].camera.hasOwnProperty('player')) return false;
+    const equipped = entities[entities[entities.camera].camera.player].playerInfo.petalsEquipped;
+    const _inventory = [...inventory];
+    for (let n = 0; n < 20 * 2; n += 2) {
+        if (equipped[n] === 0) continue;
+        --_inventory[equipped[n] * 6 + equipped[n + 1] - 6];
+    }
+    let pos = 0;
+    for (let n = 0; n < 60; n++) {
+        if (_inventory[n] === 0) delete clientSimulation.inventoryLayout[n];
+        else {
+            if (clientSimulation.inventoryLayout[n]) {
+                clientSimulation.inventoryLayout[n].pos = pos;
+                clientSimulation.inventoryLayout[n].count = _inventory[n];
+            }
+            else {
+                clientSimulation.inventoryLayout[n] = {
+                    pos, 
+                    count: _inventory[n]
+                }
+            }
+            pos++;
+        }
     }
 }
