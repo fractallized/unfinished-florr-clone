@@ -2,7 +2,7 @@ import { COMPONENTS } from "../Components.js";
 import { Entity } from "../Entity.js";
 import { OneDimensionalVector, Vector } from "../Vector.js";
 import { Mob } from "../mob/Mob.js";
-import { PETAL_RARITY_MULTIPLIER } from "../../PetalDefinitions.js";
+import { PETAL_RARITY_MULTIPLIER } from "../../coder/Helpers.js";
 
 //TODO: FIX UP FIELD GROUPS AND FINALIZE NECESSARY ONES
 
@@ -13,7 +13,6 @@ export class Petal extends Entity {
         this.petal = new COMPONENTS.PetalComponent(this, petalDefinition.id, rarity);
         this.health = new COMPONENTS.HealthComponent(this, petalDefinition.health * PETAL_RARITY_MULTIPLIER[rarity]);
         
-        this.damage = petalDefinition.damage * PETAL_RARITY_MULTIPLIER[rarity];
         this.weight = 0.5;
         this.player = player;
         this.rotationPos = pos;
@@ -23,6 +22,9 @@ export class Petal extends Entity {
         this.pos.add(Vector.fromPolar(this.holdingRadius.pos, this.player.rotationAngle + this.rotationPos * 2 * Math.PI / this.player.numSpacesAlloc))
         
         this.petalDefinition = {...petalDefinition};
+        this.count = petalDefinition.repeat? petalDefinition.repeat[rarity]: 1;
+        this.damage = petalDefinition.damage * PETAL_RARITY_MULTIPLIER[rarity] / this.count;
+        this.clump = petalDefinition.clump | false;
         
         this.creationTick = this._arena.server.tick;
     }
@@ -32,9 +34,10 @@ export class Petal extends Entity {
         const input = this.player.owner.input;
         const hoverRadius = 75 + (((input >> 4) & !this.petalDefinition.preventExtend) - ((input >> 5) & 1)) * 25;
         this.holdingRadius.accel = (hoverRadius - this.holdingRadius.pos) * 0.04;
-        this.holdingRadius.vel *= 0.75;
+        this.holdingRadius.vel *= 0.8;
         this.holdingRadius.tick();
-        this.pos.set2(Vector.fromPolar(this.holdingRadius.pos, this.player.rotationAngle + this.rotationPos * 2 * Math.PI / this.player.numSpacesAlloc).add(this.player.pos));
+        if (this.clump) this.vel.set2(Vector.fromPolar(this.holdingRadius.pos, this.player.rotationAngle + this.rotationPos * 2 * Math.PI / this.player.numSpacesAlloc).add(Vector.fromPolar(10, this.innerPos * 2 * Math.PI / this.count)).add(this.player.pos).sub(this.pos));
+        else this.vel.set2(Vector.fromPolar(this.holdingRadius.pos, this.player.rotationAngle + this.rotationPos * 2 * Math.PI / this.player.numSpacesAlloc).add(this.player.pos).sub(this.pos));
         super.tick();
     }
     tick2() {

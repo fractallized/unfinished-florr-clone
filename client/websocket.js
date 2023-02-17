@@ -5,6 +5,7 @@ ws.onmessage = async (e) => {
     r = new Reader(packet);
     switch(r.u8()) {
         case 1: parseEntPacket(); break;
+        case 254: entities = {}; break;
     }
 }
 function parseEntPacket() {
@@ -158,33 +159,30 @@ function parseEntPacket() {
 }
 function getAdjustedEquipped(equipped, count) {
     for (let n = 0; n < 20; n++) {
-        if (equipped[n*2] === 0) return delete clientSimulation.loadout[n];
-        if (!clientSimulation.loadout[n]) clientSimulation.loadout[n] = new ClientEntity(canvas.width/(2*devicePixelRatio) + (1 - count + 2 * n) * 40 * staticScale, canvas.height/devicePixelRatio - 80 * staticScale, n);
+        if (equipped[n*2] === 0) delete clientSimulation.loadout[n];
+        else if (!clientSimulation.loadout[n]) clientSimulation.loadout[n] = new LoadoutEntity(canvas.width/(2*devicePixelRatio) + (1 - count + 2 * n) * 40 * staticScale, canvas.height/devicePixelRatio - 80 * staticScale, n);
     }
 }
 function getAdjustedInv() {
-    if (!entities.hasOwnProperty('camera') || !entities[entities.camera] || !entities[entities.camera].camera.hasOwnProperty('player')) return false;
+    if (!entities.hasOwnProperty('camera')) return false;
+    if (!entities[entities.camera]) return false;
+    if (!entities[entities.camera].camera.hasOwnProperty('player')) return false;
+    if (!entities[entities[entities.camera].camera.player]) return false;
     const equipped = entities[entities[entities.camera].camera.player].playerInfo.petalsEquipped;
     const _inventory = [...inventory];
     for (let n = 0; n < 20 * 2; n += 2) {
         if (equipped[n] === 0) continue;
-        --_inventory[equipped[n] * 6 + equipped[n + 1] - 6];
+        --_inventory[((equipped[n] - 1) << 3) + (equipped[n + 1])];
     }
-    let pos = 0;
-    for (let n = 0; n < 60; n++) {
-        if (_inventory[n] === 0) delete clientSimulation.inventoryLayout[n];
-        else {
-            if (clientSimulation.inventoryLayout[n]) {
-                clientSimulation.inventoryLayout[n].pos = pos;
-                clientSimulation.inventoryLayout[n].count = _inventory[n];
-            }
-            else {
-                clientSimulation.inventoryLayout[n] = {
-                    pos, 
-                    count: _inventory[n]
-                }
-            }
-            pos++;
+    clientSimulation.inventoryLayout = [];
+    for (let rarity = 7; rarity >= 0; rarity--) {
+        for (let petalID = 1; petalID <= 10; petalID++) {
+            if (_inventory[((petalID - 1) << 3) + rarity] <= 0) continue;
+            clientSimulation.inventoryLayout.push({
+                count: _inventory[((petalID - 1) << 3) + rarity],
+                petalID,
+                rarity
+            })
         }
     }
 }

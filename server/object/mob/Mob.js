@@ -2,11 +2,12 @@ import { Entity } from "../Entity.js";
 import { Drop } from "./Drop.js";
 import { COMPONENTS } from "../Components.js";
 import { interpolate } from "../Vector.js";
-import { MOB_RARITY_MULTIPLIER, MOB_SIZE_MULTIPLIER } from "../../MobDefinitions.js";
-
+import { FROM_TABLE, MOB_RARITY_MULTIPLIER, MOB_SIZE_MULTIPLIER } from "../../coder/Helpers.js";
+//TODO: AI
 export class Mob extends Entity {
-    constructor(arena, x, y, angle, rarity, mobDefinition) {
+    constructor(arena, zone, x, y, angle, rarity, mobDefinition) {
         super(arena, x, y, mobDefinition.size * MOB_SIZE_MULTIPLIER[rarity], angle);
+        this.zone = zone;
         this.style.color = 1;
         this.health = new COMPONENTS.HealthComponent(this, mobDefinition.health * MOB_RARITY_MULTIPLIER[rarity]);
         this.mob = new COMPONENTS.MobComponent(this, mobDefinition.id, rarity);
@@ -24,8 +25,8 @@ export class Mob extends Entity {
                 this.lastIdle = this._arena.server.tick;
             }
         }
-        this.pos.angle = interpolate(this.pos.angle, this.angle, 0.1);
-        if (this._arena.server.tick - this.lastIdle === 25) this.vel.set(Math.cos(this.pos.angle) * 8, Math.sin(this.pos.angle) * 8);
+        if (this._arena.server.tick - this.lastIdle < 25) this.pos.angle = interpolate(this.pos.angle, this.angle, 0.1);
+        else if (this._arena.server.tick - this.lastIdle === 25) this.vel.set(Math.cos(this.pos.angle) * 8, Math.sin(this.pos.angle) * 8);
         const collisions = this.getCollisions();
         for (const ent of collisions) {
             if (ent === this) continue;
@@ -49,19 +50,14 @@ export class Mob extends Entity {
         }
     }
     delete() {
+        --this.zone.mobCount;
         const drops = [];
         for (const [id, table] of Object.entries(this.loot)) {
-            let rand = Math.random();
-            for (let n = 0; n < table[this.mob.rarity].length; ++n) {
-                rand -= table[this.mob.rarity][n];
-                if (rand < 0) {
-                    if (n > 0) drops.push([id, n-1]);
-                    break;
-                }
-            }
+            const rar = FROM_TABLE(table[this.mob.rarity]);
+            if (rar) drops.push([id, rar - 1]);
         }
         for (let n = 0; n < drops.length; ++n) {
-            this._arena.add(new Drop(this._arena, this.pos.x, this.pos.y, 25, 2 * n * Math.PI / drops.length, {
+            this._arena.add(new Drop(this._arena, this.pos.x, this.pos.y, 40, 2 * n * Math.PI / drops.length, {
                 id: parseInt(drops[n][0]),
                 rarity: drops[n][1]
             }));

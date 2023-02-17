@@ -1,5 +1,5 @@
 import { Vector } from "../Vector.js";
-import { PETAL_RARITY_MULTIPLIER } from "../../PetalDefinitions.js";
+import { PETAL_RARITY_MULTIPLIER } from "../../coder/Helpers.js";
 import { Petal } from "./Petal.js";
 //TODO: FIX UP FIELD GROUPS AND FINALIZE NECESSARY ONES
 

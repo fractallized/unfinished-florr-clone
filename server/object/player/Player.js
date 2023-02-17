@@ -17,9 +17,10 @@ export class Player extends Entity {
         super(arena, x, y, r, 0);
         this.owner = camera;
         this.owner.player = this;
+        this.creationTick = this._arena.server.tick;
 
         this.health = new COMPONENTS.HealthComponent(this, 100);
-        this.playerInfo = new COMPONENTS.PlayerInfoComponent(this, [...this.owner.equipped]); 
+        this.playerInfo = new COMPONENTS.PlayerInfoComponent(this, new Uint8Array(40)); 
 
         this.equipped = new Array(10).fill([]); //ACCOUNTS FOR PETALS THAT SPAWN MULTIPLE
         this.getAdjustedEquipped();
@@ -27,47 +28,35 @@ export class Player extends Entity {
     getAdjustedEquipped() {
         this.playerInfo.numEquipped = this.owner.numEquipped;
         this.numSpacesAlloc = 0;
-        const equipped = this.playerInfo.petalsEquipped;
+        const equipped = this.owner.equipped;
         if (!equipped) return;
         for (let n = 0; n < this.owner.numEquipped; ++n) {
-            this.equipped[n] = [];
-            if (equipped[n * 2]) {
-                this.equipped[n].push({
-                    id: equipped[n * 2],
-                    rarity: equipped[n * 2 + 1],
-                    petal: null,
-                    cdTick: 0,
-                    cooldown: PETAL_DEFINITIONS[equipped[n * 2]].cooldown
-                });
-                ++this.numSpacesAlloc;
-            } else {
-                this.equipped[n] = [{
-                    id: 0,
-                    petal: null
-                }];
-            }
+            this.changePetal(n, equipped[n * 2], equipped[n * 2 + 1]);
         }
     }
     changePetal(pos, id, rarity) {
         if (pos >= this.numEquipped) return;
-        this.numSpacesAlloc -= this.equipped[pos].length | 0;
+        this.owner.equipped[pos << 1] = id;
+        this.owner.equipped[(pos << 1) + 1] = rarity;
+        if (this.equipped[pos].length !== 0) {
+            if (this.equipped[pos][0].clump) --this.numSpacesAlloc;
+            else this.numSpacesAlloc -= this.equipped[pos].length | 0;
+        }
         for (const petalInfo of this.equipped[pos]) if (petalInfo.petal) petalInfo.petal.delete();
         this.equipped[pos] = [];
-        const equipped = this.playerInfo.petalsEquipped;
         if (id) {
-            this.equipped[pos].push({
-                id,
-                rarity,
-                petal: null,
-                cdTick: 0,
-                cooldown: PETAL_DEFINITIONS[equipped[pos * 2]].cooldown
-            });
-            ++this.numSpacesAlloc;
-        } else {
-            this.equipped[pos] = [{
-                id: 0,
-                petal: null
-            }];
+            const repeat = PETAL_DEFINITIONS[id].repeat ? PETAL_DEFINITIONS[id].repeat[rarity]: 1;
+            for (let n = 0; n < repeat; n++) {
+                this.equipped[pos].push({
+                    id,
+                    rarity,
+                    petal: null,
+                    cdTick: 0,
+                    cooldown: PETAL_DEFINITIONS[id].cooldown,
+                    clump: PETAL_DEFINITIONS[id].clump | false
+                });
+                if (n === 0 || !PETAL_DEFINITIONS[id].clump) ++this.numSpacesAlloc;
+            }
         }
         this.playerInfo.petalsEquipped[pos << 1] = id;
         this.playerInfo.petalsEquipped[(pos << 1) + 1] = rarity;
@@ -80,20 +69,23 @@ export class Player extends Entity {
         let rotPos = -1;
         for (let outer = 0; outer < this.playerInfo.numEquipped; ++outer) {
             const innerLength = this.equipped[outer].length;
-            let healthSum = 0, cdSum = 0;
+            let healthSum = 0, minCD = 1;
             for (let inner = 0; inner < innerLength; ++inner) {
                 const petal = this.equipped[outer][inner];
                 if (petal.id === 0) continue;
-                ++rotPos;
+                if (!petal.clump || inner === 0) ++rotPos;
                 if (petal.cdTick < petal.cooldown) ++petal.cdTick;
                 else if (!petal.petal) {
                     if (PETAL_DEFINITIONS[petal.id].petal === 'Petal') petal.petal = this._arena.add(new Petal(this._arena, this, this.pos.x, this.pos.y, outer, inner, rotPos, this.playerInfo.petalsEquipped[2*outer+1], PETAL_DEFINITIONS[petal.id]))
                     else if (PETAL_DEFINITIONS[petal.id].petal === 'HealPetal') petal.petal = this._arena.add(new HealPetal(this._arena, this, this.pos.x, this.pos.y, outer, inner, rotPos, this.playerInfo.petalsEquipped[2*outer+1], PETAL_DEFINITIONS[petal.id]))
-                } else healthSum += petal.petal.health.health / petal.petal.health.maxHealth;
-                cdSum += petal.cdTick / petal.cooldown;
+                } else {
+                    healthSum += petal.petal.health.health / petal.petal.health.maxHealth;
+                    petal.petal.rotationPos = rotPos;
+                }
+                minCD = Math.min(minCD, petal.cdTick / petal.cooldown);
             }
             this.playerInfo.petalHealths[outer] = (healthSum / innerLength) * 255;
-            this.playerInfo.petalCooldowns[outer] = (cdSum / innerLength) * 255;
+            this.playerInfo.petalCooldowns[outer] = minCD * 255;
         }
     }
     tick() {
@@ -122,6 +114,7 @@ export class Player extends Entity {
     }
     getCollisions() { return this._arena.collisionGrid.getEntityCollisions(this, this.collectionRadius); }
     onCollide(ent) {
+        if (this._arena.server.tick - this.creationTick < 50) return;
         if (ent instanceof Mob) {
             if (this._arena.server.tick - this.health.lastDamaged > 2) {
                 this.health.health -= ent.damage;

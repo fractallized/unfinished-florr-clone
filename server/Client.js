@@ -8,7 +8,7 @@ import { Inventory } from "./game/Inventory.js";
 
 export class Client {
     state = 2;
-    addedToArena = false;
+    enteredPortalTick = -100;
     constructor(server, ws) {
         this.server = server;
         this._arena = null;
@@ -18,7 +18,7 @@ export class Client {
         this.input = 0;
         this.camera = new COMPONENTS.CameraComponent(this,0,0,1,-1);
         this.equipped = new Uint8Array(40).fill(0).map((_,i) => i<10?1-(i&1):0);
-        this.numEquipped = 5;
+        this.numEquipped = 8;
 
         this.inventory = new Inventory(this); //separate packet send
         this.inventory[0] = 5; //init inv;
@@ -50,21 +50,30 @@ export class Client {
         }
         this.wipeState();
     }
+    moveServer(num, x, y) {
+        if (this._arena instanceof Arena) {
+            this._arena.removeClient(this);
+            if (this.player instanceof Player) this._arena.removeFromActive(this.player);
+        }
+        console.log("spawn");
+        this.map = num;
+        this._arena = this.server.maps[this.map];
+        this.player = new Player(this._arena, 500, 500, 25, this); //client spawned, give it a player
+        this.player.pos.set(x, y);
+        this._arena.addClient(this); //add the camera
+        this.addedToArena = true;
+        this._arena.add(this.player); //add the player of the camera
+        this.camera.player = this.player.id;
+        this.enteredPortalTick = this.server.tick; //prevent ping ponging petween portals
+        this.ws.send(new Uint8Array([254]));
+        this.state = 2;
+    }
     onmessage(req) {
         const reader = new Reader(new Uint8Array(req.data));
         switch(reader.u8()) {
             case 0:
                 if (this.player) break;
-                console.log("spawn");
-                this.map = 0;
-                this._arena = this.server.maps[this.map];
-                this.player = new Player(this._arena, 500, 500, 25, this); //client spawned, give it a player
-                if (!this.addedToArena) {
-                    this._arena.addClient(this); //add the camera
-                    this.addedToArena = true;
-                }
-                this._arena.add(this.player); //add the player of the camera
-                this.camera.player = this.player.id;
+                this.moveServer(0, 1800, 1000);
                 break;
             case 1:
                 this.input = reader.u8();
@@ -75,13 +84,10 @@ export class Client {
                 const id = reader.u8(), rarity = reader.u8();
                 if (this.player.playerInfo.petalsEquipped[index] === id && this.player.playerInfo.petalsEquipped[index + 1] === rarity) return;
                 let sameCt = 0;
-                for (let n = 0; n < 40; n += 2) if (this.equipped[n] === id && this.equipped[n + 1] === rarity) sameCt++;
-                if (sameCt >= this.inventory[id * 6 + rarity - 6]) return; //check if client has enough
-                //this.player.playerInfo.petalsEquipped[index] = id;
-                //this.player.playerInfo.petalsEquipped[index + 1] = rarity;
+                for (let n = 0; n < 40; n += 2) if (this.equipped[n] === id && this.equipped[n + 1] === rarity) ++sameCt;
+                if (sameCt >= this.inventory[(id - 1) << 3 + rarity]) return; //check if client has enough
                 this.player.changePetal(index >> 1, id, rarity);
-                for (let n = 0; n < 40; n++) this.equipped[n] = this.player.playerInfo.petalsEquipped[n];
-                //change inv
+                for (let n = 0; n < 40; ++n) this.equipped[n] = this.player.playerInfo.petalsEquipped[n];
                 break;
         }
     }

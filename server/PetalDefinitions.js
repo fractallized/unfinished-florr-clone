@@ -14,7 +14,8 @@ export const PETAL_DEFINITIONS = {
         damage: 8,
         health: 5,
         cooldown: 25,
-        petal: 'Petal'
+        petal: 'Petal',
+        repeat: [1,2,2,3,3,5,5,7]
     },
     3: {
         id: 3,
@@ -22,7 +23,9 @@ export const PETAL_DEFINITIONS = {
         damage: 35,
         health: 5,
         cooldown: 82,
-        petal: 'Petal'
+        petal: 'Petal',
+        repeat: [1,1,1,1,3,5,5,5],
+        clump: true
     },
     4: {
         id: 4,
@@ -32,7 +35,15 @@ export const PETAL_DEFINITIONS = {
         cooldown: 100,
         petal: 'HealPetal',
         preventExtend: true,
-        heal: -2 //negative if the petal sacrifices itself
+        heal: -10 //negative if the petal sacrifices itself
+    },
+    5: {
+        id: 5,
+        radius: 10,
+        damage: 8,
+        health: 10,
+        cooldown: 20,
+        petal: 'HealPetal',
+        heal: 0.3
     }
 }
-export const PETAL_RARITY_MULTIPLIER = [1, 2, 4, 8, 16, 32, 64];
