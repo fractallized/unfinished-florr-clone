@@ -1,7 +1,7 @@
 import { FROM_OBJECT_TABLE, FROM_TABLE } from "../coder/Helpers.js";
 import { MOB_DEFINITIONS } from "../MobDefinitions.js";
 import { COMPONENTS } from "../object/Components.js";
-import { Portal } from "../object/map/Portal.js";
+import { Portal } from "./Portal.js";
 import { Mob } from "../object/mob/Mob.js";
 import { SpatialHash } from "./Collisions.js";
 
@@ -51,12 +51,6 @@ export class Arena {
         entity.gridHash = this.collisionGrid.insert(entity);
         return entity;
     }
-    addPortal(entity) {
-        const hash = this.calculateOpenHash();
-        this.entities[hash] = (entity);
-        entity.id = hash;
-        return entity;
-    }
     removeFromActive(entity) {
         entity.isDeleted = true;
         delete this.entities[entity.id];
@@ -73,7 +67,7 @@ export class Arena {
         return this;
     }
     setPortals(...portals) {
-        for (const portal of portals) this.addPortal(new Portal(this, ...portal));
+        for (const portal of portals) this.add(new Portal(this, ...portal));
         return this;
     }
 }

@@ -11,8 +11,9 @@ export class Entity {
     accel = new Vector(0,0);
     gridHash = -1;
     pendingDelete = false;
-    isDeleted = false;
+    canCollide = true;
     state = 2; //create
+    gridBounds = [];
 
     constructor(arena, x, y, r, angle) {
         this._arena = arena;
@@ -33,7 +34,7 @@ export class Entity {
         else if (this.pos.x + this.pos.radius > this._arena.arena.width) this.pos.x = this._arena.arena.width - this.pos.radius;
         if (this.pos.y < this.pos.radius) this.pos.y = this.pos.radius;
         else if (this.pos.y + this.pos.radius > this._arena.arena.height) this.pos.y = this._arena.arena.height - this.pos.radius;
-        if (this.gridHash !== SpatialHash.getHash(this.pos)) {
+        if (true) { //rethink this
             this._arena.collisionGrid.remove(this);
             this.gridHash = this._arena.collisionGrid.insert(this);
         }
@@ -41,7 +42,12 @@ export class Entity {
     delete() { 
         this.pendingDelete = true;
     }
-    getCollisions() { return this._arena.collisionGrid.getEntityCollisions(this) }
+    getCollisions() { 
+        const collisions = new Set();
+        const possibleCollisions = this._arena.collisionGrid.getEntityCollisions(this);
+        for (const entity of possibleCollisions) if (entity.canCollide) collisions.add(entity);
+        return collisions;
+    }
     collideWith(entity) {
         this.onCollide(entity);
         entity.onCollide(this);

@@ -35,7 +35,7 @@ export class GameServer {
             BASE_CHANCE: 0.1,
             MOB_CHANCE: {1: 1},
             RARITY_CHANCE: [0,0.01,0.29,0.2,0.2,0.3] 
-        }]).setPortals([900,500,0,100,500],[500,100,1,500,900]);
+        }]).setPortals([900,500,0,100,1500],[500,100,1,500,900]);
 
         this.tick = 0;
 

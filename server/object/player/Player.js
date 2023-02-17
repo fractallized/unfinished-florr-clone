@@ -112,7 +112,12 @@ export class Player extends Entity {
         }
         super.tick();
     }
-    getCollisions() { return this._arena.collisionGrid.getEntityCollisions(this, this.collectionRadius); }
+    getCollisions() { 
+        const collisions = new Set();
+        const possibleCollisions = this._arena.collisionGrid.getEntityCollisions(this, this.collectionRadius);
+        for (const entity of possibleCollisions) if (entity.canCollide) collisions.add(entity);
+        return collisions;
+    }
     onCollide(ent) {
         if (this._arena.server.tick - this.creationTick < 50) return;
         if (ent instanceof Mob) {

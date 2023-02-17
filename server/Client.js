@@ -9,6 +9,8 @@ import { Inventory } from "./game/Inventory.js";
 export class Client {
     state = 2;
     enteredPortalTick = -100;
+    view = new Set();
+
     constructor(server, ws) {
         this.server = server;
         this._arena = null;
@@ -37,6 +39,7 @@ export class Client {
         if (this.camera) {
             if (this.player) this.camera.set(this.player.pos.x, this.player.pos.y);
             const p = new Writer();
+            //const renders = [];
             p.u8(1);
             for (const id of Object.keys(this._arena.deletions)) p.i32(id);
             p.i32(-1);
@@ -85,7 +88,7 @@ export class Client {
                 if (this.player.playerInfo.petalsEquipped[index] === id && this.player.playerInfo.petalsEquipped[index + 1] === rarity) return;
                 let sameCt = 0;
                 for (let n = 0; n < 40; n += 2) if (this.equipped[n] === id && this.equipped[n + 1] === rarity) ++sameCt;
-                if (sameCt >= this.inventory[(id - 1) << 3 + rarity]) return; //check if client has enough
+                if (sameCt >= this.inventory[((id - 1) << 3) + rarity]) return; //check if client has enough
                 this.player.changePetal(index >> 1, id, rarity);
                 for (let n = 0; n < 40; ++n) this.equipped[n] = this.player.playerInfo.petalsEquipped[n];
                 break;
