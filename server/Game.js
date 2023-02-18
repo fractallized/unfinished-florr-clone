@@ -36,5 +36,5 @@ const HTTPServer = createServer(_server.app);
 HTTPServer.listen(8080);
 
 const Socket = new WebSocketServer({ server: HTTPServer });
-const Game = new GameServer(Socket);
-console.log("started");
+new GameServer(Socket);
+console.log("[Server is running]");

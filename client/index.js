@@ -1,10 +1,20 @@
 let entities = {};
 const inventory = new Int32Array(80);
 
-const ws = window.ws = new WebSocket(`ws${location.protocol.slice(4)}//${location.host}`);
+let ws = new WebSocket(`ws${location.protocol.slice(4)}//${location.host}`);
 
 const canvas = document.getElementById('canvas'); 
 const ctx = canvas.getContext('2d');
+//creates arena grid pattern
+const patternCanvas = new OffscreenCanvas(50,50);
+const pCtx = patternCanvas.getContext('2d');
+pCtx.fillStyle = '#33dd3380';
+pCtx.strokeStyle = '#00000080'
+pCtx.lineWidth = 0.5;
+pCtx.rect(0,0,50,50);
+pCtx.fill();
+pCtx.stroke();
+const pattern = ctx.createPattern(patternCanvas, 'repeat');
 let scale = 1; //global scaling
 let staticScale = 1; //doesn't count fov;
 let cameraEnt, arenaEnt, playerEnt;
@@ -24,7 +34,7 @@ const loop = _ => {
         ctx.setTransform(scale,0,0,scale,canvas.width/(2*devicePixelRatio)-cameraEnt.camera.x*scale,canvas.height/(2*devicePixelRatio)-cameraEnt.camera.y*scale)
         ctx.lineCap = 'round';
         ctx.strokeStyle = '#ff00ff';
-        ctx.fillStyle = '#00aa0080';
+        ctx.fillStyle = pattern;
         ctx.lineWidth = 5;
         ctx.beginPath();
         ctx.rect(0,0,arenaEnt.arena.width,arenaEnt.arena.height);
@@ -157,39 +167,47 @@ const loop = _ => {
             ctx.fillText(`${PETAL_NAMES[val.id - 1] || ''}`, 0, 30);
     }
     }
-    if (ws.readyState === 1) window.ws.send(new Uint8Array([1,input]));
+    if (ws.readyState === 1) ws.send(new Uint8Array([1,input]));
     requestAnimationFrame(loop);
 }
 const drawEntity = (ent) => {
     if (!ent.hasOwnProperty('pos')) return;
     ctx.setTransform(scale,0,0,scale,canvas.width/(2*devicePixelRatio),canvas.height/(2*devicePixelRatio));
     const {x, y} = ent.pos;
-    ctx.translate(x - cameraEnt.camera.x, y - cameraEnt.camera.y);
+    ent.pos.lerpX += 0.5 * (x - ent.pos.lerpX);
+    ent.pos.lerpY += 0.5 * (y - ent.pos.lerpY);
+    ctx.translate(ent.pos.lerpX - cameraEnt.camera.x, ent.pos.lerpY - cameraEnt.camera.y);
     ctx.globalAlpha = ent.style.opacity;
     const r = ent.pos.radius;
     if (ent.mob) {
         ctx.fillStyle = getColorByRarity(ent.mob.rarity);
         const text = getNameByRarity(ent.mob.rarity);
+        const name = MOB_NAMES[ent.mob.id - 1];
         ctx.strokeStyle = '#000000';
         ctx.textAlign = 'right';
         ctx.font = '8px Ubuntu';
         ctx.lineWidth = 1.6;
         ctx.beginPath();
-        ctx.strokeText(text, r, r+25);
-        ctx.fillText(text, r, r+25);
+        ctx.strokeText(text, r*1.5, r*1.1+25);
+        ctx.fillText(text, r*1.5, r*1.1+25);
+        ctx.fillStyle = '#ffffff';
+        ctx.textAlign = 'left';
+        ctx.beginPath();
+        ctx.strokeText(name, -r*1.5, r*1.1+8);
+        ctx.fillText(name, -r*1.5, r*1.1+8);
     }
     if (ent.health) {
         ctx.strokeStyle = '#111111';
         ctx.lineWidth = 4;
         ctx.beginPath();
-        ctx.moveTo(-r,r+15);
-        ctx.lineTo(r,r+15);
+        ctx.moveTo(-r*1.5,r*1.1+15);
+        ctx.lineTo(r*1.5,r*1.1+15);
         ctx.stroke();
         ctx.strokeStyle = '#00bb00';
         ctx.lineWidth = 3.2;
         ctx.beginPath();
-        ctx.moveTo(-r,r+15);
-        ctx.lineTo(-r+2*ent.health.health/255*r,r+15);
+        ctx.moveTo(-r*1.5,r*1.1+15);
+        ctx.lineTo(-r*1.5+3*ent.health.health/255*r,r*1.1+15);
         ctx.stroke();
     }
     ctx.scale(ent.pos.radius, ent.pos.radius);

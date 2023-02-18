@@ -17,15 +17,15 @@ export const LOOT_TABLE_GEN = init => {
         chanceLeft = 1;
         let base = MOB_VERTICAL_PROPAGATION(ret[mobR - 1][firstShift]);
         if (base === 0)  ++firstShift;
-                chanceLeft -= base;
+        chanceLeft -= base;
         ret[mobR][firstShift] = base;
-        for (let dropR = firstShift + 1; dropR < RARITY_COUNT; ++dropR) {
+        for (let dropR = firstShift + 1; dropR <= mobR; ++dropR) {
           base = MOB_RARITY_PROPAGATION(chanceLeft);
             if (chanceLeft <= base) { ret[mobR][dropR] = chanceLeft; chanceLeft = 0; break; }
             ret[mobR][dropR] = base;
             chanceLeft -= base;
         }
-        ret[mobR][RARITY_COUNT] = chanceLeft;
+        ret[mobR][mobR] += chanceLeft;
     }
     return ret;
 }

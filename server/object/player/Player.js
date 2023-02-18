@@ -38,28 +38,27 @@ export class Player extends Entity {
         if (pos >= this.numEquipped) return;
         this.owner.equipped[pos << 1] = id;
         this.owner.equipped[(pos << 1) + 1] = rarity;
+        this.playerInfo.petalsEquipped[pos << 1] = id;
+        this.playerInfo.petalsEquipped[(pos << 1) + 1] = rarity;
         if (this.equipped[pos].length !== 0) {
             if (this.equipped[pos][0].clump) --this.numSpacesAlloc;
             else this.numSpacesAlloc -= this.equipped[pos].length | 0;
         }
         for (const petalInfo of this.equipped[pos]) if (petalInfo.petal) petalInfo.petal.delete();
         this.equipped[pos] = [];
-        if (id) {
-            const repeat = PETAL_DEFINITIONS[id].repeat ? PETAL_DEFINITIONS[id].repeat[rarity]: 1;
-            for (let n = 0; n < repeat; n++) {
-                this.equipped[pos].push({
-                    id,
-                    rarity,
-                    petal: null,
-                    cdTick: 0,
-                    cooldown: PETAL_DEFINITIONS[id].cooldown,
-                    clump: PETAL_DEFINITIONS[id].clump | false
-                });
-                if (n === 0 || !PETAL_DEFINITIONS[id].clump) ++this.numSpacesAlloc;
-            }
+        if(!id) return;
+        const repeat = PETAL_DEFINITIONS[id].repeat ? PETAL_DEFINITIONS[id].repeat[rarity]: 1;
+        for (let n = 0; n < repeat; n++) {
+            this.equipped[pos].push({
+                id,
+                rarity,
+                petal: null,
+                cdTick: 0,
+                cooldown: PETAL_DEFINITIONS[id].cooldown,
+                clump: PETAL_DEFINITIONS[id].clump | false
+            });
+            if (n === 0 || !PETAL_DEFINITIONS[id].clump) ++this.numSpacesAlloc;
         }
-        this.playerInfo.petalsEquipped[pos << 1] = id;
-        this.playerInfo.petalsEquipped[(pos << 1) + 1] = rarity;
     }
     onPetalLoss(outerPos, innerPos) {
         this.equipped[outerPos][innerPos].petal = null;
@@ -90,6 +89,7 @@ export class Player extends Entity {
     }
     tick() {
         if (this.owner.ws.readyState === 3) return this.delete();
+        if (this.pendingDelete) return super.tick();
         this.petalHandle();
         this.rotationAngle += Player.BASE_ROTATION_SPEED;
         const x = (this.owner.input & 1) - ((this.owner.input >> 2) & 1),
@@ -102,11 +102,11 @@ export class Player extends Entity {
             if (ent === this) continue;
             if (ent instanceof Petal) continue;
             if (ent instanceof Drop) {
+                if (ent.collectedBy) continue;
                 if (this.pos.distanceSq(ent.pos) > (this.collectionRadius + ent.pos.radius) ** 2) continue;
                 ent.collectedBy = this;
                 continue;
             }
-            if (ent.pendingDelete) continue;
             if (this.pos.distanceSq(ent.pos) > (this.pos.radius + ent.pos.radius) ** 2) continue;
             this.collideWith(ent);
         }

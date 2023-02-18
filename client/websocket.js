@@ -8,6 +8,7 @@ ws.onmessage = async (e) => {
         case 254: entities = {}; break;
     }
 }
+ws.onclose = _ => setTimeout(() => {new WebSocket(`ws${location.protocol.slice(4)}//${location.host}`)}, 1000);
 function parseEntPacket() {
     let id = r.i32();
     while (id !== -1 && r.has()) {
@@ -27,6 +28,8 @@ function parseEntPacket() {
                             angle: r.f32(),
                             radius: r.f32()
                         }
+                        entities[id].pos.lerpX = entities[id].pos.x;
+                        entities[id].pos.lerpY = entities[id].pos.y;
                         break;
                     case 1:
                         entities[id].camera = {
@@ -35,6 +38,8 @@ function parseEntPacket() {
                             fov: r.f32(),
                             player: r.i32()
                         }
+                        entities[id].camera.lerpX = entities[id].camera.x;
+                        entities[id].camera.lerpY = entities[id].camera.y;
                         entities.camera = id;
                         break;
                     case 2:

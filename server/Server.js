@@ -5,47 +5,32 @@ export class GameServer {
         this.wss = server;
         this.clients = new Set();
         this.maps = [
-            new Arena(this,2000,2000,0,'Spawn'),
-            new Arena(this,1000,1000,1,'Test'),
-            new Arena(this,1000,1000,2,'Test2')
+            new Arena(this,6000,6000,0,'Spawn'),
+            new Arena(this,6000,6000,1,'Easy Garden'),
+            new Arena(this,6000,6000,2,'Medium Garden')
         ];
-        this.maps[0].setZones([100,100,100,100,{
-            BASE_CHANCE: 0.05,
-            MOB_CHANCE: {5: 1},
-            RARITY_CHANCE: [0,0,0,0,0,0,0.5,0.5] 
-        }],
-        [1800,1800,100,100,{
-            BASE_CHANCE: 0.02,
-            MOB_CHANCE: {1: 0.2, 2: 0.2, 3: 0.4, 4: 0.2},
-            RARITY_CHANCE: [0.2,0.2,0.3,0.3] 
-        }],
-        [100,1800,100,100,{
-            BASE_CHANCE: 0.03,
-            MOB_CHANCE: {1: 0.5, 2: 0.1, 3: 0.2, 4: 0.2},
-            RARITY_CHANCE: [0,0,0,0,0.5,0.5] 
-        }]).setPortals([100,500,1,900,500],[100,1500,2,900,500]);
-
-        this.maps[1].setZones([100,100,100,100,{
-            BASE_CHANCE: 0.1,
-            MOB_CHANCE: {1: 0.25, 2: 0.25, 4: 0.5},
-            RARITY_CHANCE: [0.1,0.1,0.2,0.1,0.2,0.3] 
-        }]).setPortals([900,500,0,100,500],[500,900,2,500,100]);
-        
-        this.maps[2].setZones([100,100,100,100,{
-            BASE_CHANCE: 0.1,
-            MOB_CHANCE: {1: 1},
-            RARITY_CHANCE: [0,0.01,0.29,0.2,0.2,0.3] 
-        }]).setPortals([900,500,0,100,1500],[500,100,1,500,900]);
-
+        this.maps[0].setZones([2000,2000,2000,2000,{
+            MOB_CHANCE: {1: 0.2, 2: 0.2, 3: 0.2, 4: 0.2, 5: 0.2},
+            RARITY_CHANCE: [0.8,0.15,0.05],
+            BASE_CHANCE: 0.005 // 1 per 200 ticks, or 8 seconds
+        }]).setPortals([3000,100,1,3000,5900],[100,3000,2,5900,3000]);
+        this.maps[1].setZones([0,0,6000,4000,{
+            MOB_CHANCE: {1: 0.3, 2: 0.2, 3: 0.1, 4: 0.1, 5: 0.3},
+            RARITY_CHANCE: [0.6,0.3,0.09,0.01],
+            BASE_CHANCE: 0.005 // 1 per 200 ticks, or 8 seconds
+        }]).setPortals([3000,5900,0,3000,100]);
+        this.maps[2].setZones([0,0,4000,6000,{
+            MOB_CHANCE: {2: 0.2, 3: 0.1, 4: 0.4, 5: 0.3},
+            RARITY_CHANCE: [0.2,0.4,0.3,0.09,0.01],
+            BASE_CHANCE: 0.01 // 1 per 200 ticks, or 8 seconds
+        }]).setPortals([5900,3000,0,100,3000]);
         this.tick = 0;
 
         setInterval(() => {
-            for (const map of this.maps) if (Object.keys(map.entities).length) map.tick();
-            this.tick++;
+            for (const map of this.maps) if (Object.keys(map.clients).length) map.tick();
+            ++this.tick;
         }, 40);
-        this.wss.on("connection", (ws, req) => {
-            this.add(ws);
-        })
+        this.wss.on("connection", (ws, _) => this.add(ws));
     }
     add(ws) {
         this.clients.add(new Client(this, ws));

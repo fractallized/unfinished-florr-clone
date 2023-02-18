@@ -42,7 +42,7 @@ export const PETAL_DEFINITIONS = {
         radius: 10,
         damage: 8,
         health: 10,
-        cooldown: 20,
+        cooldown: 30,
         petal: 'HealPetal',
         heal: 0.3
     }

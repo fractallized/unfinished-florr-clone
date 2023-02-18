@@ -61,9 +61,9 @@ export class Entity {
         entity.vel.add(dist.normalize().scale(ratio * Entity.BASE_KNOCKBACK));
         this.vel.add(dist.scale(-1));
     }
-    onCollide(entity) {}
+    onCollide() {}
     wipeState() {
-        this.state &= ~3;
+        this.state = 0;
         this.pos.reset();
         this.style.reset();
     }
@@ -77,7 +77,6 @@ class DeletionAnimation {
         this.pos = -1;
     }
     tick() {
-        this._arena.collisionGrid.remove(this.entity);
         ++this.pos;
         if (this.pos === DeletionAnimation.DURATION) return this._arena.removeFromActive(this.entity);
         if (this.pos === DeletionAnimation.DURATION + 1) return this._arena.delete(this.entity);

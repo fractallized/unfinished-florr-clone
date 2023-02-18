@@ -38,14 +38,28 @@ export class Client {
     tick() {
         if (this.camera) {
             if (this.player) this.camera.set(this.player.pos.x, this.player.pos.y);
+            if (!this._arena) return;
             const p = new Writer();
-            //const renders = [];
+            const inView = this._arena.collisionGrid.getCollisions(this.camera.x, this.camera.y, 1000 / this.camera.fov, 600 / this.camera.fov);
+            const creates = [], updates = [], deletes = [];
+            for (const entity of this.view) {
+                if (!inView.has(entity)) {
+                    this.view.delete(entity);
+                    deletes.push(entity);
+                }
+            }
+            for (const entity of inView) {
+                if (!this.view.has(entity)) creates.push(entity);
+                else updates.push(entity);
+                this.view.add(entity);
+            }
             p.u8(1);
-            for (const id of Object.keys(this._arena.deletions)) p.i32(id);
+            for (const ent of deletes) p.i32(ent.id);
             p.i32(-1);
             compileEnt(p, this._arena, this.state);
             compileEnt(p, this, this.state);
-            for (const entity of Object.values(this._arena.entities)) compileEnt(p, entity, this.state);
+            for (const entity of creates) compileEnt(p, entity, 2);
+            for (const entity of updates) compileEnt(p, entity, this.state);
             p.i32(-1);
             compileInventory(p, this.inventory, this.state);
             this.ws.send(p.write());
@@ -56,7 +70,7 @@ export class Client {
     moveServer(num, x, y) {
         if (this._arena instanceof Arena) {
             this._arena.removeClient(this);
-            if (this.player instanceof Player) this._arena.removeFromActive(this.player);
+            if (this.player instanceof Player) this.player.delete();
         }
         console.log("spawn");
         this.map = num;
@@ -76,7 +90,7 @@ export class Client {
         switch(reader.u8()) {
             case 0:
                 if (this.player) break;
-                this.moveServer(0, 1800, 1000);
+                this.moveServer(0, 5000, 5000);
                 break;
             case 1:
                 this.input = reader.u8();
@@ -90,7 +104,6 @@ export class Client {
                 for (let n = 0; n < 40; n += 2) if (this.equipped[n] === id && this.equipped[n + 1] === rarity) ++sameCt;
                 if (sameCt >= this.inventory[((id - 1) << 3) + rarity]) return; //check if client has enough
                 this.player.changePetal(index >> 1, id, rarity);
-                for (let n = 0; n < 40; ++n) this.equipped[n] = this.player.playerInfo.petalsEquipped[n];
                 break;
         }
     }

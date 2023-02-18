@@ -13,7 +13,6 @@ export class Drop extends Entity {
         this.angle = new OneDimensionalVector(0,3.8,0);
         this.friction = 0.8;
         this.creationTick = this._arena.server.tick;
-        this.collectionTick = -1;
         this.collectedBy = null;
         this.vel.add(Vector.fromPolar(Drop.BASE_VELOCITY, moveAngle));
     }
@@ -24,8 +23,8 @@ export class Drop extends Entity {
             //add to player now
             //diff delete animation
             if (this.pos.distanceSq(this.collectedBy.pos) <= (this.pos.radius + this.collectedBy.pos.radius) ** 2) {
-                this.delete();
                 ++this.collectedBy.owner.inventory[(this.drop.id - 1) * 8 + this.drop.rarity];
+                this.delete();
                 //add to loadout if possible
                 for (let n = 0; n < 2 * this.collectedBy.owner.numEquipped; n += 2) {
                     if (this.collectedBy.owner.equipped[n]) continue;

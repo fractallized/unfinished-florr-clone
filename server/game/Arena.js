@@ -14,7 +14,6 @@ export class Arena {
         this.id = 0;
         this.entities = {};
         this.clients = {};
-        this.deletions = {};
         this.collisionGrid = new SpatialHash(this);
         this.zones = [];
         this._tick = 0;
@@ -23,15 +22,13 @@ export class Arena {
         this.state = 0;
         const entities = Object.values(this.entities);
         const clients = Object.values(this.clients);
-        const deletions = Object.values(this.deletions);
         for (const client of clients) client.tick();
         for (const entity of entities) { entity.wipeState(); entity.tick(); }
-        for (const deletion of deletions) deletion.deleteAnimation.tick();
         for (const zone of this.zones) zone.tick();
         ++this._tick;
     }
     calculateOpenHash() {
-        for (let n = 1; n < 16384; ++n) if (!this.entities[n] && !this.deletions[n]) return n;
+        for (let n = 1; n < 16384; ++n) if (!this.entities[n]) return n;
         return 16384;
     }
     calculateClientHash() {
@@ -53,11 +50,12 @@ export class Arena {
     }
     removeFromActive(entity) {
         entity.isDeleted = true;
-        delete this.entities[entity.id];
-        this.deletions[entity.id] = entity;
+        entity.canCollide = false;
     }
     delete(entity) {
-        delete this.deletions[entity.id];
+        entity.state = 4;
+        this.collisionGrid.remove(entity);
+        delete this.entities[entity.id];
     }
     removeClient(client) {
         delete this.clients[client.id];
@@ -81,10 +79,11 @@ export class SpawnZone {
         this.spawnTable = spawnTable;
         this.mobCount = 0;
         this.lastSpawned = 0;
+        this.MOB_CAP = spawnTable.MOB_CAP || 8;
     }
     tick() {
-        if (this.mobCount > 8) return;
-        if ((this.arena.server.tick - this.lastSpawned) & 7) return; 
+        if (this.mobCount > this.MOB_CAP) return;
+        //if ((this.arena.server.tick - this.lastSpawned) & 7) return; 
         if (Math.random() < this.spawnTable.BASE_CHANCE) {
             const potentialX = this.x + Math.random() * this.width;
             const potentialY = this.y + Math.random() * this.height;

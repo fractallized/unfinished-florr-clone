@@ -21,7 +21,6 @@ export class SpatialHash {
             }
         }
         entity.gridBounds = [startX, startY, endX, endY]; //have to rethink this
-        //return hash;
     }
     remove(entity) {
         const [startX, startY, endX, endY] = entity.gridBounds;
@@ -41,7 +40,6 @@ export class SpatialHash {
         endY = (y + h) >> SpatialHash.GRID_SIZE;
         for (let Y = startY; Y <= endY; ++Y) {
             for (let X = startX; X <= endX; ++X) {
-                if (X < 0 || Y < 0) continue;
                 const hash = X | (Y << 16);
                 if (!this.map.has(hash)) continue;
                 for (const ent of this.map.get(hash)) ret.add(ent);

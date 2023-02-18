@@ -31,7 +31,6 @@ export class Mob extends Entity {
         for (const ent of collisions) {
             if (ent === this) continue;
             if (ent instanceof Drop) continue;
-            if (ent.pendingDelete) continue;
             if (this.pos.distanceSq(ent.pos) > (this.pos.radius + ent.pos.radius) ** 2) continue;
             this.collideWith(ent);
         }
@@ -50,6 +49,7 @@ export class Mob extends Entity {
         }
     }
     delete() {
+        if (this.pendingDelete) return;
         --this.zone.mobCount;
         const drops = [];
         for (const [id, table] of Object.entries(this.loot)) {

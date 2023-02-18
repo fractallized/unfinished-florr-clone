@@ -348,3 +348,4 @@ function drawMob(id, clientRenderTick) {
     }
 }
 const PETAL_NAMES = ['Basic','Light','Stinger','Rose','Leaf'];
+const MOB_NAMES = ['Baby Ant','Worker Ant','Soldier Ant','Ladybug','Bee']
