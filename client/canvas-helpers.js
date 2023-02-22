@@ -195,6 +195,7 @@ function drawPetalAsStatic(id, rarity) {
 function drawMobAsEnt(mob) {
     if (!mob.CLIENT_RENDER_TICK) mob.CLIENT_RENDER_TICK = 0;
     ctx.save();
+    ctx.scale(MOB_SIZE_MULTIPLIER[mob.mob.rarity],MOB_SIZE_MULTIPLIER[mob.mob.rarity]);
     let path, secondaryAngle;
     switch(mob.mob.id) {
         case 1:

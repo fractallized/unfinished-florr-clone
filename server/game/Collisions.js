@@ -1,11 +1,9 @@
 export class SpatialHash {
     static GRID_SIZE = 6; //64
-    constructor(arena) {
-        this.arena = arena;
-        this.entities = arena.entities;
-        //this.width = arena.arena.width;
-        //this.height = arena.arena.height;
-        this.map = new Map();
+    constructor() {
+        //this.arena = arena;
+        //this.entities = arena.entities;
+        this.map = {};
     }
     static getHash({x, y}) { return (x >> SpatialHash.GRID_SIZE) | ((y >> SpatialHash.GRID_SIZE) << 16) }
     insert(entity) {
@@ -16,8 +14,8 @@ export class SpatialHash {
         for (let Y = startY; Y <= endY; ++Y) {
             for (let X = startX; X <= endX; ++X) {
                 const hash = X | (Y << 16);
-                if (!this.map.has(hash)) this.map.set(hash, new Set());
-                this.map.get(hash).add(entity);
+                if (!this.map[hash]) this.map[hash] = new Set();
+                this.map[hash].add(entity);
             }
         }
         entity.gridBounds = [startX, startY, endX, endY]; //have to rethink this
@@ -27,8 +25,8 @@ export class SpatialHash {
         for (let Y = startY; Y <= endY; ++Y) {
             for (let X = startX; X <= endX; ++X) {
                 const hash = X | (Y << 16);
-                if (!this.map.has(hash)) continue;
-                this.map.get(hash).delete(entity);
+                if (!this.map[hash]) continue;
+                this.map[hash].delete(entity);
             }
         }
     }
@@ -41,8 +39,8 @@ export class SpatialHash {
         for (let Y = startY; Y <= endY; ++Y) {
             for (let X = startX; X <= endX; ++X) {
                 const hash = X | (Y << 16);
-                if (!this.map.has(hash)) continue;
-                for (const ent of this.map.get(hash)) ret.add(ent);
+                if (!this.map[hash]) continue;
+                for (const ent of this.map[hash]) ret.add(ent);
             }
         }
         return ret;
@@ -52,6 +50,6 @@ export class SpatialHash {
         return this.getCollisions(x, y, radius, radius);
     }
     clear() {
-        this.map = new Map();
+        this.map = {};
     }
 }

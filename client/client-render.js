@@ -25,6 +25,7 @@ const PETAL_NAMES =
 ['Basic','Light','Stinger','Rose','Leaf','Wing','Antennae',
 'Rock','Faster','Iris'];
 const MOB_NAMES = ['Baby Ant','Worker Ant','Soldier Ant','Ladybug','Bee'];
+const MOB_SIZE_MULTIPLIER = [1, 1.2, 1.5, 2, 3, 4, 6, 10];
 function getStroke(color, black = 0.64) {
     return "#" +
     (Math.min(Math.round(parseInt(color.slice(1,3), 16) * black), 255)).toString(16).padStart(2, '0') + 

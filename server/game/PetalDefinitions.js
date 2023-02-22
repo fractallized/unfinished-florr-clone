@@ -58,7 +58,7 @@ export const PETAL_DEFINITIONS = {
         id: 7, //antennae (first special petal)
         radius: 0,
         noSpawn: true,
-        fovMultiplier: [0.9,0.8,0.7,0.6,0.5,0.4,0.3,0.2]
+        fovMultiplier: [0.9,0.85,0.8,0.75,0.7,0.65,0.6,0.55]
     },
     8: {
         id: 8, //rock

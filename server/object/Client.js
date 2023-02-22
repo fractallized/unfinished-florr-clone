@@ -26,11 +26,13 @@ export class Client {
         this.inventory = new Inventory(this); //sent after ent upcreates
         //this.setPetal(0, 3, 0);
         //this.setPetal(1, 2, 0);
-        ++this.inventory[(5 - 1) * 8 + 2];
-        ++this.inventory[(7 - 1) * 8 + 2];
-        this.setPetal(0, 5, 2);
-        this.setPetal(1, 7, 2);
-        this.setPetal(2, 3, 6);
+        ++this.inventory[(3 - 1) * 8 + 7];
+        ++this.inventory[(3 - 1) * 8 + 7];
+        ++this.inventory[(7 - 1) * 8 + 7];
+        ++this.inventory[(9 - 1) * 8 + 7];
+        this.setPetal(0, 3, 7);
+        this.setPetal(1, 3, 7);
+        this.setPetal(2, 7, 7);
         this.setPetal(3, 9, 7);
         this.ws.onmessage = (req) => this.onmessage(req);
         this.ws.onclose = () => {
