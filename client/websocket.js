@@ -1,5 +1,4 @@
 let r;
-ws.onopen = () => ws.send(new Uint8Array([0]));
 ws.onmessage = async (e) => {
     const packet = new Uint8Array(await e.data.arrayBuffer());
     r = new Reader(packet);
@@ -30,6 +29,7 @@ function parseEntPacket() {
                         }
                         entities[id].pos.lerpX = entities[id].pos.x;
                         entities[id].pos.lerpY = entities[id].pos.y;
+                        entities[id].pos.lerpAngle = entities[id].pos.angle;
                         break;
                     case 1:
                         entities[id].camera = {
@@ -59,6 +59,7 @@ function parseEntPacket() {
                         entities[id].health = {
                             health: r.u8(),
                         }
+                        entities[id].health.lerpHP = entities[id].health.health;
                         break;
                     case 5:
                         entities[id].drop = {
@@ -86,9 +87,6 @@ function parseEntPacket() {
                             petalCooldowns: new Uint8Array(10).map(_ => r.u8()),
                             faceFlags: r.u8()
                         }
-                        const count = entities[id].playerInfo.numEquipped;
-                        getAdjustedEquipped(entities[id].playerInfo.petalsEquipped, count);
-                        getAdjustedInv();
                         break;
                 }
             }
@@ -138,9 +136,6 @@ function parseEntPacket() {
                         entities[id].playerInfo.numEquipped = r.u8(); break;
                     case 20:
                         entities[id].playerInfo.petalsEquipped = new Uint8Array(40).map(_ => r.u8());
-                        const count = entities[id].playerInfo.numEquipped;
-                        getAdjustedInv();
-                        getAdjustedEquipped(entities[id].playerInfo.petalsEquipped, count);
                         break;
                     case 21:
                         entities[id].playerInfo.petalHealths = new Uint8Array(10).map(_ => r.u8()); break;
@@ -159,35 +154,5 @@ function parseEntPacket() {
     while(pos !== -1 && r.has()) {
         inventory[pos] = r.i32();
         pos = r.i32();
-    }
-    getAdjustedInv();
-}
-function getAdjustedEquipped(equipped, count) {
-    for (let n = 0; n < 20; n++) {
-        if (equipped[n*2] === 0) delete clientSimulation.loadout[n];
-        else if (!clientSimulation.loadout[n]) clientSimulation.loadout[n] = new LoadoutEntity(canvas.width/(2*devicePixelRatio) + (1 - count + 2 * n) * 40 * staticScale, canvas.height/devicePixelRatio - 80 * staticScale, n);
-    }
-}
-function getAdjustedInv() {
-    if (!entities.hasOwnProperty('camera')) return false;
-    if (!entities[entities.camera]) return false;
-    if (!entities[entities.camera].camera.hasOwnProperty('player')) return false;
-    if (!entities[entities[entities.camera].camera.player]) return false;
-    const equipped = entities[entities[entities.camera].camera.player].playerInfo.petalsEquipped;
-    const _inventory = [...inventory];
-    for (let n = 0; n < 20 * 2; n += 2) {
-        if (equipped[n] === 0) continue;
-        --_inventory[((equipped[n] - 1) << 3) + (equipped[n + 1])];
-    }
-    clientSimulation.inventoryLayout = [];
-    for (let rarity = 7; rarity >= 0; rarity--) {
-        for (let petalID = 1; petalID <= 10; petalID++) {
-            if (_inventory[((petalID - 1) << 3) + rarity] <= 0) continue;
-            clientSimulation.inventoryLayout.push({
-                count: _inventory[((petalID - 1) << 3) + rarity],
-                petalID,
-                rarity
-            })
-        }
     }
 }

@@ -1,6 +1,6 @@
-import { Client } from "../Client.js";
-import { COMPONENTS } from "../object/Components.js";
-import { Player } from "../object/player/Player.js";
+import { Client } from "./Client.js";
+import { COMPONENTS } from "./Components.js";
+import { Player } from "./player/Player.js";
 export class Portal {
     canCollide = false;
     

@@ -1,8 +1,8 @@
 {
-    "main": "server/Game.js",
+    "main": "server/game/Game.js",
     "type": "module",
     "scripts": {
-        "start": "node server/Game.js"
+        "start": "node server/game/Game.js"
     },
     "dependencies": {
         "body-parser": "^1.20.1",

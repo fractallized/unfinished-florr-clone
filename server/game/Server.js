@@ -1,18 +1,18 @@
-import { Client } from "./Client.js";
-import { Arena } from "./game/Arena.js";
+import { Client } from "../object/Client.js";
+import { Arena } from "./Arena.js";
 export class GameServer {
     constructor(server) {
         this.wss = server;
         this.clients = new Set();
         this.maps = [
-            new Arena(this,6000,6000,0,'Spawn'),
+            new Arena(this,1000,1000,0,'Spawn'),
             new Arena(this,6000,6000,1,'Easy Garden'),
             new Arena(this,6000,6000,2,'Medium Garden')
         ];
-        this.maps[0].setZones([2000,2000,2000,2000,{
+        this.maps[0].setZones([0,0,1000,1000,{
             MOB_CHANCE: {1: 0.2, 2: 0.2, 3: 0.2, 4: 0.2, 5: 0.2},
             RARITY_CHANCE: [0.8,0.15,0.05],
-            BASE_CHANCE: 0.005 // 1 per 200 ticks, or 8 seconds
+            BASE_CHANCE: 0.01 // 1 per 100 ticks, or 4 seconds
         }]).setPortals([3000,100,1,3000,5900],[100,3000,2,5900,3000]);
         this.maps[1].setZones([0,0,6000,4000,{
             MOB_CHANCE: {1: 0.3, 2: 0.2, 3: 0.1, 4: 0.1, 5: 0.3},

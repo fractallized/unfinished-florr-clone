@@ -1,7 +1,7 @@
 import { FROM_OBJECT_TABLE, FROM_TABLE } from "../coder/Helpers.js";
-import { MOB_DEFINITIONS } from "../MobDefinitions.js";
+import { MOB_DEFINITIONS } from "./MobDefinitions.js";
 import { COMPONENTS } from "../object/Components.js";
-import { Portal } from "./Portal.js";
+import { Portal } from "../object/Portal.js";
 import { Mob } from "../object/mob/Mob.js";
 import { SpatialHash } from "./Collisions.js";
 
@@ -23,7 +23,8 @@ export class Arena {
         const entities = Object.values(this.entities);
         const clients = Object.values(this.clients);
         for (const client of clients) client.tick();
-        for (const entity of entities) { entity.wipeState(); entity.tick(); }
+        for (const entity of entities) entity.wipeState();
+        for (const entity of entities) entity.tick();
         for (const zone of this.zones) zone.tick();
         ++this._tick;
     }

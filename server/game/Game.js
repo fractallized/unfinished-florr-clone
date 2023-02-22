@@ -33,7 +33,7 @@ const _server = new Server()
 .addGetReq("/client-render.js","client/client-render.js","application/javascript")
 .addGetReq("/websocket.js","client/websocket.js","application/javascript");
 const HTTPServer = createServer(_server.app);
-HTTPServer.listen(8080);
+HTTPServer.listen(1025);
 
 const Socket = new WebSocketServer({ server: HTTPServer });
 new GameServer(Socket);

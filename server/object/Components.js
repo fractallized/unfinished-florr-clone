@@ -123,13 +123,13 @@ class DropComponent {
     reset() { this.state.fill(0) }
 }
 class PlayerInfoComponent {
-    constructor(entity, petalsEquipped) {
+    constructor(entity) {
         this.entity = entity;
         this.values = {
             numEquipped: 0,
             faceFlags: 0
         }
-        this.petalsEquipped = new StateArray(this, 1, petalsEquipped, 40);
+        this.petalsEquipped = new StateArray(this, 1, new Uint8Array(40), 40);
         this.petalHealths = new StateArray(this, 2, new Uint8Array(10), 10);
         this.petalCooldowns = new StateArray(this, 3, new Uint8Array(10), 10);
         this.state = new Uint8Array(5);

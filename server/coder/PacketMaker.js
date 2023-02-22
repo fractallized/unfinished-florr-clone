@@ -40,7 +40,7 @@ function compileCreate(w, entity) {
         w.u8(entity.style.color);
         w.f32(entity.style.opacity);
     }
-    if (entity.health) {
+    if (entity.health && !entity.petal) {
         w.u8(4);
         w.u8(255 * entity.health.health / entity.health.maxHealth);
     }
@@ -92,7 +92,7 @@ function compileUpdate(w, entity) {
         if (entity.style.state[0] & 1) { w.u8(10); w.u8(entity.style.color); }
         if (entity.style.state[1] & 1) { w.u8(11); w.f32(entity.style.opacity); }
     }
-    if (entity.health) {
+    if (entity.health && !entity.petal) {
         if (entity.health.state[0] & 1) { w.u8(12); w.u8(255 * entity.health.health / entity.health.maxHealth); }
     }
     if (entity.drop) {

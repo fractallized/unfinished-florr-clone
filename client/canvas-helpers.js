@@ -1,33 +1,7 @@
-function getStroke(color, black = 0.75) {
-    return "#" +
-    (Math.min(parseInt(color.slice(1,3), 16) * black | 0, 255)).toString(16).padStart(2, '0') + 
-    (Math.min(parseInt(color.slice(3,5), 16) * black | 0, 255)).toString(16).padStart(2, '0') + 
-    (Math.min(parseInt(color.slice(5,7), 16) * black | 0, 255)).toString(16).padStart(2, '0');
-}
-function getColorByRarity(rarity) {
-    if (rarity === 0) return '#0edb32';
-    if (rarity === 1) return '#f2e338';
-    if (rarity === 2) return '#3c41e6';
-    if (rarity === 3) return '#a420e6';
-    if (rarity === 4) return '#b31214';
-    if (rarity === 5) return '#1ee7e4';
-    if (rarity === 6) return '#f7147e';
-    if (rarity === 7) return '#21cd8a';
-    else return '#999999';
-}
-function getNameByRarity(rarity) {
-    if (rarity === 0) return 'Common';
-    if (rarity === 1) return 'Unusual';
-    if (rarity === 2) return 'Rare';
-    if (rarity === 3) return 'Epic';
-    if (rarity === 4) return 'Legendary';
-    if (rarity === 5) return 'Mythic';
-    if (rarity === 6) return 'Ultra';
-    if (rarity === 7) return 'Super';
-    else return '???';
-}
+const PI_2 = Math.PI * 2;
 function drawPortal(portal) {
     if (!portal.CLIENT_RENDER_TICK) portal.CLIENT_RENDER_TICK = 0;
+    ctx.scale(30,30);
     ctx.fillStyle = '#ffffff';
     ctx.globalAlpha = 0.3;
     for (let n = 3; n > 0; n--) {
@@ -37,315 +11,449 @@ function drawPortal(portal) {
     }
     portal.CLIENT_RENDER_TICK++;
 }
-function drawPlayer(player) {
-    ctx.fillStyle = '#ddbb22';
-    ctx.strokeStyle = getStroke(ctx.fillStyle);
-    ctx.lineWidth = 1/5;
-    ctx.beginPath();
-    ctx.arc(0,0,1,0,2*Math.PI);
-    ctx.stroke();
-    ctx.fill();
-}
 function drawDrop(drop) {
-    ctx.fillStyle = getColorByRarity(drop.drop.rarity);
-    ctx.strokeStyle = getStroke(ctx.fillStyle);
-    ctx.lineWidth = 1/5;
-    ctx.beginPath();
-    ctx.rect(-0.5,-0.5,1,1);
-    ctx.stroke();
-    ctx.fill();
-    ctx.translate(0,-0.1);
-    drawPetalAsStatic(drop.drop.id,drop.drop.rarity, ctx);
-    ctx.scale(0.02,0.02);
-    ctx.font = '10px Ubuntu';
-    ctx.textAlign = 'center';
-    ctx.lineWidth = 2;
-    ctx.fillStyle = '#ffffff';
-    ctx.strokeStyle = '#000000';
-    ctx.beginPath();
-    ctx.strokeText(`${PETAL_NAMES[drop.drop.id - 1] || 'hi'}`, 0, 25);
-    ctx.fillText(`${PETAL_NAMES[drop.drop.id - 1] || 'hi'}`, 0, 25);
+    ctx.save();
+    ctx.scale(0.8,0.8);
+    drawLoadoutPetal(drop.drop.id,drop.drop.rarity,255,0)
+    ctx.restore();
 }
 function drawPetalAsEnt(petal) {
-    if (!petal.CLIENT_RENDER_TICK) petal.CLIENT_RENDER_TICK = Math.random() * 400 * Math.PI;
-    ctx.rotate(petal.CLIENT_RENDER_TICK / 200);
-    petal.CLIENT_RENDER_TICK++;
+    if (!petal.CLIENT_RENDER_TICK) petal.CLIENT_RENDER_TICK = 0;
+    if (petal.petal.id === 6) ctx.rotate(petal.CLIENT_RENDER_TICK / 10);
+    else ctx.rotate(petal.CLIENT_RENDER_TICK / 40);
+    drawPetal(petal.petal.id);
+    ++petal.CLIENT_RENDER_TICK;
+}
+function drawPetal(id) {
     let path;
-    switch(petal.petal.id) {
-        case 1:
-            ctx.fillStyle = '#eeeeee';
-            ctx.strokeStyle = getStroke(ctx.fillStyle);
-            ctx.lineWidth = 1/6;
+    switch(id) {
+        case 1: //basic
+            ctx.fillStyle = '#cfcfcf';
             ctx.beginPath();
-            ctx.arc(0,0,1,0,2*Math.PI);
-            ctx.stroke();
+            ctx.arc(0,0,10+1.5,0,PI_2);
             ctx.fill();
-        case 2:
-            ctx.fillStyle = '#eeeeee';
-            ctx.strokeStyle = getStroke(ctx.fillStyle);
-            ctx.lineWidth = 1/6;
+            ctx.fillStyle = '#ffffff';
             ctx.beginPath();
-            ctx.arc(0,0,1,0,2*Math.PI);
-            ctx.stroke();
+            ctx.arc(0,0,10-1.5,0,PI_2);
             ctx.fill();
             break;
-        case 3:
-            ctx.fillStyle = '#222222';
-            ctx.strokeStyle = getStroke(ctx.fillStyle);
-            ctx.lineWidth = 1/6;
+        case 2: //light
+            ctx.fillStyle = '#cfcfcf';
             ctx.beginPath();
-            ctx.moveTo(1, 0);
-            ctx.lineTo(-0.5, 0.8660254037);
-            ctx.lineTo(-0.5,-0.8660254037);
+            ctx.arc(0,0,7+1.5,0,PI_2);
+            ctx.fill();
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(0,0,7-1.5,0,PI_2);
+            ctx.fill();
+            break;
+        case 3: //stinger
+            ctx.fillStyle = '#333333';
+            ctx.strokeStyle = '#292929';
+            ctx.lineWidth = 3;
+            ctx.lineJoin = 'round';
+            ctx.beginPath();
+            ctx.moveTo(7,0);
+            ctx.lineTo(-3.500000476837158,6.062177658081055);
+            ctx.lineTo(-3.4999992847442627,-6.062178134918213);
             ctx.closePath();
-            ctx.stroke();
             ctx.fill();
+            ctx.stroke();
             break;
-        case 4:
-            ctx.fillStyle = '#eeaaaa';
-            ctx.strokeStyle = getStroke(ctx.fillStyle);
-            ctx.lineWidth = 1/6;
+        case 4: //rose
+            ctx.fillStyle = '#cf78a3';
             ctx.beginPath();
-            ctx.arc(0,0,1,0,2*Math.PI);
-            ctx.stroke();
+            ctx.arc(0,0,10+1.5,0,PI_2);
+            ctx.fill();
+            ctx.fillStyle = '#ff94c9';
+            ctx.beginPath();
+            ctx.arc(0,0,10-1.5,0,PI_2);
             ctx.fill();
             break;
-        case 5:
-            ctx.fillStyle = '#17c821'
-            ctx.strokeStyle = getStroke(ctx.fillStyle);
-            ctx.lineWidth = 1/6;
-            path = new Path2D('M-1 1-.5.5Q-1-1 1-1 1 1-.5.5');
+        case 5: //leaf
+            ctx.rotate(-1);
+            ctx.strokeStyle = '#2e933c';
+            ctx.lineWidth = 3;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(-15,0);
+            ctx.lineTo(-20,0);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(-15,0);
+            ctx.bezierCurveTo(-10,-12,5,-12,15,0);
+            ctx.bezierCurveTo(5,12,-10,12,-15,0);
+            ctx.closePath();
+            ctx.fillStyle = '#39b54a';
+            ctx.fill();
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(-9,0);
+            ctx.quadraticCurveTo(0,-1.5,7.5,0);
+            ctx.stroke();
+            break;
+        case 6: //wing
+            ctx.fillStyle = '#ffffff';
+            ctx.strokeStyle = '#cfcfcf';
+            ctx.lineWidth = 3;
+            ctx.rotate(1);
+            ctx.beginPath();
+            ctx.arc(0,0,15,-1.5707963267948966,1.5707963267948966,false);
+            ctx.quadraticCurveTo(10,0,0,-15);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            break;
+        case 7: //antennae
+            ctx.fillStyle = '#333333';
+            ctx.strokeStyle = '#333333';
+            ctx.lineCap = 'round';
+            ctx.lineWidth = 3;
+            ctx.rotate(-PI_2 / 4);
+            ctx.beginPath();
+            ctx.moveTo(-10,-5);
+            ctx.quadraticCurveTo(5,-10,15,-15);
+            ctx.quadraticCurveTo(5,-5,-10,-5);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(-10,5);
+            ctx.quadraticCurveTo(5,10,15,15);
+            ctx.quadraticCurveTo(5,5,-10,5);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            break;
+        case 8: //rock
+            path = new Path2D();
+            path.lineTo(3.8414306640625,12.377452850341797);
+            path.lineTo(-11.311542510986328,7.916932582855225);
+            path.lineTo(-11.461170196533203,-7.836822032928467);
+            path.lineTo(4.538298606872559,-13.891617774963379);
+            path.lineTo(12.138091087341309,0);
+            path.closePath();
+            ctx.fillStyle = '#777777';
+            ctx.strokeStyle = '#606060';
+            ctx.lineWidth = 6;
+            ctx.lineJoin = 'round';
             ctx.beginPath();
             ctx.stroke(path);
             ctx.fill(path);
-            ctx.stroke(new Path2D('M-.3.3Q0-.5.8-.8'));
+            break;
+        case 9: //faster
+            ctx.fillStyle = '#cecfa3';
+            ctx.beginPath();
+            ctx.arc(0,0,8.5,0,6.283185307179586,false);
+            ctx.fill();
+            ctx.fillStyle = '#feffc9';
+            ctx.beginPath();
+            ctx.arc(0,0,5.5,0,6.283185307179586,false);
+            ctx.fill();
+            break;
+        case 10: //iris
+            ctx.fillStyle = '#a760b1';
+            ctx.beginPath();
+            ctx.arc(0,0,7.5,0,6.283185307179586,false);
+            ctx.fill();
+            ctx.fillStyle = '#ce76db';
+            ctx.beginPath();
+            ctx.arc(0,0,4.5,0,6.283185307179586,false);
+            ctx.fill();
+            break;
     }
 }
-function drawPetalAsStatic(id, rarity, ctx) {
-    switch(id) {
-        case 1:
-            ctx.fillStyle = '#eeeeee';
-            ctx.strokeStyle = getStroke(ctx.fillStyle);
-            ctx.lineWidth = 1/6;
-            ctx.beginPath();
-            ctx.arc(0,0,0.25,0,2*Math.PI);
-            ctx.stroke();
-            ctx.fill();
-            break;
-        case 2:
-            if (rarity === 0) {
-                ctx.fillStyle = '#eeeeee';
-                ctx.strokeStyle = getStroke(ctx.fillStyle);
-                ctx.lineWidth = 1/6;
-                ctx.beginPath();
-                ctx.arc(0,0,0.125,0,2*Math.PI);
-                ctx.stroke();
-                ctx.fill();
-                break;
-            }
-            count = [1,2,2,3,3,5,5,7][rarity];
-            for (let n = 0; n < count; n++) {
-                const angle = n / count * 2 * Math.PI;
-                ctx.fillStyle = '#eeeeee';
-                ctx.strokeStyle = getStroke(ctx.fillStyle);
-                ctx.lineWidth = 1/6;
-                ctx.beginPath();
-                ctx.arc(Math.cos(angle)/4,Math.sin(angle)/4,0.125,0,2*Math.PI);
-                ctx.stroke();
-                ctx.fill();
-            }
-            break;
-        case 3:
-            ctx.fillStyle = '#222222';
-            ctx.strokeStyle = getStroke(ctx.fillStyle);
-            ctx.lineWidth = 1/8;
-            if (rarity < 4) {
-                ctx.beginPath();
-                ctx.moveTo(0.05, 0);
-                ctx.lineTo(-0.025, 0.043301270189);
-                ctx.lineTo(-0.025,-0.043301270189);
-                ctx.closePath();
-                ctx.stroke();
-                ctx.fill();
-            } else if (rarity === 4) {
-                for (let n = 0; n < 3; n++) {
-                    ctx.beginPath();
-                    ctx.moveTo(0.25, 0);
-                    ctx.lineTo(0.175, 0.043301270189);
-                    ctx.lineTo(0.175,-0.043301270189);
-                    ctx.closePath();
-                    ctx.stroke();
-                    ctx.fill();
-                    ctx.rotate(2 * Math.PI / 3);
-                }
-            } else {
-                for (let n = 0; n < 5; n++) {
-                    ctx.beginPath();
-                    ctx.moveTo(0.15, 0);
-                    ctx.lineTo(0.225, 0.043301270189);
-                    ctx.lineTo(0.225,-0.043301270189);
-                    ctx.closePath();
-                    ctx.stroke();
-                    ctx.fill();
-                    ctx.rotate(2 * Math.PI / 5);
-                }
-            }
-            break;
-        case 4:
-            ctx.fillStyle = '#eeaaaa';
-            ctx.strokeStyle = getStroke(ctx.fillStyle);
-            ctx.lineWidth = 1/6;
-            ctx.beginPath();
-            ctx.arc(0,0,0.25,0,2*Math.PI);
-            ctx.stroke();
-            ctx.fill();
-            break;
-        case 5:
-            ctx.fillStyle = '#17c821'
-            ctx.strokeStyle = getStroke(ctx.fillStyle);
-            ctx.lineWidth = 1/12;
-            path = new Path2D('M-.25.25-.125.125Q-.25-.25.25-.25.25.25-.125.125');
-            ctx.beginPath();
-            ctx.stroke(path);
-            ctx.fill(path);
-            ctx.lineWidth = 1/24;
-            ctx.stroke(new Path2D('M-.075.075Q0-.125.2-.2'));
-    }
+function drawPetalAsStatic(id, rarity) {
+    if (id === 2 && rarity > 0) {
+        const repeat = [2,2,3,3,5,5,7][rarity-1];
+        for (let n = 0; n < repeat; n++) {
+            ctx.translate(10,0);
+            drawPetal(id);
+            ctx.translate(-10,0);
+            ctx.rotate(PI_2 / repeat);
+        }
+    } else if (id === 3 && rarity > 4) {
+        if (rarity === 5) {
+            for (let n = 0; n < 3; n++) {
+                ctx.translate(10,0);
+                drawPetal(id);
+                ctx.translate(-10,0);
+                ctx.rotate(PI_2 / 3);
+            } 
+        } else {
+            for (let n = 0; n < 5; n++) {
+                ctx.save()
+                ctx.translate(10,0);
+                ctx.rotate(PI_2 / 2);
+                drawPetal(id);
+                ctx.restore();
+                ctx.rotate(PI_2 / 5);
+            } 
+        }
+    } else return drawPetal(id);
 }
 function drawMobAsEnt(mob) {
     if (!mob.CLIENT_RENDER_TICK) mob.CLIENT_RENDER_TICK = 0;
-    mob.CLIENT_RENDER_TICK++;
-    drawMob(mob.mob.id, mob.CLIENT_RENDER_TICK);
-}
-function drawMob(id, clientRenderTick) {
+    ctx.save();
     let path, secondaryAngle;
-    switch (id) {
+    switch(mob.mob.id) {
         case 1:
-            secondaryAngle = Math.sin(clientRenderTick / 6) / 10;
-            ctx.fillStyle = '#666666';
-            ctx.strokeStyle = getStroke(ctx.fillStyle);
-            ctx.lineWidth = 0.4;
+            secondaryAngle = Math.sin(mob.CLIENT_RENDER_TICK * 0.1) * 0.05;
+            ctx.fillStyle = '#454545';
+            ctx.strokeStyle = '#292929';
+            ctx.lineWidth = 7;
+            ctx.lineCap = 'round';
             ctx.beginPath();
-            ctx.ellipse(0.7,0.3,0.5,0.1,secondaryAngle,0.2,3);
+            ctx.moveTo(0,-7);
+            ctx.quadraticCurveTo(11,-10,22,-5);
             ctx.stroke();
             ctx.beginPath();
-            ctx.ellipse(0.7,-0.3,0.5,0.1,-secondaryAngle,-3,-0.2);
+            ctx.moveTo(0,7);
+            ctx.quadraticCurveTo(11,10,22,5);
             ctx.stroke();
-            ctx.lineWidth = 0.4;
             ctx.beginPath();
-            ctx.arc(0,0,0.75,0,2*Math.PI);
+            ctx.arc(0,0,17.5,0,6.283185307179586,false);
             ctx.fill();
-            ctx.stroke();
+            ctx.fillStyle = '#555555';
+            ctx.beginPath();
+            ctx.arc(0,0,10.5,0,6.283185307179586,false);
+            ctx.fill();
             break;
         case 2:
-            secondaryAngle = Math.sin(clientRenderTick / 6) / 10;
-            ctx.fillStyle = '#666666';
-            ctx.strokeStyle = getStroke(ctx.fillStyle);
-            ctx.lineWidth = 0.4;
+            ctx.fillStyle = '#454545';
+            ctx.strokeStyle = '#292929';
+            ctx.lineWidth = 7;
+            ctx.lineCap = 'round';
             ctx.beginPath();
-            ctx.ellipse(1.1,0.3,0.5,0.1,secondaryAngle,0.2,3);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.ellipse(1.1,-0.3,0.5,0.1,-secondaryAngle,-3,-0.2);
-            ctx.stroke();
-            ctx.lineWidth = 0.4;
-            ctx.beginPath();
-            ctx.arc(-0.4,0,0.6,0,2*Math.PI);
+            ctx.arc(-13.5,0,13.5,0,6.283185307179586,false);
             ctx.fill();
+            ctx.fillStyle = '#555555';
+            ctx.beginPath();
+            ctx.arc(-13.5,0,6.5,0,6.283185307179586,false);
+            ctx.fill();
+            secondaryAngle = Math.sin(mob.CLIENT_RENDER_TICK * 0.1) * 0.05;
+            ctx.fillStyle = '#454545';
+            ctx.strokeStyle = '#292929';
+            ctx.lineWidth = 7;
+            ctx.lineCap = 'round';
+            ctx.rotate(-secondaryAngle);
+            ctx.beginPath();
+            ctx.moveTo(0,-7);
+            ctx.quadraticCurveTo(11,-10,22,-5);
+            ctx.stroke();
+            ctx.rotate(secondaryAngle * 2);
+            ctx.beginPath();
+            ctx.moveTo(0,7);
+            ctx.quadraticCurveTo(11,10,22,5);
             ctx.stroke();
             ctx.beginPath();
-            ctx.arc(0.4,0,0.75,0,2*Math.PI);
+            ctx.arc(0,0,17.5,0,6.283185307179586,false);
             ctx.fill();
-            ctx.stroke();
+            ctx.fillStyle = '#555555';
+            ctx.beginPath();
+            ctx.arc(0,0,10.5,0,6.283185307179586,false);
+            ctx.fill();
             break;
-        case 3:
-            secondaryAngle = Math.sin(clientRenderTick / 6) / 10;
-            ctx.fillStyle = '#666666';
-            ctx.strokeStyle = getStroke(ctx.fillStyle);
-            ctx.lineWidth = 0.4;
+        case 3:     
+            secondaryAngle = Math.sin(mob.CLIENT_RENDER_TICK * 0.1) * 0.05;
+            ctx.fillStyle = '#454545';
+            ctx.strokeStyle = '#292929';
+            ctx.lineWidth = 7;
+            ctx.lineCap = 'round';
             ctx.beginPath();
-            ctx.ellipse(1.1,0.3,0.5,0.1,secondaryAngle,0.2,3);
+            ctx.arc(-13.5,0,13.5,0,6.283185307179586,false);
+            ctx.fill();
+            ctx.fillStyle = '#555555';
+            ctx.beginPath();
+            ctx.arc(-13.5,0,6.5,0,6.283185307179586,false);
+            ctx.fill();
+            ctx.fillStyle = '#eeeeee80';
+            ctx.beginPath();
+            ctx.ellipse(-12.5,-8,15,7,secondaryAngle*4+0.3141592741012573,0,6.283185307179586,false);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.ellipse(-12.5,8,15,7,-secondaryAngle*4-0.3141592741012573,0,6.283185307179586,false);
+            ctx.fill();
+            ctx.fillStyle = '#454545';
+            ctx.strokeStyle = '#292929';
+            ctx.lineWidth = 7;
+            ctx.lineCap = 'round';
+            ctx.rotate(-secondaryAngle);
+            ctx.beginPath();
+            ctx.moveTo(0,-7);
+            ctx.quadraticCurveTo(11,-10,22,-5);
+            ctx.stroke();
+            ctx.rotate(secondaryAngle * 2);
+            ctx.beginPath();
+            ctx.moveTo(0,7);
+            ctx.quadraticCurveTo(11,10,22,5);
             ctx.stroke();
             ctx.beginPath();
-            ctx.ellipse(1.1,-0.3,0.5,0.1,-secondaryAngle,-3,-0.2);
-            ctx.stroke();
-            ctx.lineWidth = 0.4;
-            ctx.beginPath();
-            ctx.arc(-0.4,0,0.6,0,2*Math.PI);
+            ctx.arc(0,0,17.5,0,6.283185307179586,false);
             ctx.fill();
-            ctx.stroke();
-            ctx.translate(0.4,0);
-            secondaryAngle = Math.sin(clientRenderTick / 7) / 10;
-            ctx.fillStyle = '#aaaaaa80';
-            ctx.rotate(secondaryAngle + 0.5);
+            ctx.fillStyle = '#555555';
             ctx.beginPath();
-            ctx.ellipse(-0.5,0,1,0.5,0,0,2*Math.PI);
+            ctx.arc(0,0,10.5,0,6.283185307179586,false);
             ctx.fill();
-            ctx.rotate(-2 * (secondaryAngle + 0.5));
-            ctx.beginPath();
-            ctx.ellipse(-0.5,0,1,0.5,0,0,2*Math.PI);
-            ctx.fill();
-            ctx.fillStyle = '#666666';
-            ctx.strokeStyle = getStroke(ctx.fillStyle);
-            ctx.beginPath();
-            ctx.arc(0,0,0.75,0,2*Math.PI);
-            ctx.fill();
-            ctx.stroke();
             break;
         case 4:
-            ctx.strokeStyle = '#f71414';
-            ctx.lineWidth = 0.2;
+            ctx.fillStyle = '#0e0e0e';
             ctx.beginPath();
-            ctx.arc(0,0,0.9,0.6,-0.6);
-            ctx.stroke();
-            ctx.fillStyle = '#000000';
+            ctx.arc(15,0,25.5,0,6.283185307179586,false);
+            ctx.fillStyle = '#111111';
             ctx.beginPath();
-            ctx.arc(0.55,0,0.5,0,2*Math.PI);
+            ctx.arc(15,0,18.5,0,6.283185307179586,false);
             ctx.fill();
-            ctx.fillStyle = getStroke(ctx.strokeStyle);
+            ctx.fillStyle = '#eb4034';
+            path = new Path2D();
+            path.moveTo(24.760068893432617,16.939273834228516);
+            path.quadraticCurveTo(17.74359130859375,27.195226669311523,5.530136585235596,29.485883712768555);
+            path.quadraticCurveTo(-6.683317184448242,31.77654457092285,-16.939273834228516,24.760068893432617);
+            path.quadraticCurveTo(-27.195226669311523,17.74359130859375,-29.485883712768555,5.530136585235596);
+            path.quadraticCurveTo(-31.77654457092285,-6.683317184448242,-24.760068893432617,-16.939273834228516);
+            path.quadraticCurveTo(-17.74359130859375,-27.195226669311523,-5.530136585235596,-29.485883712768555);
+            path.quadraticCurveTo(6.683317184448242,-31.77654457092285,16.939273834228516,-24.760068893432617);
+            path.quadraticCurveTo(19.241104125976562,-23.185302734375,21.213199615478516,-21.213205337524414);
+            path.quadraticCurveTo(23.1852970123291,-19.241111755371094,24.76006507873535,-16.939281463623047);
+            path.quadraticCurveTo(10,0,24.760068893432617,16.939273834228516);
+            path.closePath();
+            ctx.fill(path);
+            ctx.save();
+            ctx.clip(path);
+            ctx.fillStyle = '#111111';
             ctx.beginPath();
-            ctx.arc(0,0,0.9,0,2*Math.PI);
+            ctx.arc(-24.998876571655273,-20.74837875366211,7.209468364715576,0,6.283185307179586,false);
             ctx.fill();
+            ctx.beginPath();
+            ctx.arc(19.580562591552734,23.397785186767578,4.327828407287598,0,6.283185307179586,false);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(0.7487926483154297,-5.099580764770508,4.840342998504639,0,6.283185307179586,false);
+            ctx.fill();
+            ctx.restore();
+            ctx.fillStyle = '#be342a';
+            path = new Path2D();
+            path.moveTo(27.64874267578125,18.915523529052734);
+            path.quadraticCurveTo(19.813682556152344,30.36800765991211,6.175320625305176,32.925907135009766);
+            path.quadraticCurveTo(-7.463029861450195,35.48381042480469,-18.91551971435547,27.648746490478516);
+            path.quadraticCurveTo(-30.36800765991211,19.813682556152344,-32.925907135009766,6.175320625305176);
+            path.quadraticCurveTo(-35.48381042480469,-7.463029861450195,-27.648746490478516,-18.91551971435547);
+            path.quadraticCurveTo(-19.813682556152344,-30.36800765991211,-6.175320625305176,-32.925907135009766);
+            path.quadraticCurveTo(7.463029861450195,-35.48381042480469,18.91551971435547,-27.648746490478516);
+            path.quadraticCurveTo(24.10110092163086,-24.101102828979492,27.648740768432617,-18.915529251098633);
+            path.quadraticCurveTo(28.323867797851562,-17.928699493408203,28.25410270690918,-16.73506736755371);
+            path.quadraticCurveTo(28.184337615966797,-15.541434288024902,27.398849487304688,-14.639973640441895);
+            path.quadraticCurveTo(14.642288208007812,0,27.398853302001953,14.639965057373047);
+            path.quadraticCurveTo(28.184343338012695,15.541427612304688,28.254106521606445,16.735061645507812);
+            path.quadraticCurveTo(28.323869705200195,17.928693771362305,27.64874267578125,18.9155216217041);
+            path.lineTo(27.64874267578125,18.915523529052734);
+            path.closePath();
+            path.moveTo(21.871395111083984,14.963025093078613);
+            path.lineTo(24.760068893432617,16.939273834228516);
+            path.lineTo(22.12128448486328,19.238582611083984);
+            path.quadraticCurveTo(5.3577117919921875,0,22.121280670166016,-19.238590240478516);
+            path.lineTo(24.76006507873535,-16.939281463623047);
+            path.lineTo(21.871389389038086,-14.963033676147461);
+            path.quadraticCurveTo(19.065046310424805,-19.0650577545166,14.96302318572998,-21.871395111083984);
+            path.quadraticCurveTo(5.903592586517334,-28.06928253173828,-4.884955406188965,-26.045866012573242);
+            path.quadraticCurveTo(-15.673511505126953,-24.022449493408203,-21.871395111083984,-14.96302318572998);
+            path.quadraticCurveTo(-28.06928253173828,-5.903592586517334,-26.045866012573242,4.884955406188965);
+            path.quadraticCurveTo(-24.022449493408203,15.673511505126953,-14.96302318572998,21.871395111083984);
+            path.quadraticCurveTo(-5.903592586517334,28.06928253173828,4.884955406188965,26.045866012573242);
+            path.quadraticCurveTo(15.673511505126953,24.022449493408203,21.871395111083984,14.963025093078613);
+            path.closePath();
+            ctx.fill(path);
             break;
         case 5:
-            ctx.save();
-            ctx.fillStyle = '#000000';
+            ctx.fillStyle = '#333333';
+            ctx.strokeStyle = '#292929';
+            ctx.lineWidth = 5;
+            ctx.lineCap = 'round';
             ctx.beginPath();
-            ctx.moveTo(-1,-0.4);
-            ctx.lineTo(-1.8,0);
-            ctx.lineTo(-1,0.4);
+            ctx.moveTo(-37,0);
+            ctx.lineTo(-25,-9);
+            ctx.lineTo(-25,9);
             ctx.closePath();
             ctx.fill();
-            ctx.fillStyle = '#f3e715';
-            ctx.strokeStyle = getStroke(ctx.fillStyle);
-            ctx.lineWidth = 0.3;
-            path = new Path2D();
-            path.ellipse(0,0,1.2,0.8,0,0,2*Math.PI);
-            ctx.stroke(path);
-            ctx.lineWidth = 0.15;
-            ctx.strokeStyle = '#000000';
-            ctx.beginPath();
-            ctx.ellipse(0.8,0.5,0.8,0.3,0,-Math.PI/2,0);
             ctx.stroke();
+            ctx.fillStyle = '#ffe763';
             ctx.beginPath();
-            ctx.ellipse(0.8,-0.5,0.8,0.3,0,0,Math.PI/2);
-            ctx.stroke();
-            ctx.fill(path);
-            ctx.fillStyle = '#000000';
-            ctx.beginPath();
-            ctx.arc(1.6,0.5,0.2,0,2*Math.PI);
+            ctx.ellipse(0,0,30,20,0,0,6.283185307179586,false);
             ctx.fill();
-            ctx.beginPath();
-            ctx.arc(1.6,-0.5,0.2,0,2*Math.PI);
-            ctx.fill();
-            ctx.clip(path);
-            ctx.beginPath();
-            ctx.fillRect(-0.7,-1,0.4,2);
-            ctx.beginPath();
-            ctx.fillRect(0.1,-1,0.4,2);
+            ctx.save();
+            ctx.clip();
+            ctx.fillStyle = '#333333';
+            ctx.fillRect(-30,-20,10,40);
+            ctx.fillRect(-10,-20,10,40);
+            ctx.fillRect(10,-20,10,40);
             ctx.restore();
+            ctx.strokeStyle = '#d3bd46';
+            ctx.beginPath();
+            ctx.ellipse(0,0,30,20,0,0,6.283185307179586,false);
+            ctx.stroke();
+            ctx.strokeStyle = '#333333';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(25,-5);
+            ctx.quadraticCurveTo(35,-5,40,-15);
+            ctx.stroke();
+            ctx.fillStyle = '#333333';
+            ctx.beginPath();
+            ctx.arc(40,-15,5,0,6.283185307179586,false);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(25,5);
+            ctx.quadraticCurveTo(35,5,40,15);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(40,15,5,0,6.283185307179586,false);
+            ctx.fill();
             break;
     }
+    ctx.restore();
+    ++mob.CLIENT_RENDER_TICK;
 }
-const PETAL_NAMES = ['Basic','Light','Stinger','Rose','Leaf'];
-const MOB_NAMES = ['Baby Ant','Worker Ant','Soldier Ant','Ladybug','Bee']
+function drawPlayer(player) {
+    ctx.fillStyle = '#cfbb50';
+    ctx.beginPath();
+    ctx.arc(0,0,player.pos.radius+1.5,0,PI_2);
+    ctx.fill();
+    ctx.fillStyle = '#ffe763';
+    ctx.beginPath();
+    ctx.arc(0,0,player.pos.radius-1.5,0,PI_2);
+    ctx.fill();
+}
+function drawLoadoutPetal(id, rarity, cd, hp) {
+    ctx.fillStyle = getColorByRarity(rarity);
+    ctx.strokeStyle = getStroke(ctx.fillStyle);
+    ctx.lineWidth = 10;
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+    ctx.rect(-30,-30,60,60);
+    ctx.stroke();
+    ctx.fill();
+    ctx.clip();
+    ctx.fillStyle = '#00000040';
+    ctx.beginPath();
+    ctx.moveTo(0,0);
+    ctx.arc(0,0,50, -PI_2 / 4 + 6 * cd * PI_2 / 255, -PI_2 / 4 + 5 * cd * PI_2 / 255);
+    ctx.closePath();
+    ctx.fill();
+    if (hp) {
+        ctx.beginPath();
+        ctx.fillRect(-30,-30,60,60*(1-hp/255));
+    }
+    ctx.fillStyle = '#ffffff';
+    ctx.strokeStyle = '#000000';
+    ctx.font = '1px Ubuntu';
+    const name = PETAL_NAMES[id - 1];
+    const { width } = ctx.measureText(name);
+    ctx.font = `${Math.min(50 / width, 15)}px Ubuntu`;
+    ctx.textAlign = 'center';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.strokeText(name, 0, 25);
+    ctx.fillText(name, 0, 25);
+    ctx.translate(0,-5);
+    drawPetalAsStatic(id,rarity);
+}

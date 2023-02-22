@@ -48,7 +48,9 @@ export class Vector {
         return (this.x-x)**2+(this.y-y)**2;
     }
     normalize() {
-        return this.scale(1 / this.magnitude);
+        const mag = this.magnitude;
+        if (mag === 0) return this;
+        return this.scale(1 / mag);
     }
 }
 export class OneDimensionalVector {

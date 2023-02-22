@@ -1,15 +1,13 @@
 import { Vector } from "./Vector.js";
 import { COMPONENTS } from "./Components.js";
-import { SpatialHash } from "../game/Collisions.js";
 
 export class Entity {
-    static BASE_KNOCKBACK = 5;
+    static BASE_KNOCKBACK = 2;
     static BASE_FRICTION = 0.9;
     static BASE_WEIGHT = 1;
 
     vel = new Vector(0,0);
     accel = new Vector(0,0);
-    gridHash = -1;
     pendingDelete = false;
     canCollide = true;
     state = 2; //create
@@ -26,7 +24,6 @@ export class Entity {
         this.deleteAnimation = new DeletionAnimation(this);
     }
     tick() {
-        if (this.pendingDelete) return this.deleteAnimation.tick();
         this.vel.scale(this.friction);
         this.vel.add(this.accel);
         this.pos.add(this.vel);
@@ -34,6 +31,7 @@ export class Entity {
         else if (this.pos.x + this.pos.radius > this._arena.arena.width) this.pos.x = this._arena.arena.width - this.pos.radius;
         if (this.pos.y < this.pos.radius) this.pos.y = this.pos.radius;
         else if (this.pos.y + this.pos.radius > this._arena.arena.height) this.pos.y = this._arena.arena.height - this.pos.radius;
+        if (this.pendingDelete) return this.deleteAnimation.tick();
         if (true) { //rethink this
             this._arena.collisionGrid.remove(this);
             this.gridHash = this._arena.collisionGrid.insert(this);
@@ -45,21 +43,21 @@ export class Entity {
     getCollisions() { 
         const collisions = new Set();
         const possibleCollisions = this._arena.collisionGrid.getEntityCollisions(this);
-        for (const entity of possibleCollisions) if (entity.canCollide) collisions.add(entity);
+        for (const entity of possibleCollisions) if (entity.canCollide && !entity.pendingDelete) collisions.add(entity);
         return collisions;
     }
     collideWith(entity) {
+        if (this.pendingDelete || entity.pendingDelete) return;
         this.onCollide(entity);
         entity.onCollide(this);
-        if (this.pendingDelete || entity.pendingDelete) return;
         let ratio = (entity.weight) / (this.weight + entity.weight);
         if (ratio === 0 || !Number.isFinite(ratio)) ratio = 0.5;
         const dist = Vector.sub(this.pos, entity.pos), _dist = dist.magnitude;
         if (_dist === 0) return;
         this.pos.add(dist.normalize().scale((this.pos.radius + entity.pos.radius - _dist + 0.5) * ratio)); //0.5 to prevent recollision
         entity.pos.add(dist.scale((ratio - 1) / ratio));
-        entity.vel.add(dist.normalize().scale(ratio * Entity.BASE_KNOCKBACK));
-        this.vel.add(dist.scale(-1));
+        entity.vel.add(dist.normalize().scale((1 - ratio) * Entity.BASE_KNOCKBACK));
+        this.vel.add(dist.scale(ratio / (ratio - 1)));
     }
     onCollide() {}
     wipeState() {

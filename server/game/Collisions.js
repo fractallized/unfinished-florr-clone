@@ -47,8 +47,8 @@ export class SpatialHash {
         }
         return ret;
     }
-    getEntityCollisions(entity) {
-        const {x, y, radius} = entity.pos;
+    getEntityCollisions(entity, radius = entity.pos.radius) {
+        const {x, y} = entity.pos;
         return this.getCollisions(x, y, radius, radius);
     }
     clear() {

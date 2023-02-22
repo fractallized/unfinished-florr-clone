@@ -1,8 +1,8 @@
 import { Entity } from "../Entity.js";
 import { Drop } from "./Drop.js";
 import { COMPONENTS } from "../Components.js";
-import { interpolate } from "../Vector.js";
 import { FROM_TABLE, MOB_RARITY_MULTIPLIER, MOB_SIZE_MULTIPLIER } from "../../coder/Helpers.js";
+import { AI } from "./AI.js";
 //TODO: AI
 export class Mob extends Entity {
     constructor(arena, zone, x, y, angle, rarity, mobDefinition) {
@@ -12,21 +12,17 @@ export class Mob extends Entity {
         this.health = new COMPONENTS.HealthComponent(this, mobDefinition.health * MOB_RARITY_MULTIPLIER[rarity]);
         this.mob = new COMPONENTS.MobComponent(this, mobDefinition.id, rarity);
         this.damage = mobDefinition.damage * MOB_RARITY_MULTIPLIER[rarity];
-        this.lastIdle = arena.server.tick - 100;
-        this.friction = 0.97;
+        this.lastIdle = arena._tick - 100;
+        this.friction = 0.8;
         this.loot = mobDefinition.loot;
         this.angle = angle;
+        this.ai = new AI(this, 500);
     }
     tick() {
         if (this.pendingDelete) return super.tick();
-        if (this._arena.server.tick - this.lastIdle > 100) {
-            if (Math.random() < 0.05) {
-                this.angle = Math.random() * 2 * Math.PI;
-                this.lastIdle = this._arena.server.tick;
-            }
-        }
-        if (this._arena.server.tick - this.lastIdle < 25) this.pos.angle = interpolate(this.pos.angle, this.angle, 0.1);
-        else if (this._arena.server.tick - this.lastIdle === 25) this.vel.set(Math.cos(this.pos.angle) * 8, Math.sin(this.pos.angle) * 8);
+        this.ai.tick();
+        this.accel.set2(this.ai.input.normalize().scale(2));
+        this.pos.angle = this.ai.input.angle ?? this.pos.angle;
         const collisions = this.getCollisions();
         for (const ent of collisions) {
             if (ent === this) continue;
@@ -38,9 +34,9 @@ export class Mob extends Entity {
     }
     onCollide(ent) {
         if (ent.playerInfo || ent.petal) {
-            if (this._arena.server.tick - this.health.lastDamaged > 2) {
+            if (this._arena._tick - this.health.lastDamaged > 2) {
                 this.health.health -= ent.damage;
-                this.health.lastDamaged = this._arena.server.tick;
+                this.health.lastDamaged = this._arena._tick;
             }
         }
         if (this.health.health < 0.0001) { 

@@ -12,24 +12,27 @@ export class Drop extends Entity {
 
         this.angle = new OneDimensionalVector(0,3.8,0);
         this.friction = 0.8;
-        this.creationTick = this._arena.server.tick;
+        this.creationTick = this._arena._tick;
         this.collectedBy = null;
         this.vel.add(Vector.fromPolar(Drop.BASE_VELOCITY, moveAngle));
     }
     tick() {
-        if (this._arena.server.tick - this.creationTick > (1 + this.drop.rarity) * 25 * 10) this.delete();
+        if (this._arena._tick - this.creationTick > (1 + this.drop.rarity) * 25 * 10) this.delete();
         if (this.pendingDelete) return super.tick();
         if (this.collectedBy) {
-            //add to player now
-            //diff delete animation
             if (this.pos.distanceSq(this.collectedBy.pos) <= (this.pos.radius + this.collectedBy.pos.radius) ** 2) {
                 ++this.collectedBy.owner.inventory[(this.drop.id - 1) * 8 + this.drop.rarity];
                 this.delete();
                 //add to loadout if possible
                 for (let n = 0; n < 2 * this.collectedBy.owner.numEquipped; n += 2) {
-                    if (this.collectedBy.owner.equipped[n]) continue;
+                    if (this.collectedBy.playerInfo.petalsEquipped[n]) continue;
                     this.collectedBy.changePetal(n >> 1, this.drop.id, this.drop.rarity);
-                    break;
+                    return;
+                }
+                for (let n = 2 * this.collectedBy.owner.numEquipped; n < 4 * this.collectedBy.owner.numEquipped; n += 2) {
+                    if (this.collectedBy.playerInfo.petalsEquipped[n]) continue;
+                    this.collectedBy.changePetal(n >> 1, this.drop.id, this.drop.rarity);
+                    return;
                 }
                 return;
             }
