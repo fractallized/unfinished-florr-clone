@@ -10,7 +10,6 @@ export class HealPetal extends Petal {
     }
     tick() {
         if (this.pendingDelete) return super.tick();
-        if (this.player.pendingDelete || this.player !== this._arena.entities[this.player.id]) return this.delete();
         if (this.player.health.health === this.player.health.maxHealth || this._arena._tick - this.creationTick <= 25) return super.tick();
         if (this.petalDefinition.heal < 0) {
             if (this.holdingRadius.pos < this.player.pos.radius) {
@@ -20,11 +19,7 @@ export class HealPetal extends Petal {
             this.holdingRadius.accel =  this.holdingRadius.pos * -0.02;
             this.holdingRadius.vel *= 0.75;
             this.holdingRadius.tick();
-            this.pos.set2(Vector.fromPolar(this.holdingRadius.pos, this.player.rotationAngle + this.rotationPos * 2 * Math.PI / this.player.numSpacesAlloc).add(this.player.pos));
-            return super.tick2();
-        } else {
-            this.player.health.health = Math.min(this.player.health.health + this.petalDefinition.heal, this.player.health.maxHealth);
-        }
+        } else this.player.health.health = Math.min(this.player.health.health + this.petalDefinition.heal, this.player.health.maxHealth);
         super.tick();
     }
 }

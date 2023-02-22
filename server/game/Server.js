@@ -27,7 +27,7 @@ export class GameServer {
         this.tick = 0;
 
         setInterval(() => {
-            for (const map of this.maps) if (Object.keys(map.clients).length) map.tick();
+            for (const map of this.maps) if (map.clients.size) map.tick();
             ++this.tick;
         }, 40);
         this.wss.on("connection", (ws, _) => this.add(ws));

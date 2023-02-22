@@ -31,7 +31,7 @@ export class Petal extends Entity {
     }
     tick() {
         if (this.pendingDelete) return super.tick();
-        if (this.player.pendingDelete || this.player !== this._arena.entities[this.player.id]) return this.delete();
+        if (this.player.pendingDelete || this.player !== this._arena.entities.get(this.player.id)) return this.delete();
         const input = this.player.owner.input;
         let hoverRadius = 75;
         if (this.petalDefinition.preventExtend) {
@@ -46,9 +46,6 @@ export class Petal extends Entity {
         if (this.clump) this.accel.set2(Vector.fromPolar(this.holdingRadius.pos, this.player.rotationAngle + this.rotationPos * 2 * Math.PI / this.player.numSpacesAlloc).add(Vector.fromPolar(10, this.innerPos * 2 * Math.PI / this.count)).add(this.player.pos).sub(this.pos));
         else this.accel.set2(Vector.fromPolar(this.holdingRadius.pos, this.player.rotationAngle + this.rotationPos * 2 * Math.PI / this.player.numSpacesAlloc).add(this.player.pos).sub(this.pos));
         super.tick();
-    }
-    tick2() {
-        super.tick(); //for heal petals
     }
     onCollide(ent) {
         if (ent instanceof Mob) {

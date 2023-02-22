@@ -12,39 +12,39 @@ export class Arena {
         this.serverID = serverID;
         this.arena = new COMPONENTS.ArenaComponent(this, x, y, name);
         this.id = 0;
-        this.entities = {};
-        this.clients = {};
+        this.entities = new Map();
+        this.clients = new Map();
         this.collisionGrid = new SpatialHash(this);
         this.zones = [];
         this._tick = 0;
     }
     tick() {
         this.state = 0;
-        const entities = Object.values(this.entities);
-        const clients = Object.values(this.clients);
+        const entities = this.entities.values();
+        const clients = this.clients.values();
         for (const client of clients) client.tick();
         for (const entity of entities) entity.wipeState();
-        for (const entity of entities) entity.tick();
+        for (const entity of this.entities.values()) entity.tick();
         for (const zone of this.zones) zone.tick();
         ++this._tick;
     }
     calculateOpenHash() {
-        for (let n = 1; n < 16384; ++n) if (!this.entities[n]) return n;
+        for (let n = 1; n < 16384; ++n) if (!this.entities.get(n)) return n;
         return 16384;
     }
     calculateClientHash() {
-        for (let n = 16384; n < 32768; ++n) if (!this.clients[n]) return n;
+        for (let n = 16384; n < 32768; ++n) if (!this.clients.get(n)) return n;
         return 32768;
     }
     addClient(entity) {
         const hash = this.calculateClientHash();
-        this.clients[hash] = (entity);
+        this.clients.set(hash, entity);
         entity.id = hash;
         return entity;
     }
     add(entity) {
         const hash = this.calculateOpenHash();
-        this.entities[hash] = (entity);
+        this.entities.set(hash, entity);
         entity.id = hash;
         entity.gridHash = this.collisionGrid.insert(entity);
         return entity;
@@ -56,10 +56,10 @@ export class Arena {
     delete(entity) {
         entity.state = 4;
         this.collisionGrid.remove(entity);
-        delete this.entities[entity.id];
+        this.entities.delete(entity.id);
     }
     removeClient(client) {
-        delete this.clients[client.id];
+        this.clients.delete(client.id);
     }
     setZones(...zones) {
         for (const zone of zones) this.zones.push(new SpawnZone(this, ...zone));
