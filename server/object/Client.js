@@ -5,6 +5,7 @@ import { compileEnt, compileInventory } from "../coder/PacketMaker.js";
 import { COMPONENTS } from "./Components.js";
 import { Arena } from "../game/Arena.js";
 import { Inventory } from "../game/Inventory.js";
+import { Vector } from "./Vector.js";
 
 export class Client {
     static BASE_FOV = 1;
@@ -48,7 +49,6 @@ export class Client {
         }
     }
     setPetal(pos, id, rarity) {
-        //++this.inventory[(id - 1) * 8 + rarity];
         if (this.equipped[pos * 2] === id && this.equipped[pos * 2 + 1] === rarity) return;
         let sameCt = 0;
         for (let n = 0; n < 40; n += 2) if (this.equipped[n] === id && this.equipped[n + 1] === rarity) ++sameCt;
@@ -97,8 +97,7 @@ export class Client {
         console.log("spawn");
         this.map = num;
         this._arena = this.server.maps[this.map];
-        this.player = new Player(this._arena, 500, 500, 25, this); //client spawned, give it a player
-        this.player.pos.set(x, y);
+        this.player = new Player(this._arena, x, y, 25, this); //client spawned, give it a player
         this._arena.addClient(this); //add the camera
         this.addedToArena = true;
         this._arena.add(this.player); //add the player of the camera
@@ -112,7 +111,7 @@ export class Client {
         switch(reader.u8()) {
             case 0:
                 if (this.player) break;
-                this.moveServer(0, 5000, 5000);
+                this.moveServer(0, 5000, 5000); //initial spawn
                 break;
             case 1:
                 this.input = reader.u8();
@@ -126,5 +125,26 @@ export class Client {
     wipeState() {
         this.state = 0;
         this.camera.reset();
+    }
+}
+
+export class Input extends Vector {
+    constructor(x, y) {
+        super(x, y);
+        this.targetX = x;
+        this.targetY = y;
+        this.input = 0;
+    }
+    setTarget({x, y}) {
+        this.targetX = x;
+        this.targetY = y;
+    }
+    tick() {
+        this.x += 0.1 * (this.targetX - this.x);
+        this.y += 0.1 * (this.targetY - this.y);
+    }
+    get angle() {
+        if (this.x && this.y) return Math.atan2(this.y, this.x);
+        return null;
     }
 }

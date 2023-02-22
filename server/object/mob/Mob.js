@@ -2,9 +2,11 @@ import { Entity } from "../Entity.js";
 import { Drop } from "./Drop.js";
 import { COMPONENTS } from "../Components.js";
 import { FROM_TABLE, MOB_RARITY_MULTIPLIER, MOB_SIZE_MULTIPLIER } from "../../coder/Helpers.js";
-import { AI } from "./AI.js";
+import { NeutralAI1 } from "./mob-behavior/NeutralAI.js";
 //TODO: AI
 export class Mob extends Entity {
+    passiveSpeed = 2; //in bursts
+    aggroSpeed = 2;
     constructor(arena, zone, x, y, angle, rarity, mobDefinition) {
         super(arena, x, y, mobDefinition.size * MOB_SIZE_MULTIPLIER[rarity], angle);
         this.zone = zone;
@@ -12,17 +14,15 @@ export class Mob extends Entity {
         this.health = new COMPONENTS.HealthComponent(this, mobDefinition.health * MOB_RARITY_MULTIPLIER[rarity]);
         this.mob = new COMPONENTS.MobComponent(this, mobDefinition.id, rarity);
         this.damage = mobDefinition.damage * MOB_RARITY_MULTIPLIER[rarity];
-        this.lastIdle = arena._tick - 100;
-        this.friction = 0.8;
+        this.lastIdle = -1;
+        this.friction = 0.95;
         this.loot = mobDefinition.loot;
         this.angle = angle;
-        this.ai = new AI(this, 500);
+        this.ai = new NeutralAI1(this);
     }
     tick() {
         if (this.pendingDelete) return super.tick();
-        this.ai.tick();
-        this.accel.set2(this.ai.input.normalize().scale(2));
-        this.pos.angle = this.ai.input.angle ?? this.pos.angle;
+        this.ai.tick(); //sets changes in acceleration and angle as well
         const collisions = this.getCollisions();
         for (const ent of collisions) {
             if (ent === this) continue;
@@ -33,11 +33,11 @@ export class Mob extends Entity {
         super.tick();
     }
     onCollide(ent) {
-        if (ent.playerInfo || ent.petal) {
-            if (this._arena._tick - this.health.lastDamaged > 2) {
-                this.health.health -= ent.damage;
-                this.health.lastDamaged = this._arena._tick;
-            }
+        if ((ent.playerInfo || ent.petal) && this._arena._tick - this.health.lastDamaged > 2) {
+            if (ent.playerInfo) this.ai.onDamage(ent);
+            else this.ai.onDamage(ent.player);
+            this.health.health -= ent.damage;
+            this.health.lastDamaged = this._arena._tick;
         }
         if (this.health.health < 0.0001) { 
             this.health.health = 0;
