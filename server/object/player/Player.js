@@ -27,7 +27,16 @@ export class Player extends Entity {
         this.playerInfo = new COMPONENTS.PlayerInfoComponent(this); 
 
         this.equipped = new Array(10).fill(0).map(_ => []); //ACCOUNTS FOR PETALS THAT SPAWN MULTIPLE
-        this.getAdjustedEquipped();
+        this.initLoadout();
+    }
+    initLoadout() {
+        this.playerInfo.numEquipped = this.owner.numEquipped;
+        this.numSpacesAlloc = 0;
+        const equipped = this.owner.equipped;
+        if (!equipped) return;
+        for (let n = 0; n < this.owner.numEquipped; ++n) {
+            this.changePetal(n, equipped[n * 2], equipped[n * 2 + 1]);
+        }
     }
     calculateSpecials() {
         this.playerInfo.faceFlags &= ~16;
@@ -43,15 +52,6 @@ export class Player extends Entity {
                 } 
                 petal.definition.rotationSpeedAddition && (this.rotationSpeed += petal.definition.rotationSpeedAddition[petal.rarity] * 0.04);
             }
-        }
-    }
-    getAdjustedEquipped() {
-        this.playerInfo.numEquipped = this.owner.numEquipped;
-        this.numSpacesAlloc = 0;
-        const equipped = this.owner.equipped;
-        if (!equipped) return;
-        for (let n = 0; n < this.owner.numEquipped; ++n) {
-            this.changePetal(n, equipped[n * 2], equipped[n * 2 + 1]);
         }
     }
     changePetal(pos, id, rarity) {

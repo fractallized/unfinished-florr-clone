@@ -91,7 +91,7 @@ export class SpawnZone {
             const id = FROM_OBJECT_TABLE(this.spawnTable.MOB_CHANCE);
             const rarity = FROM_TABLE(this.spawnTable.RARITY_CHANCE);
             const ent = new Mob(this.arena, this, potentialX, potentialY, 2 * Math.PI * Math.random(), rarity, MOB_DEFINITIONS[id]);
-            if (this.arena.collisionGrid.getCollisions(ent).length) return;
+            if (this.arena.collisionGrid.getEntityCollisions(ent).length) return;
             this.arena.add(ent);
             ++this.mobCount;
         }

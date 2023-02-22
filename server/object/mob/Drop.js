@@ -11,7 +11,7 @@ export class Drop extends Entity {
         this.drop = new COMPONENTS.DropComponent(this,dropDefinition.id,dropDefinition.rarity); //id,rar
 
         this.angle = new OneDimensionalVector(0,3.8,0);
-        this.friction = 0.8;
+        this.friction = 0.9;
         this.creationTick = this._arena._tick;
         this.collectedBy = null;
         this.vel.add(Vector.fromPolar(Drop.BASE_VELOCITY, moveAngle));
@@ -36,7 +36,7 @@ export class Drop extends Entity {
                 }
                 return;
             }
-            this.vel.add(Vector.sub(this.collectedBy.pos, this.pos).normalize().scale(16));
+            this.vel.add(Vector.sub(this.collectedBy.pos, this.pos).normalize().scale(8));
             this.pos.angle += 0.4;
             return super.tick();
         }

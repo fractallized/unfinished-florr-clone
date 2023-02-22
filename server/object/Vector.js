@@ -1,6 +1,6 @@
 export class Vector {
+    values = {};
     constructor(x,y) {
-        this.values = {}; //for fields
         this.x = x;
         this.y = y;
     }
