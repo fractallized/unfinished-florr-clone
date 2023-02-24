@@ -1,6 +1,6 @@
-import { AI } from "./AI";
+import AI from "./AI";
 
-export class StationaryAI extends AI {
+export default class StationaryAI extends AI {
     constructor(mob) {
         super(mob);
     }

@@ -1,4 +1,4 @@
-export const PETAL_DEFINITIONS = {
+const PETAL_DEFINITIONS = {
     0: null,
     1: {
         id: 1, //basic
@@ -65,7 +65,7 @@ export const PETAL_DEFINITIONS = {
         radius: 10,
         damage: 1,
         health: 2000,
-        cooldown: 3,
+        cooldown: 200,
         petal: 'Petal'
     }, 
     9: {
@@ -78,3 +78,4 @@ export const PETAL_DEFINITIONS = {
         rotationSpeedAddition: [0.3,0.6,0.9,1.2,1.5,1.8,2.1,2.4]
     }
 }
+export default PETAL_DEFINITIONS;

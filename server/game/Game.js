@@ -2,7 +2,7 @@ import { createServer } from "http";
 import { WebSocketServer } from "ws";
 import express from "express";
 import { existsSync, readFileSync } from "fs";
-import { GameServer } from "./Server.js";
+import GameServer from "./Server.js";
 
 class Server {
     constructor() {

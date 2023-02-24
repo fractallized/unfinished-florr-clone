@@ -1,12 +1,12 @@
-import { COMPONENTS } from "../Components.js";
-import { Entity } from "../Entity.js";
-import { OneDimensionalVector, Vector } from "../Vector.js";
-import { Mob } from "../mob/Mob.js";
+import COMPONENTS from "../Components.js";
+import Entity from "../Entity.js";
+import Vector, { OneDimensionalVector } from "../Vector.js";
+import Mob from "../mob/Mob.js";
 import { PETAL_RARITY_MULTIPLIER } from "../../coder/Helpers.js";
 
 //TODO: FIX UP FIELD GROUPS AND FINALIZE NECESSARY ONES
 
-export class Petal extends Entity {
+export default class Petal extends Entity {
     constructor(arena, player, outerPos, innerPos, pos, rarity, petalDefinition) {
         super(arena, player.pos.x, player.pos.y, petalDefinition.radius, 0);
 

@@ -1,5 +1,5 @@
 /* handles packets from client and sends back */
-export class Reader {
+export default class Reader {
     constructor(packet) {
         this.packet = packet;
         this.index = 0;

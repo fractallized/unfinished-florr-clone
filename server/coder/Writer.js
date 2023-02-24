@@ -1,4 +1,4 @@
-export class Writer {
+export default class Writer {
     constructor() {
         this.packet = [];
     }

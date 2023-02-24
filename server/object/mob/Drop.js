@@ -1,9 +1,9 @@
-import { Entity } from "../Entity.js";
-import { Vector } from "../Vector.js";
-import { COMPONENTS } from "../Components.js";
+import Entity from "../Entity.js";
+import Vector from "../Vector.js";
+import COMPONENTS from "../Components.js";
 import { OneDimensionalVector } from "../Vector.js";
 
-export class Drop extends Entity {
+export default class Drop extends Entity {
     static BASE_VELOCITY = 16;
     constructor(arena, x, y, r, moveAngle, dropDefinition) {
         super(arena, x, y, r, 0);

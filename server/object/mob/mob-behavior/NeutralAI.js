@@ -1,7 +1,7 @@
-import { Vector } from "../../Vector.js";
-import { PassiveAI1 } from "./PassiveAI.js";
+import Vector from "../../Vector.js";
+import PassiveAI1 from "./PassiveAI.js";
 
-export class NeutralAI1 extends PassiveAI1 {
+export default class NeutralAI1 extends PassiveAI1 {
     target = null;
     constructor(mob) {
         super(mob);
@@ -13,9 +13,9 @@ export class NeutralAI1 extends PassiveAI1 {
             this.target = null;
             return;
         }
-        this.input.setTarget(Vector.sub(this.target.pos, this.mob.pos).normalize().scale(this.mob.aggroSpeed));
+        this.input.setTarget(Vector.sub(this.target.pos, this.mob.pos).normalize().scale(this.mob.aggroSpeed * 5.8));
         this.input.tick();
-        this.mob.accel.set2(this.input);
+        this.mob.vel.set2(this.input);
         this.mob.pos.angle = this.input.angle ?? this.mob.pos.angle;
     }
     onDamage(ent) {

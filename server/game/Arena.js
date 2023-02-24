@@ -1,11 +1,11 @@
 import { FROM_OBJECT_TABLE, FROM_TABLE } from "../coder/Helpers.js";
-import { MOB_DEFINITIONS } from "./MobDefinitions.js";
-import { COMPONENTS } from "../object/Components.js";
-import { Portal } from "../object/Portal.js";
-import { Mob } from "../object/mob/Mob.js";
-import { SpatialHash } from "./Collisions.js";
+import MOB_DEFINITIONS from "./MobDefinitions.js";
+import COMPONENTS from "../object/Components.js";
+import Portal from "../object/Portal.js";
+import Mob from "../object/mob/Mob.js";
+import SpatialHash from "./Collisions.js";
 
-export class Arena {
+export default class Arena {
     state = 2; // create
     constructor(server, x, y, serverID, name = '') {
         this.server = server;
@@ -70,7 +70,7 @@ export class Arena {
         return this;
     }
 }
-export class SpawnZone {
+class SpawnZone {
     constructor(arena, x, y, w, h, spawnTable) {
         this.arena = arena;
         this.x = x;

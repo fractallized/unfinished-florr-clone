@@ -1,7 +1,7 @@
-import { Client } from "./Client.js";
-import { COMPONENTS } from "./Components.js";
-import { Player } from "./player/Player.js";
-export class Portal {
+import Client from "./Client.js";
+import COMPONENTS from "./Components.js";
+import Player from "./player/Player.js";
+export default class Portal {
     canCollide = false;
     
     constructor(arena, x, y, to, spawnX, spawnY) {

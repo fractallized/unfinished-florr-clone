@@ -1,12 +1,12 @@
-import { Entity } from "../Entity.js";
-import { Drop } from "../mob/Drop.js";
-import { Mob } from "../mob/Mob.js";
-import { COMPONENTS } from "../Components.js";
-import { Petal } from "./Petal.js";
-import { PETAL_DEFINITIONS } from "../../game/PetalDefinitions.js";
-import { HealPetal } from "./petal/HealPetal.js";
+import Entity from "../Entity.js";
+import Drop from "../mob/Drop.js";
+import Mob from "../mob/Mob.js";
+import COMPONENTS from "../Components.js";
+import Petal from "./Petal.js";
+import PETAL_DEFINITIONS from "../../game/PetalDefinitions.js";
+import HealPetal from "./petal/HealPetal.js";
 
-export class Player extends Entity {
+export default class Player extends Entity {
     static BASE_ROTATION_SPEED = 0.1;
     static BASE_DAMAGE = 25;
     static BASE_HEALTH = 100;

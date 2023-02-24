@@ -1,4 +1,4 @@
-import { Vector } from "./Vector.js";
+import Vector from "./Vector.js";
 class StateArray {
     constructor(component, componentIndex, val, size) {
         this.values = val;
@@ -178,7 +178,7 @@ class PetalComponent {
     
     reset() { this.state.fill(0) }
 }
-export const COMPONENTS = {
+const COMPONENTS = {
     PositionComponent,
     CameraComponent,
     ArenaComponent,
@@ -189,3 +189,4 @@ export const COMPONENTS = {
     MobComponent,
     PetalComponent
 }
+export default COMPONENTS;

@@ -1,7 +1,7 @@
-import { Vector } from "../../Vector.js";
-import { AI } from "./AI.js";
+import Vector from "../../Vector.js";
+import AI from "./AI.js";
 
-export class PassiveAI1 extends AI {
+export default class PassiveAI1 extends AI {
     lastIdle = -1;
     targetAngle = 0;
     constructor(mob) {

@@ -1,13 +1,13 @@
-import { Player } from "./player/Player.js";
-import { Reader } from "../coder/Reader.js";
-import { Writer } from "../coder/Writer.js";
+import Player from "./player/Player.js";
+import Reader from "../coder/Reader.js";
+import Writer from "../coder/Writer.js";
 import { compileEnt, compileInventory } from "../coder/PacketMaker.js";
-import { COMPONENTS } from "./Components.js";
-import { Arena } from "../game/Arena.js";
-import { Inventory } from "../game/Inventory.js";
-import { Vector } from "./Vector.js";
+import COMPONENTS from "./Components.js";
+import Arena from "../game/Arena.js";
+import Inventory from "../game/Inventory.js";
+import Vector from "./Vector.js";
 
-export class Client {
+export default class Client {
     static BASE_FOV = 1;
     state = 2;
     enteredPortalTick = -100;

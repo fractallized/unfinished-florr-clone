@@ -1,4 +1,4 @@
-export class SpatialHash {
+export default class SpatialHash {
     static GRID_SIZE = 6; //64
     constructor() {
         //this.arena = arena;

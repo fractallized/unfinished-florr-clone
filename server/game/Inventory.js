@@ -1,6 +1,6 @@
 import { RARITY_COUNT } from "../coder/Helpers.js";
 
-export class Inventory {
+export default class Inventory {
     constructor() {
         this.values = new Int32Array(RARITY_COUNT * 10);
         this.state = new Uint8Array(this.values.length);

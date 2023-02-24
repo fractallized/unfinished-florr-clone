@@ -1,4 +1,4 @@
-export class Vector {
+export default class Vector {
     values = {};
     constructor(x,y) {
         this.x = x;

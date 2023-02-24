@@ -1,9 +1,9 @@
-import { Vector } from "./Vector.js";
-import { COMPONENTS } from "./Components.js";
+import Vector from "./Vector.js";
+import COMPONENTS from "./Components.js";
 
-export class Entity {
+export default class Entity {
     static BASE_KNOCKBACK = 2;
-    static BASE_FRICTION = 0.9;
+    static BASE_FRICTION = 0.85;
     static BASE_WEIGHT = 1;
 
     vel = new Vector(0,0);

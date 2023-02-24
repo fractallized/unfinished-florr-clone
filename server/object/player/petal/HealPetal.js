@@ -1,9 +1,8 @@
-import { Vector } from "../../Vector.js";
 import { PETAL_RARITY_MULTIPLIER } from "../../../coder/Helpers.js";
-import { Petal } from "../Petal.js";
+import Petal from "../Petal.js";
 //TODO: FIX UP FIELD GROUPS AND FINALIZE NECESSARY ONES
 
-export class HealPetal extends Petal {
+export default class HealPetal extends Petal {
     constructor(arena, player, outerPos, innerPos, pos, rarity, petalDefinition) {
         super(arena, player, outerPos, innerPos, pos, rarity, petalDefinition);
         this.petalDefinition.heal *= PETAL_RARITY_MULTIPLIER[rarity];
