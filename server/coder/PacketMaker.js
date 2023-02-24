@@ -109,7 +109,15 @@ function compileUpdate(w, entity) {
     }
     if (entity.playerInfo) {
         if (entity.playerInfo.state[0] & 1) { w.u8(19); w.u8(entity.playerInfo.numEquipped); }
-        if (entity.playerInfo.state[1] & 1) { w.u8(20); for (const v of entity.playerInfo.petalsEquipped.values) w.u8(v); }
+        if (entity.playerInfo.state[1] & 1) { w.u8(20); 
+            for (let n = 0; n < entity.playerInfo.petalsEquipped.values.length; ++n) {
+                if (entity.playerInfo.petalsEquipped.state[n] & 1) {
+                    w.u8(n);
+                    w.u8(entity.playerInfo.petalsEquipped.values[n])
+                };
+            }
+            w.u8(255);
+        }
         if (entity.playerInfo.state[2] & 1) { w.u8(21); for (const v of entity.playerInfo.petalHealths.values) w.u8(v); }
         if (entity.playerInfo.state[3] & 1) { w.u8(22); for (const v of entity.playerInfo.petalCooldowns.values) w.u8(v); }
         if (entity.playerInfo.state[4] & 1) { w.u8(23); w.u8(entity.playerInfo.faceFlags); }

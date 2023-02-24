@@ -204,10 +204,12 @@ function drawMobAsEnt(mob) {
             ctx.strokeStyle = '#292929';
             ctx.lineWidth = 7;
             ctx.lineCap = 'round';
+            ctx.rotate(-secondaryAngle);
             ctx.beginPath();
             ctx.moveTo(0,-7);
             ctx.quadraticCurveTo(11,-10,22,-5);
             ctx.stroke();
+            ctx.rotate(secondaryAngle*2);
             ctx.beginPath();
             ctx.moveTo(0,7);
             ctx.quadraticCurveTo(11,10,22,5);

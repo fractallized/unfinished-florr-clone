@@ -50,12 +50,24 @@ export class Client {
     }
     setPetal(pos, id, rarity) {
         if (this.equipped[pos * 2] === id && this.equipped[pos * 2 + 1] === rarity) return;
+        this.equipped[pos * 2] = 0;
+        this.equipped[pos * 2 + 1] = 0;
+        if (!id) return this.player && this.player.changePetal(pos, id, rarity);
         let sameCt = 0;
         for (let n = 0; n < 40; n += 2) if (this.equipped[n] === id && this.equipped[n + 1] === rarity) ++sameCt;
         if (sameCt >= this.inventory[((id - 1) << 3) + rarity]) return; //check if client has enough
         this.equipped[pos * 2] = id;
         this.equipped[pos * 2 + 1] = rarity;
         this.player && this.player.changePetal(pos, id, rarity);
+    }
+    swapPetals(pos1, pos2) {
+        //no need for petal count validation
+        const [i1, r1] = this.equipped.slice(pos1 * 2, pos1 * 2 + 2);
+        const [i2, r2] = this.equipped.slice(pos2 * 2, pos2 * 2 + 2);
+        if (this.player) {
+            this.player.changePetal(pos1, i2, r2);
+            this.player.changePetal(pos2, i1, r1);
+        } 
     }
     tick() {
         if (this.camera) {
@@ -118,8 +130,11 @@ export class Client {
                 break;
             case 2:
                 if (!this.player) return;
-                this.setPetal(this.u8(), this.u8(), this.u8());
+                this.setPetal(reader.u8(), reader.u8(), reader.u8());
                 break;
+            case 3:
+                if (!this.player) return;
+                this.swapPetals(reader.u8(), reader.u8())
         }
     }
     wipeState() {

@@ -5,7 +5,7 @@ import { FROM_TABLE, MOB_RARITY_MULTIPLIER, MOB_SIZE_MULTIPLIER } from "../../co
 import { NeutralAI1 } from "./mob-behavior/NeutralAI.js";
 //TODO: AI
 export class Mob extends Entity {
-    passiveSpeed = 2; //in bursts
+    passiveSpeed = 4; //in bursts
     aggroSpeed = 2;
     constructor(arena, zone, x, y, angle, rarity, mobDefinition) {
         super(arena, x, y, mobDefinition.size * MOB_SIZE_MULTIPLIER[rarity], angle);
@@ -15,7 +15,7 @@ export class Mob extends Entity {
         this.mob = new COMPONENTS.MobComponent(this, mobDefinition.id, rarity);
         this.damage = mobDefinition.damage * MOB_RARITY_MULTIPLIER[rarity];
         this.lastIdle = -1;
-        this.friction = 0.95;
+        this.friction = 0.8;
         this.loot = mobDefinition.loot;
         this.angle = angle;
         this.ai = new NeutralAI1(this);

@@ -54,3 +54,122 @@ function getNameByRarity(rarity) {
     if (rarity === 7) return 'Super';
     else return '???';
 }
+class LoadoutPetal {
+    selected = false;
+    squareRadius = 0;
+    constructor(pos) {
+        this.pos = pos;
+        this.id = 0;
+        this.rarity = 0;
+        this.x = this.targetX = this.baseX = 0;
+        this.y = this.targetY = this.baseY = 0;
+    }
+    tick() {
+        if (!this.selected) {
+            this.targetX = this.baseX;
+            this.targetY = this.baseY;
+        }
+        this.x += 0.2 * (this.targetX - this.x);
+        this.y += 0.2 * (this.targetY - this.y);
+    }
+    onmousedown(e) {
+        this.selected = true;
+        this.targetX = e.clientX;
+        this.targetY = e.clientY;
+        CLIENT_RENDER.selected = this;
+    }
+    onmousemove(e) {
+        this.targetX = e.clientX;
+        this.targetY = e.clientY; 
+    }
+    onmouseup(e) {
+        this.selected = false;
+        this.targetX = this.baseX;
+        this.targetY = this.baseY;
+        CLIENT_RENDER.selected = null;
+        if (ws.readyState === 1) {
+            let swap = null;
+            for (const ent of CLIENT_RENDER.loadout) {
+                if (Math.abs(ent.baseX - e.clientX) > ent.squareRadius) continue;
+                if (Math.abs(ent.baseY - e.clientY) > ent.squareRadius) continue;
+                swap = ent;
+                break;
+            }
+            if (swap) {
+                ws.send(new Uint8Array([3,this.pos,swap.pos]));
+            }
+            else ws.send(new Uint8Array([2,this.pos,0,0]));
+        }
+    }
+    draw(cd,hp) {
+        ctx.setTransform(this.squareRadius/30,0,0,this.squareRadius/30,this.x,this.y);
+        ctx.save();
+        drawLoadoutPetal(this.id,this.rarity,cd,hp)
+        ctx.restore();
+    }
+}
+class IntermediatePetal extends LoadoutPetal {
+    constructor(pos,id,rarity,x,y) {
+        super(pos);
+        this.id = id;
+        this.rarity = rarity;
+        this.x = this.targetX = this.baseX = x;
+        this.y = this.targetY = this.baseY = y;
+        this.selected = true;
+    }
+    onmouseup(e) {
+        this.selected = false;
+        this.targetX = this.baseX;
+        this.targetY = this.baseY;
+        CLIENT_RENDER.selected = null;
+        if (ws.readyState === 1) {
+            let swap = null;
+            for (const ent of CLIENT_RENDER.loadout) {
+                if (Math.abs(ent.baseX - e.clientX) > ent.squareRadius) continue;
+                if (Math.abs(ent.baseY - e.clientY) > ent.squareRadius) continue;
+                swap = ent;
+                break;
+            }
+            if (swap) {
+                ws.send(new Uint8Array([2,swap.pos,this.id,this.rarity]));
+            }
+        }
+    }
+    draw() {
+        super.draw(255,0);
+    }
+}
+class InventoryPetal extends LoadoutPetal {
+    count = 0;
+    constructor(pos) {
+        super(pos);
+        this.id = (pos >>> 3) + 1;
+        this.rarity = pos & 7;
+        this.x = this.targetX = this.baseX = 80;
+        this.y = this.targetY = this.baseY = 80;
+    }
+    onmousedown(){
+        CLIENT_RENDER.selected = new IntermediatePetal(this.pos,this.id,this.rarity,this.x,this.y);
+    }
+    onmousemove(){}
+    onmouseup() {}
+    draw() {
+        super.draw();
+        if (this.count === 1) return;
+        ctx.translate(20,-20);
+        ctx.fillStyle = '#ffffff';
+        ctx.strokeStyle = '#000000';
+        ctx.font = '15px Ubuntu';
+        ctx.textAlign = 'center';
+        ctx.lineWidth = 3;
+        ctx.rotate(0.5);
+        ctx.beginPath();
+        ctx.strokeText(`x${this.count}`, 0, 0)
+        ctx.fillText(`x${this.count}`, 0, 0)
+    }
+}
+const CLIENT_RENDER = {
+    loadout: new Array(20).fill(0).map((_,i) => new LoadoutPetal(i)),
+    inventory: new Array(80).fill(0).map((_,i) => new InventoryPetal(i)),
+    selected: null
+};

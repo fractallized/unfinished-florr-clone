@@ -35,24 +35,31 @@ window.onkeyup = async ({ code }) => {
             input &= ~8; 
     }
 }
-class Reader {
-    constructor(p) {
-        this.p = p;
-        this.i = 0;
-    } 
-    has() { return this.p.length > this.i }
-    ru8() { return this.p[this.i] }
-    u8() { return this.p[this.i++] }
-    i32() { return this.u8() | (this.u8() << 8) | (this.u8() << 16) | (this.u8() << 24) }
-    f32() { return new Float32Array(this.p.slice(this.i, this.i += 4).buffer)[0] }
-}
 canvas.onmousedown = async (e) => {
     e.preventDefault();
     if (e.button === 0) input |= 16;
     else input |= 32;
+    if (CLIENT_RENDER.selected) return;
+    for (const ent of CLIENT_RENDER.loadout) {
+        if (!ent.id) continue;
+        if (Math.abs(ent.x - e.clientX) > ent.squareRadius) continue;
+        if (Math.abs(ent.y - e.clientY) > ent.squareRadius) continue;
+        return ent.onmousedown(e);
+    }
+    for (const ent of CLIENT_RENDER.inventory) {
+        if (!ent.count) continue;
+        if (Math.abs(ent.x - e.clientX) > ent.squareRadius) continue;
+        if (Math.abs(ent.y - e.clientY) > ent.squareRadius) continue;
+        return ent.onmousedown(e);
+    }
+}
+canvas.onmousemove = async (e) => {
+    e.preventDefault();
+    CLIENT_RENDER.selected && CLIENT_RENDER.selected.onmousemove(e);
 }
 canvas.onmouseup = async (e) => {
     e.preventDefault();
     if (e.button === 0) input &= ~16;
     else input &= ~32; 
+    CLIENT_RENDER.selected && CLIENT_RENDER.selected.onmouseup(e);
 }

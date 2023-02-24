@@ -16,7 +16,7 @@ export class NeutralAI1 extends PassiveAI1 {
         this.input.setTarget(Vector.sub(this.target.pos, this.mob.pos).normalize().scale(this.mob.aggroSpeed));
         this.input.tick();
         this.mob.accel.set2(this.input);
-        this.mob.pos.angle ??= this.input.angle;
+        this.mob.pos.angle = this.input.angle ?? this.mob.pos.angle;
     }
     onDamage(ent) {
         if (!this.target) this.target = ent;

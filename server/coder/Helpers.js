@@ -1,6 +1,6 @@
 export const RARITY_COUNT = 8;
-const MOB_RARITY_PROPAGATION = x => x * 0.8 + 0.01;
-const MOB_VERTICAL_PROPAGATION = x => Math.max(x * 0.8 - 0.4, 0);
+const MOB_RARITY_PROPAGATION = x => x * 0.4 + 0.01;
+const MOB_VERTICAL_PROPAGATION = x => Math.max(x * 0.5- 0.3, 0);
 export const LOOT_TABLE_GEN = init => {
     const ret = new Array(RARITY_COUNT).fill(0).map(x =>new Array(RARITY_COUNT + 1).fill(0));
     let chanceLeft = 1;
@@ -19,13 +19,13 @@ export const LOOT_TABLE_GEN = init => {
         if (base === 0)  ++firstShift;
         chanceLeft -= base;
         ret[mobR][firstShift] = base;
-        for (let dropR = firstShift + 1; dropR <= mobR; ++dropR) {
+        for (let dropR = firstShift + 1; dropR <= mobR+1; ++dropR) {
           base = MOB_RARITY_PROPAGATION(chanceLeft);
             if (chanceLeft <= base) { ret[mobR][dropR] = chanceLeft; chanceLeft = 0; break; }
             ret[mobR][dropR] = base;
             chanceLeft -= base;
         }
-        ret[mobR][mobR] += chanceLeft;
+        ret[mobR][mobR+1] += chanceLeft;
     }
     return ret;
 }

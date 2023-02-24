@@ -20,11 +20,11 @@ const drawEntity = (ent) => {
         const name = MOB_NAMES[ent.mob.id - 1];
         ctx.strokeStyle = '#000000';
         ctx.textAlign = 'right';
-        ctx.font = '8px Ubuntu';
-        ctx.lineWidth = 1.6;
+        ctx.font = `15px Ubuntu`;
+        ctx.lineWidth = 3;
         ctx.beginPath();
-        ctx.strokeText(text, r*1.5, r*1.1+25);
-        ctx.fillText(text, r*1.5, r*1.1+25);
+        ctx.strokeText(text, r*1.5, r*1.1+30);
+        ctx.fillText(text, r*1.5, r*1.1+30);
         ctx.fillStyle = '#ffffff';
         ctx.textAlign = 'left';
         ctx.beginPath();
@@ -109,47 +109,41 @@ const loop = _ => {
                 ctx.translate(80, 0);
             }
             ctx.globalAlpha = 1;
-            ctx.setTransform(staticScale,0,0,staticScale,canvas.width/2,canvas.height);
-            ctx.scale(1.2,1.2);
-            ctx.translate(40 * (- numEquipped - 1),-110);
             for (let n = 0; n < numEquipped; n++) {
-                ctx.translate(80,0);
+                CLIENT_RENDER.loadout[n].baseX = canvas.width/2 + staticScale * 1.2 * 40 * (2 * n - numEquipped + 1);
+                CLIENT_RENDER.loadout[n].baseY = canvas.height - staticScale * 1.2 * 110;
+                CLIENT_RENDER.loadout[n].squareRadius = staticScale * 1.2 * 30;
+                if (CLIENT_RENDER.loadout[n].selected) continue;
+                CLIENT_RENDER.loadout[n].tick();
                 if (!petalsEquipped[n * 2]) continue;
-                ctx.save();
-                drawLoadoutPetal(petalsEquipped[n * 2],petalsEquipped[n * 2 + 1],petalCooldowns[n],petalHealths[n])
-                ctx.restore();
+                CLIENT_RENDER.loadout[n].draw(petalCooldowns[n],petalHealths[n]);
             }
-            ctx.setTransform(staticScale,0,0,staticScale,canvas.width/2,canvas.height);
-            ctx.translate(40 * (- numEquipped - 1),-50);
             for (let n = numEquipped; n < numEquipped * 2; n++) {
-                ctx.translate(80,0);
+                CLIENT_RENDER.loadout[n].baseX = canvas.width/2 + staticScale * 40 * (2 * n - 3 * numEquipped + 1);
+                CLIENT_RENDER.loadout[n].baseY = canvas.height - staticScale * 50;
+                CLIENT_RENDER.loadout[n].squareRadius = staticScale * 30;
+                if (CLIENT_RENDER.loadout[n].selected) continue;
+                CLIENT_RENDER.loadout[n].tick();
                 if (!petalsEquipped[n * 2]) continue;
-                ctx.save();
-                drawLoadoutPetal(petalsEquipped[n * 2],petalsEquipped[n * 2 + 1],255,0)
-                ctx.restore();
+                CLIENT_RENDER.loadout[n].draw(255,0);
             }
             let pos = 0;
             for (let rarity = 7; rarity >= 0; rarity--) {
                 for (let id = 1; id < 10; id++) {
-                    if (!inventory[(id - 1) * 8 + rarity]) continue;
-                    ctx.setTransform(staticScale,0,0,staticScale,0,0);
-                    ctx.translate(80 * (pos & 7) + 80, 80 * (pos >> 3) + 80);
-                    ctx.save();
-                    drawLoadoutPetal(id, rarity, 255, 0);
-                    ctx.restore();
+                    const n = (id - 1) * 8 + rarity;
+                    if (!CLIENT_RENDER.inventory[n].count || CLIENT_RENDER.inventory[n].selected) continue;
+                    CLIENT_RENDER.inventory[n].baseX = staticScale * (80 * (pos & 7) + 80);
+                    CLIENT_RENDER.inventory[n].baseY = staticScale * (80 * (pos >> 3) + 80);
+                    CLIENT_RENDER.inventory[n].squareRadius = staticScale * 30;
+                    CLIENT_RENDER.inventory[n].tick();
+                    CLIENT_RENDER.inventory[n].draw();
                     ++pos;
-                    if (inventory[(id - 1) * 8 + rarity] === 1) continue;
-                    ctx.translate(20,-20);
-                    ctx.fillStyle = '#ffffff';
-                    ctx.strokeStyle = '#000000';
-                    ctx.font = '15px Ubuntu';
-                    ctx.textAlign = 'center';
-                    ctx.lineWidth = 3;
-                    ctx.rotate(0.5);
-                    ctx.beginPath();
-                    ctx.strokeText(`x${inventory[(id - 1) * 8 + rarity]}`, 0, 0)
-                    ctx.fillText(`x${inventory[(id - 1) * 8 + rarity]}`, 0, 0)
                 }
+            }
+            if (CLIENT_RENDER.selected) {
+                CLIENT_RENDER.selected.squareRadius = staticScale * 30;
+                CLIENT_RENDER.selected.tick();
+                CLIENT_RENDER.selected.draw();
             }
         }
     }

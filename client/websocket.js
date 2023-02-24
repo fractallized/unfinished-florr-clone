@@ -7,8 +7,9 @@ ws.onmessage = async (e) => {
         case 254: entities = {}; break;
     }
 }
-ws.onclose = _ => setTimeout(() => {new WebSocket(`ws${location.protocol.slice(4)}//${location.host}`)}, 1000);
+ws.onclose = _ => setTimeout(() => {ws = new WebSocket(`ws${location.protocol.slice(4)}//${location.host}`)}, 1000);
 function parseEntPacket() {
+    let needInvAdjust = false;
     let id = r.i32();
     while (id !== -1 && r.has()) {
         if (entities.hasOwnProperty(id)) delete entities[id];
@@ -87,11 +88,24 @@ function parseEntPacket() {
                             petalCooldowns: new Uint8Array(10).map(_ => r.u8()),
                             faceFlags: r.u8()
                         }
+                        const count = entities[id].playerInfo.numEquipped;
+                        for (let n = 0; n < count; n++) {
+                            CLIENT_RENDER.loadout[n].x = CLIENT_RENDER.loadout[n].targetX = CLIENT_RENDER.loadout[n].baseX = canvas.width/2 + staticScale * 1.2 * 40 * (2 * n - count);
+                            CLIENT_RENDER.loadout[n].y = CLIENT_RENDER.loadout[n].targetY = CLIENT_RENDER.loadout[n].baseY = canvas.height - staticScale * 1.2 * 110;
+                            CLIENT_RENDER.loadout[n].id = entities[id].playerInfo.petalsEquipped[n*2];
+                            CLIENT_RENDER.loadout[n].rarity = entities[id].playerInfo.petalsEquipped[n*2+1];
+                        }
+                        for (let n = count; n < count * 2; n++) {
+                            CLIENT_RENDER.loadout[n].x = CLIENT_RENDER.loadout[n].targetX = CLIENT_RENDER.loadout[n].baseX = canvas.width/2 + staticScale * 40 * (2 * n - count);
+                            CLIENT_RENDER.loadout[n].y = CLIENT_RENDER.loadout[n].targetY = CLIENT_RENDER.loadout[n].baseY = canvas.height - staticScale * 90;
+                            CLIENT_RENDER.loadout[n].id = entities[id].playerInfo.petalsEquipped[n*2];
+                            CLIENT_RENDER.loadout[n].rarity = entities[id].playerInfo.petalsEquipped[n*2+1];
+                        }
+                        needInvAdjust = true;
                         break;
                 }
             }
         } else {
-            if (!entities[id]) { console.log("error: ", id); entities[id] = {}; }
             while(r.ru8() !== 255) {
                 switch(r.u8()) {
                     case 0:
@@ -134,8 +148,14 @@ function parseEntPacket() {
                         entities[id].petal.rarity = r.u8(); break;
                     case 19:
                         entities[id].playerInfo.numEquipped = r.u8(); break;
+                        needInvAdjust = true;
                     case 20:
-                        entities[id].playerInfo.petalsEquipped = new Uint8Array(40).map(_ => r.u8());
+                        let pos;
+                        while((pos = r.u8()) !== 255) {
+                            if (pos & 1) CLIENT_RENDER.loadout[pos >> 1].rarity = entities[id].playerInfo.petalsEquipped[pos] = r.u8()
+                            else CLIENT_RENDER.loadout[pos >> 1].id = entities[id].playerInfo.petalsEquipped[pos] = r.u8();
+                        }
+                        needInvAdjust = true;
                         break;
                     case 21:
                         entities[id].playerInfo.petalHealths = new Uint8Array(10).map(_ => r.u8()); break;
@@ -149,10 +169,39 @@ function parseEntPacket() {
         r.u8();
         id = r.i32();
     }
-    if (!r.has()) return;
+    if (!r.has()) {
+        if (needInvAdjust) getAdjustedInv();
+        return;
+    }
     let pos = r.i32();
     while(pos !== -1 && r.has()) {
+        needInvAdjust = true;
         inventory[pos] = r.i32();
         pos = r.i32();
     }
+    if (needInvAdjust) getAdjustedInv();
+}
+function getAdjustedInv() {
+    const _inv = [...inventory];
+    if (!entities.camera) return;
+    if (!entities[entities.camera].camera) return;
+    const pEnt = entities[entities[entities.camera].camera.player];
+    if (!pEnt) return;
+    const loadout = pEnt.playerInfo.petalsEquipped;
+    for (let n = 0; n < 40; n += 2) {
+        if (!loadout[n]) continue;
+        --_inv[(loadout[n] - 1) * 8 + loadout[n+1]];
+    }
+    for (let n = 0; n < 80; n++) CLIENT_RENDER.inventory[n].count = _inv[n];
+}
+class Reader {
+    constructor(p) {
+        this.p = p;
+        this.i = 0;
+    } 
+    has() { return this.p.length > this.i }
+    ru8() { return this.p[this.i] }
+    u8() { return this.p[this.i++] }
+    i32() { return this.u8() | (this.u8() << 8) | (this.u8() << 16) | (this.u8() << 24) }
+    f32() { return new Float32Array(this.p.slice(this.i, this.i += 4).buffer)[0] }
 }

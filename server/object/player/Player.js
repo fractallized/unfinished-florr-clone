@@ -34,7 +34,7 @@ export class Player extends Entity {
         this.numSpacesAlloc = 0;
         const equipped = this.owner.equipped;
         if (!equipped) return;
-        for (let n = 0; n < this.owner.numEquipped; ++n) {
+        for (let n = 0; n < this.owner.numEquipped * 2; ++n) {
             this.changePetal(n, equipped[n * 2], equipped[n * 2 + 1]);
         }
     }
@@ -58,8 +58,8 @@ export class Player extends Entity {
         if (pos >= 20) return;
         this.owner.equipped[pos * 2] = id;
         this.owner.equipped[pos * 2 + 1] = rarity;
-        this.playerInfo.petalsEquipped[pos << 1] = id;
-        this.playerInfo.petalsEquipped[(pos << 1) + 1] = rarity;
+        this.playerInfo.petalsEquipped[pos * 2] = id;
+        this.playerInfo.petalsEquipped[pos * 2 + 1] = rarity;
         if (pos >= this.owner.numEquipped) return;
         if (this.equipped[pos].length !== 0) {
             if (this.equipped[pos][0].definition.noSpawn) this.numSpacesAlloc -= 0;
