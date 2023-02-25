@@ -141,7 +141,6 @@ const loop = _ => {
                 }
             }
             if (CLIENT_RENDER.selected) {
-                CLIENT_RENDER.selected.squareRadius = staticScale * 30;
                 CLIENT_RENDER.selected.tick();
                 CLIENT_RENDER.selected.draw();
             }

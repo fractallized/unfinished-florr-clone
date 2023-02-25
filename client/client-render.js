@@ -138,6 +138,10 @@ class IntermediatePetal extends LoadoutPetal {
     draw() {
         super.draw(255,0);
     }
+    tick() {
+        this.squareRadius = 30 * staticScale;
+        super.tick();
+    }
 }
 class InventoryPetal extends LoadoutPetal {
     count = 0;
