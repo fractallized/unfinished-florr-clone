@@ -1,4 +1,4 @@
-import { LOOT_TABLE_GEN } from "../coder/Helpers.js";
+import { LOOT_TABLE_GEN } from "./Helpers.js";
 import AI from "../object/mob/mob-behavior/AI.js";
 import NeutralAI1 from "../object/mob/mob-behavior/NeutralAI";
 import PassiveAI1 from "../object/mob/mob-behavior/PassiveAI";

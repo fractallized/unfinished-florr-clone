@@ -1,10 +1,13 @@
+import Petal from "../object/player/Petal";
+import HealPetal from "../object/player/petal/HealPetal";
+
 export interface PetalDefinition {
     id: number,
     radius: number,
     damage: number,
     health: number,
     cooldown: number,
-    petal: string,
+    petal: typeof Petal,
     clump?: boolean,
     heal?: number,
     noSpawn?: boolean,
@@ -20,7 +23,7 @@ const PETAL_DEFINITIONS: Record<number, PetalDefinition> = {
         damage: 10,
         health: 10,
         cooldown: 50,
-        petal: 'Petal'
+        petal: Petal
     },
     2: {
         id: 2, //light
@@ -28,7 +31,7 @@ const PETAL_DEFINITIONS: Record<number, PetalDefinition> = {
         damage: 8,
         health: 5,
         cooldown: 12,
-        petal: 'Petal',
+        petal: Petal,
         repeat: [1,2,2,3,3,5,5,7]
     },
     3: {
@@ -37,7 +40,7 @@ const PETAL_DEFINITIONS: Record<number, PetalDefinition> = {
         damage: 35,
         health: 5,
         cooldown: 100,
-        petal: 'Petal',
+        petal: Petal,
         repeat: [1,1,1,1,1,3,5,5],
         clump: true
     },
@@ -47,7 +50,7 @@ const PETAL_DEFINITIONS: Record<number, PetalDefinition> = {
         damage: 5,
         health: 10,
         cooldown: 100,
-        petal: 'HealPetal',
+        petal: HealPetal,
         preventExtend: true,
         heal: -10 //negative if the petal sacrifices itself
     },
@@ -57,7 +60,7 @@ const PETAL_DEFINITIONS: Record<number, PetalDefinition> = {
         damage: 8,
         health: 10,
         cooldown: 40,
-        petal: 'HealPetal',
+        petal: HealPetal,
         heal: 0.3
     },
     6: {
@@ -66,7 +69,7 @@ const PETAL_DEFINITIONS: Record<number, PetalDefinition> = {
         damage: 15,
         health: 15,
         cooldown: 60,
-        petal: 'Petal'
+        petal: Petal
     },
     7: {
         id: 7, //antennae (first special petal)
@@ -74,7 +77,7 @@ const PETAL_DEFINITIONS: Record<number, PetalDefinition> = {
         damage: 0,
         health: 0, 
         cooldown: 1,
-        petal: 'Petal',
+        petal: Petal,
         noSpawn: true,
         fovMultiplier: [0.9,0.85,0.8,0.75,0.7,0.65,0.6,0.55]
     },
@@ -84,7 +87,7 @@ const PETAL_DEFINITIONS: Record<number, PetalDefinition> = {
         damage: 1,
         health: 2000,
         cooldown: 200,
-        petal: 'Petal'
+        petal: Petal
     }, 
     9: {
         id: 9, //faster
@@ -92,7 +95,7 @@ const PETAL_DEFINITIONS: Record<number, PetalDefinition> = {
         damage: 5,
         health: 5,
         cooldown: 20,
-        petal: 'Petal',
+        petal: Petal,
         rotationSpeedAddition: [0.3,0.6,0.9,1.2,1.5,1.8,2.1,2.4]
     }
 }

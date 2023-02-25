@@ -2,10 +2,10 @@ import { HealthComponent, PetalComponent } from "../Components";
 import Entity from "../Entity";
 import Vector, { OneDimensionalVector } from "../Vector";
 import Mob from "../mob/Mob";
-import { PETAL_RARITY_MULTIPLIER } from "../../coder/Helpers";
+import { PETAL_RARITY_MULTIPLIER } from "../../consts/Helpers";
 import Player from "./Player";
 import Arena from "../../game/Arena";
-import { PetalDefinition } from "../../game/PetalDefinitions";
+import { PetalDefinition } from "../../consts/PetalDefinitions";
 
 export default class Petal extends Entity {
     petal: PetalComponent;
@@ -35,7 +35,7 @@ export default class Petal extends Entity {
         this.innerPos = innerPos;
         this.pos.add(Vector.fromPolar(this.holdingRadius.pos, this.player.rotationAngle + this.rotationPos * 2 * Math.PI / this.player.numSpacesAlloc))
         
-        this.petalDefinition = {...petalDefinition};
+        this.petalDefinition = petalDefinition;
         this.count = petalDefinition.repeat? petalDefinition.repeat[rarity]: 1;
         this.damage = petalDefinition.damage * PETAL_RARITY_MULTIPLIER[rarity] / this.count;
         this.clump = petalDefinition.clump || false;
@@ -45,7 +45,7 @@ export default class Petal extends Entity {
     tick() {
         if (this.pendingDelete) return super.tick();
         if (this.player.pendingDelete || this.player !== this._arena.entities.get(this.player.id)) return this.delete();
-        const input = this.player.owner.input;
+        const input = this.player.owner.input.input;
         let hoverRadius = 75;
         if (this.petalDefinition.preventExtend) {
             if (input & 32) hoverRadius = 37.5;

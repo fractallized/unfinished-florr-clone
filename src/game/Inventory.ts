@@ -1,4 +1,4 @@
-import { RARITY_COUNT } from "../coder/Helpers.js";
+import { RARITY_COUNT } from "../consts/Helpers.js";
 
 export default class Inventory {
     values: Int32Array;

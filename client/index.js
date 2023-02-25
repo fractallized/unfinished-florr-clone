@@ -75,9 +75,8 @@ const loop = _ => {
         cameraEnt = entities[entities.camera];
         cameraEnt.camera.lerpX += 0.2 * (cameraEnt.camera.x - cameraEnt.camera.lerpX);
         cameraEnt.camera.lerpY += 0.2 * (cameraEnt.camera.y - cameraEnt.camera.lerpY);
-        scale = staticScale * cameraEnt.camera.fov;
-        const matrix = new DOMMatrix([1,0,0,1,0,0]);
-        arenaPattern.setTransform(matrix);
+        cameraEnt.camera.lerpFov += 0.2 * (cameraEnt.camera.fov - cameraEnt.camera.lerpFov);
+        scale = staticScale * cameraEnt.camera.lerpFov;
         ctx.fillStyle = arenaPattern;
         ctx.strokeStyle = '#471a1a';
         ctx.lineWidth = 200;

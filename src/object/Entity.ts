@@ -44,6 +44,7 @@ export default class Entity extends AbstractEntity {
     }
     delete() { 
         this.pendingDelete = true;
+        this.friction = 0.5;
     }
     getCollisions() { 
         const collisions = new Set<Entity>();

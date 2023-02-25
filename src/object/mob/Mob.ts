@@ -1,12 +1,12 @@
 import Entity from "../Entity";
 import Drop from "./Drop";
-import { FROM_TABLE, MOB_RARITY_MULTIPLIER, MOB_SIZE_MULTIPLIER } from "../../coder/Helpers.js";
+import { FROM_TABLE, MOB_RARITY_MULTIPLIER, MOB_SIZE_MULTIPLIER } from "../../consts/Helpers.js";
 import Arena, { SpawnZone } from "../../game/Arena";
 import { HealthComponent, MobComponent } from "../Components";
 import AI from "./mob-behavior/AI";
 import Player from "../player/Player";
 import Petal from "../player/Petal";
-import { MobDefinition } from "../../game/MobDefinitions";
+import { MobDefinition } from "../../consts/MobDefinitions";
 //TODO: AI
 export default class Mob extends Entity {
     passiveSpeed = 4; //in bursts

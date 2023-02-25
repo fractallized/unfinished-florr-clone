@@ -108,6 +108,7 @@ function drawPetal(id) {
             ctx.fillStyle = '#333333';
             ctx.strokeStyle = '#333333';
             ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
             ctx.lineWidth = 3;
             ctx.rotate(-PI_2 / 4);
             ctx.beginPath();
@@ -372,6 +373,7 @@ function drawMobAsEnt(mob) {
             ctx.strokeStyle = '#292929';
             ctx.lineWidth = 5;
             ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
             ctx.beginPath();
             ctx.moveTo(-37,0);
             ctx.lineTo(-25,-9);
@@ -417,6 +419,13 @@ function drawMobAsEnt(mob) {
     ++mob.CLIENT_RENDER_TICK;
 }
 function drawPlayer(player) {
+    if (player.playerInfo.faceFlags & 16) {
+        ctx.save();
+        ctx.translate(0,-35);
+        ctx.scale(player.pos.radius*0.05,player.pos.radius*0.05);
+        drawPetal(7);
+        ctx.restore();
+    }
     ctx.fillStyle = '#cfbb50';
     ctx.beginPath();
     ctx.arc(0,0,player.pos.radius+1.5,0,PI_2);
@@ -425,6 +434,20 @@ function drawPlayer(player) {
     ctx.beginPath();
     ctx.arc(0,0,player.pos.radius-1.5,0,PI_2);
     ctx.fill();
+    ctx.save();
+    ctx.fillStyle = '#000000';
+    ctx.beginPath();
+    ctx.arc(0,0,10,0,PI_2);
+    ctx.fill();
+    ctx.clip();
+    ctx.fillStyle = '#ffffff';
+    const flags = player.playerInfo.faceFlags & 7;
+    player.playerInfo.lerpEyeAngle += 0.2 * (flags - player.playerInfo.lerpEyeAngle);
+    ctx.rotate(player.playerInfo.lerpEyeAngle * PI_2 / 8);
+    ctx.beginPath();
+    ctx.arc(10, 0, 10, 0, PI_2);
+    ctx.fill();
+    ctx.restore();
 }
 function drawLoadoutPetal(id, rarity, cd, hp) {
     ctx.fillStyle = getColorByRarity(rarity);

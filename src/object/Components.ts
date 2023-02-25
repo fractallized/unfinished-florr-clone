@@ -36,7 +36,6 @@ export class PositionComponent implements Component, VectorLike {
     entity: AbstractEntity;
     state: Uint8Array;
     constructor(entity: AbstractEntity, x: number, y: number, radius: number, angle: number) {
-        //super(x, y);
         this.values = {
             x, y, radius, angle
         }

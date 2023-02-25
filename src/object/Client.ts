@@ -21,7 +21,7 @@ export default class Client extends AbstractEntity {
     player: Player | null = null;
     ws: WebSocket;
     map = 0;
-    input = 0;
+    input = new Input(0,0);
     camera: CameraComponent;
 
     equipped = new Uint8Array(40);
@@ -136,7 +136,7 @@ export default class Client extends AbstractEntity {
                 this.moveServer(0, 5000, 5000); //initial spawn
                 break;
             case 1:
-                this.input = reader.u8();
+                this.input.input = reader.u8();
                 break;
             case 2:
                 if (!this.player) return;

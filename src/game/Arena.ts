@@ -1,5 +1,5 @@
-import { FROM_OBJECT_TABLE, FROM_TABLE } from "../coder/Helpers.js";
-import MOB_DEFINITIONS from "./MobDefinitions.js";
+import { FROM_OBJECT_TABLE, FROM_TABLE } from "../consts/Helpers.js";
+import MOB_DEFINITIONS from "../consts/MobDefinitions.js";
 import Portal from "../object/Portal.js";
 import Mob from "../object/mob/Mob.js";
 import SpatialHash from "./Collisions.js";

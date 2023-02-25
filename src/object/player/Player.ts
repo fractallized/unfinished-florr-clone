@@ -2,10 +2,11 @@ import Entity from "../Entity";
 import Drop from "../mob/Drop";
 import Mob from "../mob/Mob";
 import Petal from "./Petal";
-import PETAL_DEFINITIONS, { PetalDefinition } from "../../game/PetalDefinitions";
+import PETAL_DEFINITIONS, { PetalDefinition } from "../../consts/PetalDefinitions";
 import Client from "../Client";
 import Arena from "../../game/Arena";
 import { HealthComponent, PlayerInfoComponent } from "../Components";
+
 interface PlayerPetal {
     id: number,
     rarity: number,
@@ -14,6 +15,7 @@ interface PlayerPetal {
     cooldown: number,
     definition: PetalDefinition
 }
+
 export default class Player extends Entity {
     static BASE_ROTATION_SPEED = 0.1;
     static BASE_DAMAGE = 25;
@@ -28,7 +30,7 @@ export default class Player extends Entity {
     creationTick: number;
     health: HealthComponent = new HealthComponent(this, Player.BASE_HEALTH);
     playerInfo: PlayerInfoComponent = new PlayerInfoComponent(this); 
-    equipped: Array<Array<PlayerPetal>> = new Array(10).fill(0).map(_ => []);
+    equipped: PlayerPetal[][] = new Array(10).fill(0).map(_ => []);
 
     constructor(arena: Arena, x: number, y: number, r: number, camera: Client) {
         super(arena, x, y, r, 0);
@@ -118,7 +120,7 @@ export default class Player extends Entity {
                 if (!petal.definition.clump || inner === 0) ++rotPos;
                 if (petal.cdTick < petal.cooldown) ++petal.cdTick;
                 else if (!petal.petal) {
-                    petal.petal = new Petal(this._arena, this, outer, inner, rotPos, petal.rarity, petal.definition)
+                    petal.petal = new (petal.definition.petal)(this._arena, this, outer, inner, rotPos, petal.rarity, petal.definition)
                     this._arena.add(petal.petal);
                 } else {
                     healthSum += petal.petal.health.health / petal.petal.health.maxHealth;
@@ -139,15 +141,22 @@ export default class Player extends Entity {
         //this.playerInfo.faceFlags = this.owner.input;
         this.petalHandle();
         this.rotationAngle += this.rotationSpeed;
-        const x = (this.owner.input & 1) - ((this.owner.input >> 2) & 1),
-        y = ((this.owner.input >> 1) & 1) - ((this.owner.input >> 3) & 1);
-        /*
-        this.playerInfo.faceFlags &= ~15;
-        this.playerInfo.faceFlags |= x;
-        this.playerInfo.faceFlags |= y << 1;
-        this.playerInfo.faceFlags |= ((this.owner.input >> 4) & 1) << 2;
-        this.playerInfo.faceFlags |= ((this.owner.input >> 5) & 1) << 3;
-        */
+        const input = this.owner.input.input;
+        const x = (input & 1) - ((input >> 2) & 1),
+        y = ((input >> 1) & 1) - ((input >> 3) & 1);
+        if (x || y) {
+            this.playerInfo.faceFlags &= ~7;
+            if (x === 1) {
+                if (y === 1) this.playerInfo.faceFlags |= 1;
+                else if (y === -1) this.playerInfo.faceFlags |= 7;
+                else this.playerInfo.faceFlags |= 0;
+            } else if (x === 0) this.playerInfo.faceFlags |= 4 - 2 * y;
+            else {
+                if (y === 1) this.playerInfo.faceFlags |= 3;
+                else if (y === -1) this.playerInfo.faceFlags |= 5;
+                else this.playerInfo.faceFlags |= 4; 
+            }
+        }
         const scale = (x&&y? Math.SQRT1_2: x||y?1:0) * 2; //sets player speed
         this.accel.set(x, y);
         this.accel.scale(scale);

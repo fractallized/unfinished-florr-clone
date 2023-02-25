@@ -41,6 +41,7 @@ function parseEntPacket() {
                         }
                         entities[id].camera.lerpX = entities[id].camera.x;
                         entities[id].camera.lerpY = entities[id].camera.y;
+                        entities[id].camera.lerpFov = entities[id].camera.fov;
                         entities.camera = id;
                         break;
                     case 2:
@@ -88,6 +89,7 @@ function parseEntPacket() {
                             petalCooldowns: new Uint8Array(10).map(_ => r.u8()),
                             faceFlags: r.u8()
                         }
+                        entities[id].playerInfo.lerpEyeAngle = entities[id].playerInfo.faceFlags & 7;
                         const count = entities[id].playerInfo.numEquipped;
                         for (let n = 0; n < count; n++) {
                             CLIENT_RENDER.loadout[n].x = CLIENT_RENDER.loadout[n].targetX = CLIENT_RENDER.loadout[n].baseX = canvas.width/2 + staticScale * 1.2 * 40 * (2 * n - count);

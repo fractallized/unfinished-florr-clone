@@ -11,6 +11,7 @@ export default class Drop extends Entity {
     creationTick: number;
     angle: OneDimensionalVector;
     drop: DropComponent;
+    canCollide = false;
     constructor(arena: Arena, x: number, y: number, r: number, moveAngle: number, dropDefinition: any) {
         super(arena, x, y, r, 0);
         this.style.color = 1;
@@ -23,6 +24,7 @@ export default class Drop extends Entity {
     }
     tick() {
         if (this._arena._tick - this.creationTick > (1 + this.drop.rarity) * 25 * 10) this.delete();
+        if (this._arena._tick - this.creationTick === 15) this.canCollide = true;
         if (this.pendingDelete) return super.tick();
         if (this.collectedBy) {
             if (this.pos.distanceSq(this.collectedBy.pos) <= (this.pos.radius + this.collectedBy.pos.radius) ** 2) {
