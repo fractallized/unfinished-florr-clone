@@ -2,7 +2,7 @@ let entities = {};
 let scale = 1; //global scaling
 let staticScale = 1; //doesn't count fov;
 let cameraEnt, arenaEnt, playerEnt;
-const inventory = new Int32Array(80);
+const inventory = new Int32Array(800);
 let ws = new WebSocket(`ws${location.protocol.slice(4)}//${location.host}`);
 
 const drawEntity = (ent) => {
@@ -46,7 +46,7 @@ const drawEntity = (ent) => {
         ctx.lineTo(-r*1.5+3*ent.health.lerpHP/255*r,r*1.1+15);
         ctx.stroke();
     }
-    ent.pos.lerpAngle += 0.2 * (ent.pos.angle - ent.pos.lerpAngle);
+    ent.pos.lerpAngle = angleLerp(ent.pos.lerpAngle, ent.pos.angle, 0.2);
     ctx.rotate(ent.pos.lerpAngle);
     ctx.beginPath();
     if (ent.mob) drawMobAsEnt(ent);
@@ -112,10 +112,12 @@ const loop = _ => {
                 CLIENT_RENDER.loadout[n].baseX = canvas.width/2 + staticScale * 1.2 * 40 * (2 * n - numEquipped + 1);
                 CLIENT_RENDER.loadout[n].baseY = canvas.height - staticScale * 1.2 * 110;
                 CLIENT_RENDER.loadout[n].squareRadius = staticScale * 1.2 * 30;
+                CLIENT_RENDER.loadout[n].cd = petalCooldowns[n];
+                CLIENT_RENDER.loadout[n].hp = petalHealths[n];
                 if (CLIENT_RENDER.loadout[n].selected) continue;
                 CLIENT_RENDER.loadout[n].tick();
                 if (!petalsEquipped[n * 2]) continue;
-                CLIENT_RENDER.loadout[n].draw(petalCooldowns[n],petalHealths[n]);
+                CLIENT_RENDER.loadout[n].draw();
             }
             for (let n = numEquipped; n < numEquipped * 2; n++) {
                 CLIENT_RENDER.loadout[n].baseX = canvas.width/2 + staticScale * 40 * (2 * n - 3 * numEquipped + 1);
@@ -124,7 +126,7 @@ const loop = _ => {
                 if (CLIENT_RENDER.loadout[n].selected) continue;
                 CLIENT_RENDER.loadout[n].tick();
                 if (!petalsEquipped[n * 2]) continue;
-                CLIENT_RENDER.loadout[n].draw(255,0);
+                CLIENT_RENDER.loadout[n].draw();
             }
             let pos = 0;
             for (let rarity = 7; rarity >= 0; rarity--) {

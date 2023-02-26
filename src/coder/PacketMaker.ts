@@ -121,8 +121,24 @@ function compileUpdate(w: Writer, entity: AbstractEntity) {
             }
             w.u8(255);
         }
-        if (entity.playerInfo.state[2] & 1) { w.u8(21); for (const v of entity.playerInfo.petalHealths.values) w.u8(v); }
-        if (entity.playerInfo.state[3] & 1) { w.u8(22); for (const v of entity.playerInfo.petalCooldowns.values) w.u8(v); }
+        if (entity.playerInfo.state[2] & 1) { w.u8(21); 
+            for (let n = 0; n < entity.playerInfo.petalHealths.values.length; ++n) {
+                if (entity.playerInfo.petalHealths.state[n] & 1) {
+                    w.u8(n);
+                    w.u8(entity.playerInfo.petalHealths.values[n])
+                };
+            }
+            w.u8(255);
+        }
+        if (entity.playerInfo.state[3] & 1) { w.u8(22); 
+            for (let n = 0; n < entity.playerInfo.petalCooldowns.values.length; ++n) {
+                if (entity.playerInfo.petalCooldowns.state[n] & 1) {
+                    w.u8(n);
+                    w.u8(entity.playerInfo.petalCooldowns.values[n])
+                };
+            }
+            w.u8(255);
+        }
         if (entity.playerInfo.state[4] & 1) { w.u8(23); w.u8(entity.playerInfo.faceFlags); }
     }
     return w.u8(255);

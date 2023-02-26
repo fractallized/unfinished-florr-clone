@@ -20,7 +20,7 @@ class StateArray {
     }
     get(n: number) { return this.values[n] }
     set(n: number, v: number) {
-        if (this.values[n] === v) return;
+        //if (this.values[n] === v) return;
         this.state[n] |= 1;
         this.component.state[this.componentIndex] |= 1;
         this.values[n] = v;

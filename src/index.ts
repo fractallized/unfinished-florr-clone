@@ -47,18 +47,6 @@ const server = http.createServer((req, res) => {
       }
       res.writeHead(404);
 });
-/*
-const _server = new Server()
-.addGetReq("/","client/index.html","text/html")
-.addGetReq("/fonts.css","client/fonts.css","text/css")
-.addGetReq("/index.js","client/index.js","application/javascript")
-.addGetReq("/input.js","client/input.js","application/javascript")
-.addGetReq("/canvas-helpers.js","client/canvas-helpers.js","application/javascript")
-.addGetReq("/client-render.js","client/client-render.js","application/javascript")
-.addGetReq("/websocket.js","client/websocket.js","application/javascript");
-const HTTPServer = HTTP.createServer(_server.app);
-HTTPServer.listen(PORT);
-*/
 server.listen(PORT);
 const Socket = new WebSocket.Server({ server });
 new GameServer(Socket);

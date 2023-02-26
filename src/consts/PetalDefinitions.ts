@@ -1,5 +1,6 @@
 import Petal from "../object/player/Petal";
 import HealPetal from "../object/player/petal/HealPetal";
+import Missile from "../object/player/petal/Missile";
 
 export interface PetalDefinition {
     id: number,
@@ -97,6 +98,23 @@ const PETAL_DEFINITIONS: Record<number, PetalDefinition> = {
         cooldown: 20,
         petal: Petal,
         rotationSpeedAddition: [0.3,0.6,0.9,1.2,1.5,1.8,2.1,2.4]
+    },
+    10: {
+        id: 10, //iris
+        radius: 6,
+        damage: 5,
+        health: 5,
+        cooldown: 150,
+        petal: Petal
+    },
+    11: {
+        id: 11, //missile (special petal)
+        radius: 8,
+        damage: 8,
+        health: 10,
+        cooldown: 25,
+        petal: Missile,
+        preventExtend: true
     }
 }
 export default PETAL_DEFINITIONS;

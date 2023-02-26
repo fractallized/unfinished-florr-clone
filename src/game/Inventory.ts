@@ -5,7 +5,7 @@ export default class Inventory {
     state: Uint8Array;
     grandState = 2;
     constructor() {
-        this.values = new Int32Array(RARITY_COUNT * 10);
+        this.values = new Int32Array(RARITY_COUNT * 100);
         this.state = new Uint8Array(this.values.length);
     }
     reset() {

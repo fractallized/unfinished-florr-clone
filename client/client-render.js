@@ -21,11 +21,28 @@ eCtx.beginPath();
 eCtx.rect(10, 10, 60, 60);
 eCtx.stroke();
 eCtx.fill();
+const petalCanvas = new Array(100).fill(null);
 const PETAL_NAMES = 
 ['Basic','Light','Stinger','Rose','Leaf','Wing','Antennae',
-'Rock','Faster','Iris'];
+'Rock','Faster','Iris','Missile'];
 const MOB_NAMES = ['Baby Ant','Worker Ant','Soldier Ant','Ladybug','Bee'];
 const MOB_SIZE_MULTIPLIER = [1, 1.2, 1.5, 2, 3, 4, 6, 10];
+const angleLerp = (curr, target, pct) => {
+    if (Math.abs(curr - target) > PI_2 / 2) {
+        if (target > curr) curr += PI_2;
+        else target += PI_2;
+    }
+    curr = curr * (1 - pct) + target * pct;
+    if (curr > PI_2 / 2) curr -= PI_2;
+    return curr;
+    /*
+    curr = (curr + PI_2) % PI_2;
+    target = (target + PI_2) % PI_2;
+    curr = curr * (1 - pct) + target * pct;
+    if (curr > PI_2 / 2) curr -= PI_2;
+    return curr;
+    */
+}
 function getStroke(color, black = 0.64) {
     return "#" +
     (Math.min(Math.round(parseInt(color.slice(1,3), 16) * black), 255)).toString(16).padStart(2, '0') + 
@@ -57,6 +74,8 @@ function getNameByRarity(rarity) {
 class LoadoutPetal {
     selected = false;
     squareRadius = 0;
+    cd = 255;
+    hp = 0;
     constructor(pos) {
         this.pos = pos;
         this.id = 0;
@@ -101,10 +120,10 @@ class LoadoutPetal {
             else ws.send(new Uint8Array([2,this.pos,0,0]));
         }
     }
-    draw(cd,hp) {
+    draw() {
         ctx.setTransform(this.squareRadius/30,0,0,this.squareRadius/30,this.x,this.y);
         ctx.save();
-        drawLoadoutPetal(this.id,this.rarity,cd,hp)
+        drawLoadoutPetal(this.id,this.rarity,this.cd,this.hp);
         ctx.restore();
     }
 }

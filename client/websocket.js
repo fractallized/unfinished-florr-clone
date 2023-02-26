@@ -90,6 +90,7 @@ function parseEntPacket() {
                             faceFlags: r.u8()
                         }
                         entities[id].playerInfo.lerpEyeAngle = entities[id].playerInfo.faceFlags & 7;
+                        if (id !== entities[entities.camera].camera.player) break;
                         const count = entities[id].playerInfo.numEquipped;
                         for (let n = 0; n < count; n++) {
                             CLIENT_RENDER.loadout[n].x = CLIENT_RENDER.loadout[n].targetX = CLIENT_RENDER.loadout[n].baseX = canvas.width/2 + staticScale * 1.2 * 40 * (2 * n - count);
@@ -109,6 +110,7 @@ function parseEntPacket() {
             }
         } else {
             while(r.ru8() !== 255) {
+                let pos;
                 switch(r.u8()) {
                     case 0:
                         entities[id].pos.x = r.f32(); break;
@@ -150,19 +152,24 @@ function parseEntPacket() {
                         entities[id].petal.rarity = r.u8(); break;
                     case 19:
                         entities[id].playerInfo.numEquipped = r.u8(); break;
-                        needInvAdjust = true;
                     case 20:
-                        let pos;
                         while((pos = r.u8()) !== 255) {
-                            if (pos & 1) CLIENT_RENDER.loadout[pos >> 1].rarity = entities[id].playerInfo.petalsEquipped[pos] = r.u8()
+                            if (id !== entities[entities.camera].camera.player) r.u8();
+                            else if (pos & 1) CLIENT_RENDER.loadout[pos >> 1].rarity = entities[id].playerInfo.petalsEquipped[pos] = r.u8()
                             else CLIENT_RENDER.loadout[pos >> 1].id = entities[id].playerInfo.petalsEquipped[pos] = r.u8();
                         }
                         needInvAdjust = true;
                         break;
                     case 21:
-                        entities[id].playerInfo.petalHealths = new Uint8Array(10).map(_ => r.u8()); break;
+                        while((pos = r.u8()) !== 255) {
+                            entities[id].playerInfo.petalHealths[pos] = r.u8();
+                        }
+                        break;                    
                     case 22:
-                        entities[id].playerInfo.petalCooldowns = new Uint8Array(10).map(_ => r.u8()); break;
+                        while((pos = r.u8()) !== 255) {
+                            entities[id].playerInfo.petalCooldowns[pos] = r.u8();
+                        }
+                        break;
                     case 23:
                         entities[id].playerInfo.faceFlags = r.u8(); break;
                 }

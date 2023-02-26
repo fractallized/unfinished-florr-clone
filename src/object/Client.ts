@@ -35,13 +35,11 @@ export default class Client extends AbstractEntity {
         this.server = server;
         this.ws = ws;
 
-        //this.setPetal(0, 3, 0);
-        //this.setPetal(1, 2, 0);
-        this.inventory.add((3 - 1) * 8 + 7, 1);
+        this.inventory.add((11 - 1) * 8 + 7, 1);
         this.inventory.add((3 - 1) * 8 + 7, 1);
         this.inventory.add((7 - 1) * 8 + 7, 1);
         this.inventory.add((9 - 1) * 8 + 7, 1);
-        this.setPetal(0, 3, 7);
+        this.setPetal(0, 11, 7);
         this.setPetal(1, 3, 7);
         this.setPetal(2, 7, 7);
         this.setPetal(3, 9, 7);
@@ -165,9 +163,5 @@ export class Input extends Vector {
     tick() {
         this.x += 0.1 * (this.targetX - this.x);
         this.y += 0.1 * (this.targetY - this.y);
-    }
-    get angle() {
-        if (this.x && this.y) return Math.atan2(this.y, this.x);
-        return null;
     }
 }

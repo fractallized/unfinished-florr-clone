@@ -20,6 +20,10 @@ export default class Vector implements VectorLike {
         return new Vector(r * Math.cos(t), r * Math.sin(t));
     }
     get magnitude() { return Math.sqrt(this.x*this.x+this.y*this.y) }
+    get angle() {
+        if (this.x && this.y) return Math.atan2(this.y, this.x);
+        return null;
+    }
     set(x: number, y: number) {
         this.x = x;
         this.y = y;

@@ -19,12 +19,14 @@ function drawDrop(drop) {
 }
 function drawPetalAsEnt(petal) {
     if (!petal.CLIENT_RENDER_TICK) petal.CLIENT_RENDER_TICK = 0;
-    if (petal.petal.id === 6) ctx.rotate(petal.CLIENT_RENDER_TICK / 10);
-    else ctx.rotate(petal.CLIENT_RENDER_TICK / 40);
-    drawPetal(petal.petal.id);
+    if (petal.petal.id === 6) ctx.rotate(petal.CLIENT_RENDER_TICK / 8);
+    else if (petal.petal.id !== 11) ctx.rotate(petal.CLIENT_RENDER_TICK / 40);
+    ctx.save();
+    drawPetal(petal.petal.id, ctx);
+    ctx.restore();
     ++petal.CLIENT_RENDER_TICK;
 }
-function drawPetal(id) {
+function drawPetal(id, ctx) {
     let path;
     switch(id) {
         case 1: //basic
@@ -162,36 +164,56 @@ function drawPetal(id) {
             ctx.arc(0,0,4.5,0,6.283185307179586,false);
             ctx.fill();
             break;
+        case 11: //missile
+            ctx.fillStyle = '#333333';
+            ctx.strokeStyle = '#333333';
+            ctx.lineWidth = 5;
+            ctx.lineJoin = 'round';
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(11,0);
+            ctx.lineTo(-11,-6);
+            ctx.lineTo(-11,6);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            break;
     }
 }
 function drawPetalAsStatic(id, rarity) {
-    if (id === 2 && rarity > 0) {
-        const repeat = [2,2,3,3,5,5,7][rarity-1];
-        for (let n = 0; n < repeat; n++) {
-            ctx.translate(10,0);
-            drawPetal(id);
-            ctx.translate(-10,0);
-            ctx.rotate(PI_2 / repeat);
-        }
-    } else if (id === 3 && rarity > 4) {
-        if (rarity === 5) {
-            for (let n = 0; n < 3; n++) {
-                ctx.translate(10,0);
-                drawPetal(id);
-                ctx.translate(-10,0);
-                ctx.rotate(PI_2 / 3);
-            } 
-        } else {
-            for (let n = 0; n < 5; n++) {
-                ctx.save()
-                ctx.translate(10,0);
-                ctx.rotate(PI_2 / 2);
-                drawPetal(id);
-                ctx.restore();
-                ctx.rotate(PI_2 / 5);
-            } 
-        }
-    } else return drawPetal(id);
+    if (petalCanvas[(id - 1) * 8 + rarity])  ctx.drawImage(petalCanvas[(id - 1) * 8 + rarity], -25, -25);
+    else {
+        petalCanvas[(id - 1) * 8 + rarity] = new OffscreenCanvas(50,50);
+        const tempCtx = petalCanvas[(id - 1) * 8 + rarity].getContext('2d');
+        tempCtx.translate(25,25);
+        if (id === 2 && rarity > 0) {
+            const repeat = [2,2,3,3,5,5,7][rarity-1];
+            for (let n = 0; n < repeat; n++) {
+                tempCtx.translate(10,0);
+                drawPetal(id, tempCtx);
+                tempCtx.translate(-10,0);
+                tempCtx.rotate(PI_2 / repeat);
+            }
+        } else if (id === 3 && rarity > 4) {
+            if (rarity === 5) {
+                for (let n = 0; n < 3; n++) {
+                    tempCtx.translate(10,0);
+                    drawPetal(id, tempCtx);
+                    tempCtx.translate(-10,0);
+                    tempCtx.rotate(PI_2 / 3);
+                } 
+            } else {
+                for (let n = 0; n < 5; n++) {
+                    tempCtx.save()
+                    tempCtx.translate(10,0);
+                    tempCtx.rotate(PI_2 / 2);
+                    drawPetal(id,tempCtx);
+                    tempCtx.restore();
+                    tempCtx.rotate(PI_2 / 5);
+                } 
+            }
+        } else return drawPetal(id, tempCtx);
+    }
 }
 function drawMobAsEnt(mob) {
     if (!mob.CLIENT_RENDER_TICK) mob.CLIENT_RENDER_TICK = 0;
@@ -423,7 +445,7 @@ function drawPlayer(player) {
         ctx.save();
         ctx.translate(0,-35);
         ctx.scale(player.pos.radius*0.05,player.pos.radius*0.05);
-        drawPetal(7);
+        drawPetal(7,ctx);
         ctx.restore();
     }
     ctx.fillStyle = '#cfbb50';
