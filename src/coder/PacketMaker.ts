@@ -1,47 +1,51 @@
+import Inventory from "../game/Inventory";
 import AbstractEntity from "../object/AbstractEntity";
+import Client from "../object/Client";
 import Writer from "./Writer";
 
-export function compileEnt(w: Writer, entity: AbstractEntity, cameraState: number) {
+export function compileEnt(w: Writer, entity: AbstractEntity, cameraState: number, camera: Client) {
     if (entity.isDeleted) return;
     if ((entity.state & 2) || (cameraState & 2)) return compileCreate(w, entity);
-    else if (entity.state & 1) return compileUpdate(w, entity);
+    else if (entity.state & 1) return compileUpdate(w, entity, camera);
 }
-export function compileInventory(w: Writer, inventory: any, cameraState: number) {
+export function compileInventory(w: Writer, inventory: Inventory) {
     if (inventory.grandState & 1) {
+        let at = -1;
         for (let n = 0; n < inventory.state.length; n++) {
             if (!(inventory.state[n] & 1)) continue;
-            w.i32(n);
-            w.i32(inventory.values[n]);
+            w.vu(n - at);
+            at = n;
+            w.vu(inventory.values[n]);
         }
-        w.i32(-1);
+        w.vu(0);
     }
 }
 function compileCreate(w: Writer, entity: AbstractEntity) {
-    w.i32(entity.id);
+    w.vu(entity.id);
     w.u8(0);
     if (entity.pos) {
         w.u8(0);
-        w.f32(entity.pos.x);
-        w.f32(entity.pos.y);
+        w.vi(entity.pos.x);
+        w.vi(entity.pos.y);
         w.f32(entity.pos.angle);
         w.f32(entity.pos.radius);
     }
     if (entity.camera) {
         w.u8(1);
-        w.f32(entity.camera.x);
-        w.f32(entity.camera.y);
+        w.vi(entity.camera.x);
+        w.vi(entity.camera.y);
         w.f32(entity.camera.fov);
-        w.i32(entity.camera.player);
+        w.vu(entity.camera.player);
     }
     if (entity.arena) {
         w.u8(2);
-        w.f32(entity.arena.width);
-        w.f32(entity.arena.height);
+        w.vu(entity.arena.width);
+        w.vu(entity.arena.height);
     }
     if (entity.style) {
         w.u8(3);
         w.u8(entity.style.color);
-        w.f32(entity.style.opacity);
+        w.u8(entity.style.opacity * 255);
     }
     if (entity.health && !entity.petal) {
         w.u8(4);
@@ -72,28 +76,28 @@ function compileCreate(w: Writer, entity: AbstractEntity) {
     }
     return w.u8(255);
 }
-function compileUpdate(w: Writer, entity: AbstractEntity) {
-    w.i32(entity.id);
+function compileUpdate(w: Writer, entity: AbstractEntity, camera: Client) {
+    w.vu(entity.id);
     w.u8(1);
     if (entity.pos) {
-        if (entity.pos.state[0] & 1) { w.u8(0); w.f32(entity.pos.x) }
-        if (entity.pos.state[1] & 1) { w.u8(1); w.f32(entity.pos.y) }
+        if (entity.pos.state[0] & 1) { w.u8(0); w.vi(entity.pos.x) }
+        if (entity.pos.state[1] & 1) { w.u8(1); w.vi(entity.pos.y) }
         if (entity.pos.state[2] & 1) { w.u8(2); w.f32(entity.pos.angle) }
         if (entity.pos.state[3] & 1) { w.u8(3); w.f32(entity.pos.radius) }
     }
     if (entity.camera) {
-        if (entity.camera.state[0] & 1) { w.u8(4); w.f32(entity.camera.x); }
-        if (entity.camera.state[1] & 1) { w.u8(5); w.f32(entity.camera.y); }
+        if (entity.camera.state[0] & 1) { w.u8(4); w.vi(entity.camera.x); }
+        if (entity.camera.state[1] & 1) { w.u8(5); w.vi(entity.camera.y); }
         if (entity.camera.state[2] & 1) { w.u8(6); w.f32(entity.camera.fov); }
-        if (entity.camera.state[3] & 1) { w.u8(7); w.i32(entity.camera.player); }
+        if (entity.camera.state[3] & 1) { w.u8(7); w.vu(entity.camera.player); }
     }
     if (entity.arena) {
-        if (entity.arena.state[0] & 1) { w.u8(8); w.f32(entity.arena.width); }
-        if (entity.arena.state[1] & 1) { w.u8(9); w.f32(entity.arena.height); }
+        if (entity.arena.state[0] & 1) { w.u8(8); w.vi(entity.arena.width); }
+        if (entity.arena.state[1] & 1) { w.u8(9); w.vi(entity.arena.height); }
     }
     if (entity.style) {
         if (entity.style.state[0] & 1) { w.u8(10); w.u8(entity.style.color); }
-        if (entity.style.state[1] & 1) { w.u8(11); w.f32(entity.style.opacity); }
+        if (entity.style.state[1] & 1) { w.u8(11); w.u8(entity.style.opacity * 255); }
     }
     if (entity.health && !entity.petal) {
         if (entity.health.state[0] & 1) { w.u8(12); w.u8(255 * entity.health.health / entity.health.maxHealth); }
@@ -112,7 +116,7 @@ function compileUpdate(w: Writer, entity: AbstractEntity) {
     }
     if (entity.playerInfo) {
         if (entity.playerInfo.state[0] & 1) { w.u8(19); w.u8(entity.playerInfo.numEquipped); }
-        if (entity.playerInfo.state[1] & 1) { w.u8(20); 
+        if (entity === camera.player && entity.playerInfo.state[1] & 1) { w.u8(20); 
             for (let n = 0; n < entity.playerInfo.petalsEquipped.values.length; ++n) {
                 if (entity.playerInfo.petalsEquipped.state[n] & 1) {
                     w.u8(n);
@@ -121,7 +125,7 @@ function compileUpdate(w: Writer, entity: AbstractEntity) {
             }
             w.u8(255);
         }
-        if (entity.playerInfo.state[2] & 1) { w.u8(21); 
+        if (entity === camera.player && entity.playerInfo.state[2] & 1) { w.u8(21); 
             for (let n = 0; n < entity.playerInfo.petalHealths.values.length; ++n) {
                 if (entity.playerInfo.petalHealths.state[n] & 1) {
                     w.u8(n);
@@ -130,7 +134,7 @@ function compileUpdate(w: Writer, entity: AbstractEntity) {
             }
             w.u8(255);
         }
-        if (entity.playerInfo.state[3] & 1) { w.u8(22); 
+        if (entity === camera.player && entity.playerInfo.state[3] & 1) { w.u8(22); 
             for (let n = 0; n < entity.playerInfo.petalCooldowns.values.length; ++n) {
                 if (entity.playerInfo.petalCooldowns.state[n] & 1) {
                     w.u8(n);

@@ -1,7 +1,6 @@
 import { HealthComponent, PetalComponent } from "../Components";
 import Entity from "../Entity";
 import Vector, { OneDimensionalVector } from "../Vector";
-import Mob from "../mob/Mob";
 import { PETAL_RARITY_MULTIPLIER } from "../../consts/Helpers";
 import Player from "./Player";
 import Arena from "../../game/Arena";
@@ -11,15 +10,17 @@ export default class Petal extends Entity {
     petal: PetalComponent;
     health: HealthComponent;
     player: Player;
+
     rotationPos: number;
     outerPos: number;
     innerPos: number;
-    petalDefinition: any;
     count: number;
     damage: number;
+    petalDefinition: PetalDefinition;
     clump: boolean;
     creationTick: number;
     followNormalRotation = true;
+    isFriendly = true;
 
     holdingRadius = new OneDimensionalVector(0,20,0);
     constructor(arena: Arena, player: Player, outerPos: number, innerPos: number, pos: number, rarity: number, petalDefinition: PetalDefinition) {
@@ -34,7 +35,6 @@ export default class Petal extends Entity {
         this.rotationPos = pos;
         this.outerPos = outerPos;
         this.innerPos = innerPos;
-        this.pos.add(Vector.fromPolar(this.holdingRadius.pos, this.player.rotationAngle + this.rotationPos * 2 * Math.PI / this.player.numSpacesAlloc))
         
         this.petalDefinition = petalDefinition;
         this.count = petalDefinition.repeat? petalDefinition.repeat[rarity]: 1;
@@ -42,6 +42,7 @@ export default class Petal extends Entity {
         this.clump = petalDefinition.clump || false;
         
         this.creationTick = this._arena._tick;
+        this.pos.add(Vector.fromPolar(this.holdingRadius.pos, this.player.rotationAngle + this.rotationPos * 2 * Math.PI / this.player.numSpacesAlloc))
     }
     tick() {
         if (this.pendingDelete) return super.tick();
@@ -64,7 +65,7 @@ export default class Petal extends Entity {
         super.tick();
     }
     onCollide(ent: Entity) {
-        if (ent instanceof Mob) {
+        if (ent.isFriendly !== this.isFriendly) {
             if (this._arena._tick - this.health.lastDamaged > 2) {
                 this.health.health -= ent.damage;
                 this.health.lastDamaged = this._arena._tick;

@@ -22,10 +22,11 @@ export default class Player extends Entity {
     static BASE_HEALTH = 100;
 
     numSpacesAlloc = 10;
-    collectionRadius = 100;
+    collectionRadius = 2000;
     damage = Player.BASE_DAMAGE;
     rotationAngle = 0;
     rotationSpeed = Player.BASE_ROTATION_SPEED;
+    isFriendly = true;
     owner: Client;
     creationTick: number;
     health: HealthComponent = new HealthComponent(this, Player.BASE_HEALTH);
@@ -183,7 +184,7 @@ export default class Player extends Entity {
     }
     onCollide(ent: Entity) {
         if (this._arena._tick - this.creationTick < 50) return;
-        if (ent instanceof Mob) {
+        if (ent.isFriendly !== this.isFriendly) {
             if (this._arena._tick - this.health.lastDamaged > 2) {
                 this.health.health -= ent.damage;
                 this.health.lastDamaged = this._arena._tick;

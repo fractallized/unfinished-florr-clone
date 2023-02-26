@@ -1,4 +1,5 @@
 let input = 0;
+let attack = defend = 0;
 document.oncontextmenu = _ => false;
 window.onkeydown = async ({ code }) => {
     switch(code) {
@@ -14,7 +15,12 @@ window.onkeydown = async ({ code }) => {
         case "KeyW":
             input |= 8;
             break;
-        case "KeyZ":
+        case "Space":
+            attack |= 2;
+            break;
+        case "ShiftLeft":
+        case "ShiftRight":
+            defend |= 2;
             break;
         case "Enter":
             if (ws.readyState === 1) ws.send(new Uint8Array([0]));
@@ -33,12 +39,20 @@ window.onkeyup = async ({ code }) => {
             break;
         case "KeyW":
             input &= ~8; 
+            break;
+        case "Space":
+            attack &= ~2;
+            break;
+        case "ShiftLeft":
+        case "ShiftRight":
+            defend &= ~2;
+            break;
     }
 }
 canvas.onmousedown = async (e) => {
     e.preventDefault();
-    if (e.button === 0) input |= 16;
-    else input |= 32;
+    if (e.button === 0) attack |= 1;
+    else defend |= 1;
     if (CLIENT_RENDER.selected) return;
     for (const ent of CLIENT_RENDER.loadout) {
         if (!ent.id) continue;
@@ -59,7 +73,7 @@ canvas.onmousemove = async (e) => {
 }
 canvas.onmouseup = async (e) => {
     e.preventDefault();
-    if (e.button === 0) input &= ~16;
-    else input &= ~32; 
+    if (e.button === 0) attack &= ~1;
+    else defend &= ~1; 
     CLIENT_RENDER.selected && CLIENT_RENDER.selected.onmouseup(e);
 }

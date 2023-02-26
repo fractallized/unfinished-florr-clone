@@ -2,6 +2,7 @@ let r;
 ws.onmessage = async (e) => {
     const packet = new Uint8Array(await e.data.arrayBuffer());
     r = new Reader(packet);
+    console.log(packet.length, " length update packet");
     switch(r.u8()) {
         case 1: parseEntPacket(); break;
         case 254: entities = {}; break;
@@ -10,21 +11,21 @@ ws.onmessage = async (e) => {
 ws.onclose = _ => setTimeout(() => {ws = new WebSocket(`ws${location.protocol.slice(4)}//${location.host}`)}, 1000);
 function parseEntPacket() {
     let needInvAdjust = false;
-    let id = r.i32();
-    while (id !== -1 && r.has()) {
+    let id = r.vu();
+    while (id && r.has()) {
         if (entities.hasOwnProperty(id)) delete entities[id];
-        id = r.i32();
+        id = r.vu();
     }
-    id = r.i32();
-    while (id !== -1 && r.has()) {
+    id = r.vu();
+    while (id && r.has()) {
         if (r.u8() === 0) {
             entities[id] = {};
             while(r.ru8() !== 255) {
                 switch(r.u8()) {
                     case 0:
                         entities[id].pos = {
-                            x: r.f32(),
-                            y: r.f32(),
+                            x: r.vi(),
+                            y: r.vi(),
                             angle: r.f32(),
                             radius: r.f32()
                         }
@@ -34,10 +35,10 @@ function parseEntPacket() {
                         break;
                     case 1:
                         entities[id].camera = {
-                            x: r.f32(),
-                            y: r.f32(),
+                            x: r.vi(),
+                            y: r.vi(),
                             fov: r.f32(),
-                            player: r.i32()
+                            player: r.vu()
                         }
                         entities[id].camera.lerpX = entities[id].camera.x;
                         entities[id].camera.lerpY = entities[id].camera.y;
@@ -46,15 +47,15 @@ function parseEntPacket() {
                         break;
                     case 2:
                         entities[id].arena = {
-                            width: r.f32(),
-                            height: r.f32()
+                            width: r.vi(),
+                            height: r.vi()
                         }
                         entities.arena = id;
                         break;
                     case 3:
                         entities[id].style = {
                             color: r.u8(),
-                            opacity: r.f32()
+                            opacity: r.u8()
                         }
                         break;
                     case 4:
@@ -113,29 +114,29 @@ function parseEntPacket() {
                 let pos;
                 switch(r.u8()) {
                     case 0:
-                        entities[id].pos.x = r.f32(); break;
+                        entities[id].pos.x = r.vi(); break;
                     case 1:
-                        entities[id].pos.y = r.f32(); break;
+                        entities[id].pos.y = r.vi(); break;
                     case 2:
                         entities[id].pos.angle = r.f32(); break;
                     case 3:
                         entities[id].pos.radius = r.f32(); break;
                     case 4:
-                        entities[id].camera.x = r.f32(); break;
+                        entities[id].camera.x = r.vi(); break;
                     case 5:
-                        entities[id].camera.y = r.f32(); break;
+                        entities[id].camera.y = r.vi(); break;
                     case 6:
                         entities[id].camera.fov = r.f32(); break;
                     case 7:
-                        entities[id].camera.player = r.i32(); break;
+                        entities[id].camera.player = r.vu(); break;
                     case 8:
-                        entities[id].arena.width = r.f32(); break;
+                        entities[id].arena.width = r.vu(); break;
                     case 9:
-                        entities[id].arena.height = r.f32(); break;
+                        entities[id].arena.height = r.vu(); break;
                     case 10:
                         entities[id].style.color = r.u8(); break;
                     case 11:
-                        entities[id].style.opacity = r.f32(); break;
+                        entities[id].style.opacity = r.u8(); break;
                     case 12:
                         entities[id].health.health = r.u8(); break;
                     case 13:
@@ -154,8 +155,7 @@ function parseEntPacket() {
                         entities[id].playerInfo.numEquipped = r.u8(); break;
                     case 20:
                         while((pos = r.u8()) !== 255) {
-                            if (id !== entities[entities.camera].camera.player) r.u8();
-                            else if (pos & 1) CLIENT_RENDER.loadout[pos >> 1].rarity = entities[id].playerInfo.petalsEquipped[pos] = r.u8()
+                            if (pos & 1) CLIENT_RENDER.loadout[pos >> 1].rarity = entities[id].playerInfo.petalsEquipped[pos] = r.u8()
                             else CLIENT_RENDER.loadout[pos >> 1].id = entities[id].playerInfo.petalsEquipped[pos] = r.u8();
                         }
                         needInvAdjust = true;
@@ -176,17 +176,18 @@ function parseEntPacket() {
             }
         }
         r.u8();
-        id = r.i32();
+        id = r.vu();
     }
     if (!r.has()) {
         if (needInvAdjust) getAdjustedInv();
         return;
     }
-    let pos = r.i32();
-    while(pos !== -1 && r.has()) {
+    let at = -1;
+    let pos = r.vu();
+    while(pos && r.has()) {
         needInvAdjust = true;
-        inventory[pos] = r.i32();
-        pos = r.i32();
+        inventory[at += pos] = r.vu();
+        pos = r.vu();
     }
     if (needInvAdjust) getAdjustedInv();
 }
@@ -201,7 +202,7 @@ function getAdjustedInv() {
         if (!loadout[n]) continue;
         --_inv[(loadout[n] - 1) * 8 + loadout[n+1]];
     }
-    for (let n = 0; n < 80; n++) CLIENT_RENDER.inventory[n].count = _inv[n];
+    for (let n = 0; n < 100; n++) CLIENT_RENDER.inventory[n].count = _inv[n];
 }
 class Reader {
     constructor(p) {
@@ -211,6 +212,15 @@ class Reader {
     has() { return this.p.length > this.i }
     ru8() { return this.p[this.i] }
     u8() { return this.p[this.i++] }
-    i32() { return this.u8() | (this.u8() << 8) | (this.u8() << 16) | (this.u8() << 24) }
+    vu() {
+        let out = 0, at = 0;
+        while (this.p[this.i] & 0x80) {
+            out |= (this.u8() & 0x7f) << at;
+            at += 7;
+        }
+        out |= this.u8() << at;
+        return out;
+    }
+    vi() { return this.vu() | 0; }
     f32() { return new Float32Array(this.p.slice(this.i, this.i += 4).buffer)[0] }
 }

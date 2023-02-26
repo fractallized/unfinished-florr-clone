@@ -3,7 +3,7 @@ import Arena from "../game/Arena";
 import { ArenaComponent, CameraComponent, DropComponent, HealthComponent, MobComponent, PetalComponent, PlayerInfoComponent, PositionComponent, StyleComponent } from "./Components";
 import AbstractEntity from "./AbstractEntity";
 export default class Entity extends AbstractEntity {
-    static BASE_KNOCKBACK = 2;
+    static BASE_KNOCKBACK = 15;
     static BASE_FRICTION = 0.85;
     static BASE_WEIGHT = 1;
 
@@ -16,8 +16,9 @@ export default class Entity extends AbstractEntity {
     pos: PositionComponent;
     style: StyleComponent;
     deleteAnimation: DeletionAnimation;
-    gridBounds: number[] = [0,0,0,0];
+    gridBounds = [0,0,0,0];
     damage = 0;
+    isFriendly = false;
 
     constructor(arena: Arena, x: number, y: number, r: number, angle: number) {
         super();

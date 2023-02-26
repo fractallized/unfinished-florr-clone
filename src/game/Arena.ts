@@ -23,11 +23,12 @@ export default class Arena extends AbstractEntity {
         this.server = server;
         this.serverID = serverID;
         this.arena = new ArenaComponent(this, x, y, name);
-        this.id = 0;
+        this.id = 1; //RULE: MUST NOT BE 0
         this.entities = new Map();
         this.clients = new Map();
     }
     tick() {
+        const start = performance.now();
         this.state = 0;
         const entities = this.entities.values();
         const clients = this.clients.values();
@@ -36,9 +37,10 @@ export default class Arena extends AbstractEntity {
         for (const entity of this.entities.values()) entity.tick();
         for (const zone of this.zones) zone.tick();
         ++this._tick;
+        console.log(performance.now() - start + "ms tick, looped " + this.entities.size + " entities");
     }
     calculateOpenHash() {
-        for (let n = 1; n < 16384; ++n) if (!this.entities.get(n)) return n;
+        for (let n = 2; n < 16384; ++n) if (!this.entities.get(n)) return n;
         return 16384;
     }
     calculateClientHash() {

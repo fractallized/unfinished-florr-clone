@@ -12,7 +12,7 @@ const drawEntity = (ent) => {
     ent.pos.lerpX += 0.2 * (x - ent.pos.lerpX);
     ent.pos.lerpY += 0.2 * (y - ent.pos.lerpY);
     ctx.translate(ent.pos.lerpX - cameraEnt.camera.lerpX, ent.pos.lerpY - cameraEnt.camera.lerpY);
-    ctx.globalAlpha = ent.style.opacity;
+    ctx.globalAlpha = ent.style.opacity / 255;
     const r = ent.pos.radius;
     if (ent.mob) {
         ctx.fillStyle = getColorByRarity(ent.mob.rarity);
@@ -130,7 +130,7 @@ const loop = _ => {
             }
             let pos = 0;
             for (let rarity = 7; rarity >= 0; rarity--) {
-                for (let id = 1; id < 10; id++) {
+                for (let id = 1; id < 12; id++) {
                     const n = (id - 1) * 8 + rarity;
                     if (!CLIENT_RENDER.inventory[n].count || CLIENT_RENDER.inventory[n].selected) continue;
                     CLIENT_RENDER.inventory[n].baseX = staticScale * (80 * (pos & 7) + 80);
@@ -147,7 +147,7 @@ const loop = _ => {
             }
         }
     }
-    if (ws.readyState === 1) ws.send(new Uint8Array([1,input]));
+    if (ws.readyState === 1) ws.send(new Uint8Array([1,input | (!!attack << 4) | (!!defend << 5)]));
     requestAnimationFrame(loop);
 }
 requestAnimationFrame(loop);

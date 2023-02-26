@@ -20,7 +20,8 @@ class StateArray {
     }
     get(n: number) { return this.values[n] }
     set(n: number, v: number) {
-        //if (this.values[n] === v) return;
+        if (this.values[n] === v) return;
+        this.component.entity.state |= 1;
         this.state[n] |= 1;
         this.component.state[this.componentIndex] |= 1;
         this.values[n] = v;
@@ -269,10 +270,10 @@ export class PlayerInfoComponent implements Component {
             numEquipped: 0,
             faceFlags: 0
         }
+        this.state = new Uint8Array(5);
         this.petalsEquipped = new StateArray(this, 1, new Uint8Array(40), 40);
         this.petalHealths = new StateArray(this, 2, new Uint8Array(10), 10);
         this.petalCooldowns = new StateArray(this, 3, new Uint8Array(10), 10);
-        this.state = new Uint8Array(5);
     }
     get numEquipped() { return this.values.numEquipped }
     get faceFlags() { return this.values.faceFlags }

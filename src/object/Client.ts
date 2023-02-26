@@ -15,7 +15,7 @@ export default class Client extends AbstractEntity {
     state = 2;
     enteredPortalTick = -100;
     view: Set<Entity> = new Set();
-    numEquipped = 8;
+    numEquipped = 10;
     server: GameServer;
     _arena: Arena | null = null;
     player: Player | null = null;
@@ -35,14 +35,11 @@ export default class Client extends AbstractEntity {
         this.server = server;
         this.ws = ws;
 
-        this.inventory.add((11 - 1) * 8 + 7, 1);
+        this.inventory.add((11 - 1) * 8 + 7, 10);
         this.inventory.add((3 - 1) * 8 + 7, 1);
         this.inventory.add((7 - 1) * 8 + 7, 1);
         this.inventory.add((9 - 1) * 8 + 7, 1);
-        this.setPetal(0, 11, 7);
-        this.setPetal(1, 3, 7);
-        this.setPetal(2, 7, 7);
-        this.setPetal(3, 9, 7);
+        for (let n = 0; n < 10; ++n) this.setPetal(n, 11, 7);
         this.ws.onmessage = (req: any) => this.onmessage(req);
         this.ws.onclose = () => {
             console.log("client left")
@@ -96,14 +93,14 @@ export default class Client extends AbstractEntity {
                 this.view.add(entity);
             }
             p.u8(1);
-            for (const ent of deletes) p.i32(ent.id);
-            p.i32(-1);
-            compileEnt(p, this._arena, this.state);
-            compileEnt(p, this, this.state);
-            for (const entity of creates) compileEnt(p, entity, 2);
-            for (const entity of updates) compileEnt(p, entity, this.state);
-            p.i32(-1);
-            compileInventory(p, this.inventory, this.state);
+            for (const ent of deletes) p.vu(ent.id);
+            p.vu(0);
+            compileEnt(p, this._arena, this.state, this);
+            compileEnt(p, this, this.state, this);
+            for (const entity of creates) compileEnt(p, entity, 2, this);
+            for (const entity of updates) compileEnt(p, entity, this.state, this);
+            p.vu(0);
+            compileInventory(p, this.inventory);
             this.ws.send(p.write());
             this.inventory.reset();
         }

@@ -193,6 +193,6 @@ class InventoryPetal extends LoadoutPetal {
 }
 const CLIENT_RENDER = {
     loadout: new Array(20).fill(0).map((_,i) => new LoadoutPetal(i)),
-    inventory: new Array(80).fill(0).map((_,i) => new InventoryPetal(i)),
+    inventory: new Array(100).fill(0).map((_,i) => new InventoryPetal(i)),
     selected: null
 };

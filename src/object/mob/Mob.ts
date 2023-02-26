@@ -40,7 +40,7 @@ export default class Mob extends Entity {
         super.tick();
     }
     onCollide(ent: Entity) {
-        if ((ent.playerInfo || ent.petal) && this._arena._tick - this.health.lastDamaged > 2) {
+        if (ent.isFriendly !== this.isFriendly && this._arena._tick - this.health.lastDamaged > 2) {
             if (ent instanceof Player) this.ai.onDamage(ent);
             else if (ent instanceof Petal) this.ai.onDamage(ent.player);
             this.health.health -= ent.damage;
