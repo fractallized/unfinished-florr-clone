@@ -7,7 +7,7 @@ import Petal from "../Petal";
 import Player from "../Player";
 
 export default class Missile extends Petal {
-    static SHOOT_DELAY = 1;
+    static SHOOT_DELAY = 15;
     isShot = false;
     shootTick = 0;
 

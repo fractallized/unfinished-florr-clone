@@ -112,7 +112,7 @@ const PETAL_DEFINITIONS: Record<number, PetalDefinition> = {
         radius: 8,
         damage: 100,
         health: 1000,
-        cooldown: 1,
+        cooldown: 40,
         petal: Missile,
         preventExtend: true
     }

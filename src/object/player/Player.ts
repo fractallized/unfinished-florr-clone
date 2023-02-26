@@ -22,7 +22,7 @@ export default class Player extends Entity {
     static BASE_HEALTH = 100;
 
     numSpacesAlloc = 10;
-    collectionRadius = 2000;
+    collectionRadius = 100;
     damage = Player.BASE_DAMAGE;
     rotationAngle = 0;
     rotationSpeed = Player.BASE_ROTATION_SPEED;
@@ -134,10 +134,7 @@ export default class Player extends Entity {
         }
     }
     tick() {
-        if (this.owner.ws.readyState === 3) {
-            this.delete();
-            return super.tick();
-        }
+        if (this.owner.ws.readyState === 3) this.delete();
         if (this.pendingDelete) return super.tick();
         //this.playerInfo.faceFlags = this.owner.input;
         this.petalHandle();

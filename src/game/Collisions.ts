@@ -2,7 +2,7 @@ import Entity from "../object/Entity";
 import { VectorLike } from "../object/Vector";
 
 export default class SpatialHash {
-    static GRID_SIZE = 6; //64
+    static GRID_SIZE = 7; //64
     map: Record<number, Set<Entity>>;
     constructor() {
         this.map = {};

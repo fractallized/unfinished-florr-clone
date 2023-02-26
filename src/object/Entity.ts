@@ -1,6 +1,6 @@
 import Vector from "./Vector";
 import Arena from "../game/Arena";
-import { ArenaComponent, CameraComponent, DropComponent, HealthComponent, MobComponent, PetalComponent, PlayerInfoComponent, PositionComponent, StyleComponent } from "./Components";
+import { PositionComponent, StyleComponent } from "./Components";
 import AbstractEntity from "./AbstractEntity";
 export default class Entity extends AbstractEntity {
     static BASE_KNOCKBACK = 15;
@@ -38,10 +38,12 @@ export default class Entity extends AbstractEntity {
         if (this.pos.y < this.pos.radius) this.pos.y = this.pos.radius;
         else if (this.pos.y + this.pos.radius > this._arena.arena.height) this.pos.y = this._arena.arena.height - this.pos.radius;
         if (this.pendingDelete) return this.deleteAnimation.tick();
+        /*
         if (true) { //rethink this
             this._arena.collisionGrid.remove(this);
             this._arena.collisionGrid.insert(this);
         }
+        */
     }
     delete() { 
         this.pendingDelete = true;
@@ -67,6 +69,10 @@ export default class Entity extends AbstractEntity {
         this.vel.add(dist.scale(ratio / (ratio - 1)));
     }
     onCollide(entity: Entity) {}
+    wipeState() {
+        this._arena.collisionGrid.insert(this);
+        super.wipeState();
+    }
 }
 
 class DeletionAnimation {
