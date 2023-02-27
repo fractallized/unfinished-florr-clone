@@ -15,6 +15,7 @@ export default class AbstractEntity {
     pendingDelete = false;
     isDeleted = false;
     canCollide = false;
+    lastQueried = 0;
     constructor() {}
     tick() {}
     wipeState() {

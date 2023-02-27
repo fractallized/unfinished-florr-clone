@@ -1,4 +1,5 @@
 export const RARITY_COUNT = 8;
+export const PI_2 = Math.PI * 2;
 const MOB_RARITY_PROPAGATION = (x: number) => x * 0.4 + 0.01;
 const MOB_VERTICAL_PROPAGATION = (x: number) => Math.max(x * 0.5 - 0.3, 0);
 export const LOOT_TABLE_GEN = (init: number) => {
@@ -41,4 +42,11 @@ export const FROM_OBJECT_TABLE = (table: Record<number, number>) => {
     let rand = Math.random();
     for (const [n, weight] of Object.entries(table)) if ((rand -= weight) <= 0) return parseInt(n);
     return 0;
+}
+export const spliceOut = (arr: any[], val: any) => {
+    const index = arr.indexOf(val);
+    if (index !== -1) arr = arr.splice(index, 1);
+}
+export const isWithin = (val: number, start: number, end: number) => {
+    return val >= start && val <= end;
 }

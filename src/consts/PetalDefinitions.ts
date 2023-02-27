@@ -110,11 +110,13 @@ const PETAL_DEFINITIONS: Record<number, PetalDefinition> = {
     11: {
         id: 11, //missile (special petal)
         radius: 8,
-        damage: 100,
-        health: 1000,
+        damage: 10,
+        health: 10,
         cooldown: 40,
         petal: Missile,
-        preventExtend: true
+        preventExtend: true,
+        repeat: [1,1,1,1,1,3,5,5],
+        clump: true
     }
 }
 export default PETAL_DEFINITIONS;

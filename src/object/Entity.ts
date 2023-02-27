@@ -37,16 +37,12 @@ export default class Entity extends AbstractEntity {
         else if (this.pos.x + this.pos.radius > this._arena.arena.width) this.pos.x = this._arena.arena.width - this.pos.radius;
         if (this.pos.y < this.pos.radius) this.pos.y = this.pos.radius;
         else if (this.pos.y + this.pos.radius > this._arena.arena.height) this.pos.y = this._arena.arena.height - this.pos.radius;
+        this._arena.collisionGrid.reinsert(this);
         if (this.pendingDelete) return this.deleteAnimation.tick();
-        /*
-        if (true) { //rethink this
-            this._arena.collisionGrid.remove(this);
-            this._arena.collisionGrid.insert(this);
-        }
-        */
     }
     delete() { 
         this.pendingDelete = true;
+        this.canCollide = false;
         this.friction = 0.5;
     }
     getCollisions() { 
@@ -69,10 +65,6 @@ export default class Entity extends AbstractEntity {
         this.vel.add(dist.scale(ratio / (ratio - 1)));
     }
     onCollide(entity: Entity) {}
-    wipeState() {
-        this._arena.collisionGrid.insert(this);
-        super.wipeState();
-    }
 }
 
 class DeletionAnimation {
@@ -86,8 +78,7 @@ class DeletionAnimation {
     }
     tick() {
         ++this.pos;
-        if (this.pos === DeletionAnimation.DURATION) return this._arena.removeFromActive(this.entity);
-        if (this.pos === DeletionAnimation.DURATION + 1) return this._arena.remove(this.entity);
+        if (this.pos === DeletionAnimation.DURATION) return this._arena.remove(this.entity);
         this.entity.pos.radius *= 1.1;
         this.entity.style.opacity *= 1 - (1 / DeletionAnimation.DURATION);
     }

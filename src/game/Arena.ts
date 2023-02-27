@@ -32,13 +32,12 @@ export default class Arena extends AbstractEntity {
         this.state = 0;
         const entities = this.entities.values();
         const clients = this.clients.values();
-        this.collisionGrid.clear();
-        for (const entity of entities) entity.wipeState();
         for (const entity of this.entities.values()) entity.tick();
         for (const client of clients) client.tick();
+        for (const entity of entities) entity.wipeState();
         for (const zone of this.zones) zone.tick();
         ++this._tick;
-        console.log(performance.now() - start + " ms tick | "+ this.entities.size + " entities");
+        console.log(performance.now() - start + " ms tick | " + this.entities.size + " entities");
     }
     calculateOpenHash() {
         for (let n = 2; n < 16384; ++n) if (!this.entities.get(n)) return n;
@@ -60,9 +59,6 @@ export default class Arena extends AbstractEntity {
         entity.id = hash;
         this.collisionGrid.insert(entity);
         return entity;
-    }
-    removeFromActive(entity: Entity) {
-        entity.canCollide = false;
     }
     remove(entity: Entity) {
         entity.state = 4;
@@ -111,17 +107,17 @@ export class SpawnZone {
         this.width = definition.w;
         this.height = definition.h;
         this.spawnTable = definition.spawnTable;
-        this.MOB_CAP = definition.spawnTable.MOB_CAP || 8;
+        this.MOB_CAP = definition.spawnTable.MOB_CAP ?? 8;
     }
     tick() {
-        if (this.mobCount > this.MOB_CAP) return;
+        if (this.mobCount >= this.MOB_CAP) return;
         if (Math.random() < this.spawnTable.BASE_CHANCE) {
             const potentialX = this.x + Math.random() * this.width;
             const potentialY = this.y + Math.random() * this.height;
             const id = FROM_OBJECT_TABLE(this.spawnTable.MOB_CHANCE);
             const rarity = FROM_TABLE(this.spawnTable.RARITY_CHANCE);
             const ent = new Mob(this.arena, this, potentialX, potentialY, 2 * Math.PI * Math.random(), rarity, MOB_DEFINITIONS[id]);
-            if (this.arena.collisionGrid.getEntityCollisions(ent).size) return;
+            if (this.arena.collisionGrid.getEntityCollisions(ent).length) return;
             this.arena.add(ent);
             ++this.mobCount;
         }

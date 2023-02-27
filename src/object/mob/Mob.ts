@@ -1,6 +1,6 @@
 import Entity from "../Entity";
 import Drop from "./Drop";
-import { FROM_TABLE, MOB_RARITY_MULTIPLIER, MOB_SIZE_MULTIPLIER } from "../../consts/Helpers.js";
+import { FROM_TABLE, MOB_RARITY_MULTIPLIER, MOB_SIZE_MULTIPLIER, PI_2 } from "../../consts/Helpers.js";
 import Arena, { SpawnZone } from "../../game/Arena";
 import { HealthComponent, MobComponent } from "../Components";
 import AI from "./mob-behavior/AI";
@@ -60,7 +60,7 @@ export default class Mob extends Entity {
             if (rar) drops.push([parseInt(id), rar - 1]);
         }
         for (let n = 0; n < drops.length; ++n) {
-            this._arena.add(new Drop(this._arena, this.pos.x, this.pos.y, 40, 2 * n * Math.PI / drops.length, {
+            this._arena.add(new Drop(this._arena, this.pos.x, this.pos.y, 40, n * PI_2 / drops.length, {
                 id: drops[n][0],
                 rarity: drops[n][1]
             }));

@@ -1,7 +1,7 @@
 import { HealthComponent, PetalComponent } from "../Components";
 import Entity from "../Entity";
 import Vector, { OneDimensionalVector } from "../Vector";
-import { PETAL_RARITY_MULTIPLIER } from "../../consts/Helpers";
+import { PETAL_RARITY_MULTIPLIER, PI_2 } from "../../consts/Helpers";
 import Player from "./Player";
 import Arena from "../../game/Arena";
 import { PetalDefinition } from "../../consts/PetalDefinitions";
@@ -42,7 +42,7 @@ export default class Petal extends Entity {
         this.clump = petalDefinition.clump || false;
         
         this.creationTick = this._arena._tick;
-        this.pos.add(Vector.fromPolar(this.holdingRadius.pos, this.player.rotationAngle + this.rotationPos * 2 * Math.PI / this.player.numSpacesAlloc))
+        this.pos.add(Vector.fromPolar(this.holdingRadius.pos, this.player.rotationAngle + this.rotationPos * PI_2 / this.player.numSpacesAlloc))
     }
     tick() {
         if (this.pendingDelete) return super.tick();
@@ -59,8 +59,8 @@ export default class Petal extends Entity {
             this.holdingRadius.accel = (hoverRadius - this.holdingRadius.pos) * 0.04;
             this.holdingRadius.vel *= 0.8;
             this.holdingRadius.tick();
-            if (this.clump) this.accel.set2(Vector.fromPolar(this.holdingRadius.pos, this.player.rotationAngle + this.rotationPos * 2 * Math.PI / this.player.numSpacesAlloc).add(Vector.fromPolar(10, this.innerPos * 2 * Math.PI / this.count)).add(this.player.pos).sub(this.pos));
-            else this.accel.set2(Vector.fromPolar(this.holdingRadius.pos, this.player.rotationAngle + this.rotationPos * 2 * Math.PI / this.player.numSpacesAlloc).add(this.player.pos).sub(this.pos));
+            if (this.clump) this.accel.set2(Vector.fromPolar(this.holdingRadius.pos, this.player.rotationAngle + this.rotationPos * PI_2 / this.player.numSpacesAlloc).add(Vector.fromPolar(10, this.innerPos * PI_2 / this.count)).add(this.player.pos).sub(this.pos));
+            else this.accel.set2(Vector.fromPolar(this.holdingRadius.pos, this.player.rotationAngle + this.rotationPos * PI_2 / this.player.numSpacesAlloc).add(this.player.pos).sub(this.pos));
         }
         super.tick();
     }

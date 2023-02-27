@@ -47,7 +47,7 @@ export default class Client extends AbstractEntity {
             if (this._arena instanceof Arena) {
                 this._arena.removeClient(this);
                 if (this.player instanceof Player) {
-                    this._arena.removeFromActive(this.player);
+                    this._arena.remove(this.player);
                     this.player = null;
                 }
             }
@@ -82,7 +82,7 @@ export default class Client extends AbstractEntity {
             const inView = this._arena.collisionGrid.getCollisions(this.camera.x, this.camera.y, 1000 / this.camera.fov, 600 / this.camera.fov);
             const creates = [], updates = [], deletes = [];
             for (const entity of this.view) {
-                if (!inView.has(entity)) {
+                if (inView.indexOf(entity) === -1) {
                     this.view.delete(entity);
                     deletes.push(entity);
                 }
@@ -128,7 +128,7 @@ export default class Client extends AbstractEntity {
         switch(reader.u8()) {
             case 0:
                 if (this.player) break;
-                this.moveServer(0, 5000, 5000); //initial spawn
+                this.moveServer(0, 30, 30); //initial spawn
                 break;
             case 1:
                 this.input.input = reader.u8();
