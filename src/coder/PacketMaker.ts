@@ -4,7 +4,6 @@ import Client from "../object/Client";
 import Writer from "./Writer";
 
 export function compileEnt(w: Writer, entity: AbstractEntity, cameraState: number, camera: Client) {
-    if (entity.isDeleted) return;
     if ((entity.state & 2) || (cameraState & 2)) return compileCreate(w, entity);
     else if (entity.state & 1) return compileUpdate(w, entity, camera);
 }

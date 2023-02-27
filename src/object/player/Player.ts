@@ -13,7 +13,7 @@ interface PlayerPetal {
     petal: Petal | null,
     cdTick: number,
     cooldown: number,
-    definition: PetalDefinition
+    definition: PetalDefinition,
 }
 
 export default class Player extends Entity {
@@ -90,7 +90,7 @@ export default class Player extends Entity {
                     petal: null,
                     cdTick: 0,
                     cooldown: 1,
-                    definition
+                    definition,
                 });
                 continue;
             }
@@ -100,7 +100,7 @@ export default class Player extends Entity {
                 petal: null,
                 cdTick: 0,
                 cooldown: definition.cooldown,
-                definition
+                definition,
             });
             if (n === 0 || !definition.clump) ++this.numSpacesAlloc;
         }

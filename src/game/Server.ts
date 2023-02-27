@@ -11,14 +11,14 @@ export default class GameServer {
         this.wss = server;
         this.clients = new Set();
         this.maps = [
-            new Arena(this,1000000,1000000,0,'Spawn'),
+            new Arena(this,3000,3000,0,'Spawn'),
             new Arena(this,3000,3000,1,'Easy Garden'),
             new Arena(this,3000,3000,2,'Medium Garden')
         ];
         this.maps[0].setZones([{
-            x: 5000, y: 5000, w: 100000, h: 100000,
+            x: 0, y: 0, w: 3000, h: 3000,
             spawnTable: {
-                MOB_CAP: 1e4,
+                MOB_CAP: 2,
                 BASE_CHANCE: 0.3,
                 MOB_CHANCE: {
                     1: 0.2, 2: 0.2, 3: 0.2, 4: 0.2, 5: 0.2,

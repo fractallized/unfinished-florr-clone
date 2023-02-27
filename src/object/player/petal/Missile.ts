@@ -11,7 +11,8 @@ export default class Missile extends Petal {
     static SHOOT_DELAY = 15;
     isShot = false;
     shootTick = 0;
-
+    followNormalRotation = false;
+    
     constructor(arena: Arena, player: Player, outerPos: number, innerPos: number, pos: number, rarity: number, petalDefinition: PetalDefinition) {
         super(arena, player, outerPos, innerPos, pos, rarity, petalDefinition);
     }
@@ -20,17 +21,34 @@ export default class Missile extends Petal {
         if (this._arena._tick - this.creationTick > Missile.SHOOT_DELAY && !this.isShot && this.player.owner.input.input & 16) {
             this.isShot = true;
             this.shootTick = this._arena._tick;
-            this.followNormalRotation = false;
             this.player.onPetalLoss(this.outerPos, this.innerPos);
             if (this.petal.rarity > 4) this.findTarget();
             this.vel.set2(Vector.fromPolar(50, this.pos.angle));
             this.friction = 0.9;
         }
+        super.tick();
+    }
+    doOrbitMechanics() {
+        const input = this.player.owner.input.input;
+        let hoverRadius = 75;
+        if (this.petalDefinition.preventExtend) {
+            if (input & 32) hoverRadius = 37.5;
+        } else {
+            if (input & 16) hoverRadius = 150;
+            else if (input & 32) hoverRadius = 37.5;
+        }
+        this.holdingRadius.accel = (hoverRadius - this.holdingRadius.pos) * 0.04;
+        this.holdingRadius.vel *= 0.8;
+        this.holdingRadius.tick();
         if (this.isShot) {
             if (this._arena._tick - this.shootTick < 50) this.accel.set2(Vector.fromPolar(4, this.pos.angle));
             else this.delete();
-        } else this.pos.angle = (Vector.sub(this.pos, this.player.pos).angle ?? 0) + PI_2 * this.innerPos / this.count;
-        super.tick();
+        } else {
+            this.pos.angle = this.innerPos * PI_2 / this.count;
+            this.accel.set2(Vector.fromPolar(this.holdingRadius.pos, this.player.rotationAngle + this.rotationPos * PI_2 / this.player.numSpacesAlloc).add(Vector.fromPolar(12, this.pos.angle)).add(this.player.pos).sub(this.pos));
+            if (this.count > 1) this.pos.angle += PI_2 / 4;
+            this.accel.add(Vector.fromPolar(20, this.pos.angle));
+        }
     }
     findTarget() {
         const possibles = this._arena.collisionGrid.getEntityCollisions(this, 100 * this.petal.rarity);

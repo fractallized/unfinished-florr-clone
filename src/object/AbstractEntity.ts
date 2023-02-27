@@ -13,7 +13,6 @@ export default class AbstractEntity {
     id = 0;
     state = 2;
     pendingDelete = false;
-    isDeleted = false;
     canCollide = false;
     lastQueried = 0;
     constructor() {}

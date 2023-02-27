@@ -62,7 +62,6 @@ export default class Arena extends AbstractEntity {
     }
     remove(entity: Entity) {
         entity.state = 4;
-        entity.isDeleted = true;
         this.collisionGrid.remove(entity);
         this.entities.delete(entity.id);
     }
