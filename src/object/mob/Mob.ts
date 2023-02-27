@@ -43,13 +43,10 @@ export default class Mob extends Entity {
         if (ent.isFriendly !== this.isFriendly && this._arena._tick - this.health.lastDamaged > 2) {
             if (ent instanceof Player) this.ai.onDamage(ent);
             else if (ent instanceof Petal) this.ai.onDamage(ent.player);
-            this.health.health -= ent.damage;
+            this.doDamage(ent.damage);
             this.health.lastDamaged = this._arena._tick;
         }
-        if (this.health.health < 0.0001) { 
-            this.health.health = 0;
-            this.delete();
-        }
+        if (this.health.health === 0) this.delete();
     }
     delete() {
         if (this.pendingDelete) return;

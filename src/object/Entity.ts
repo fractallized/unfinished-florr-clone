@@ -1,7 +1,29 @@
 import Vector from "./Vector";
 import Arena from "../game/Arena";
-import { PositionComponent, StyleComponent } from "./Components";
+import { HealthComponent, PositionComponent, StyleComponent } from "./Components";
 import AbstractEntity from "./AbstractEntity";
+
+class PoisonManager {
+    at = 0;
+    duration = 0;
+    dps = 0;
+    entity: Entity;
+
+    constructor(entity: Entity) {
+        this.entity = entity;
+    }
+    tick() {
+        if (this.at < this.duration) this.entity.doDamage(this.dps);
+        ++this.at;
+    }
+    setPoison(poison: { dps: number, tick: number}) {
+        this.at = 0;
+        if (this.dps < poison.dps) {
+            this.dps = poison.dps;
+            this.duration = poison.tick;
+        }
+    }
+}
 export default class Entity extends AbstractEntity {
     static BASE_KNOCKBACK = 15;
     static BASE_FRICTION = 0.85;
@@ -15,6 +37,7 @@ export default class Entity extends AbstractEntity {
     canCollide = true;
     pos: PositionComponent;
     style: StyleComponent;
+    health: HealthComponent = new HealthComponent(this,0);
     deleteAnimation: DeletionAnimation;
     gridBounds = [0,0,0,0];
     damage = 0;
@@ -65,6 +88,12 @@ export default class Entity extends AbstractEntity {
         this.vel.add(dist.scale(ratio / (ratio - 1)));
     }
     onCollide(entity: Entity) {}
+    doDamage(x: number) {
+        this.health.health = Math.max(this.health.health - x, 0);
+    }
+    healSelf (x: number) {
+        this.health.health = Math.min(this.health.health + x, this.health.maxHealth);
+    }
 }
 
 class DeletionAnimation {

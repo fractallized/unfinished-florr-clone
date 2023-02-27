@@ -2,9 +2,8 @@ import { HealthComponent, PetalComponent } from "../Components";
 import Entity from "../Entity";
 import Vector, { OneDimensionalVector } from "../Vector";
 import { PETAL_RARITY_MULTIPLIER, PI_2 } from "../../consts/Helpers";
-import Player from "./Player";
+import Player, { PlayerPetal } from "./Player";
 import Arena from "../../game/Arena";
-import { PetalDefinition } from "../../consts/PetalDefinitions";
 
 export default class Petal extends Entity {
     petal: PetalComponent;
@@ -16,14 +15,16 @@ export default class Petal extends Entity {
     innerPos: number;
     count: number;
     damage: number;
-    petalDefinition: PetalDefinition;
+    petalDefinition: PlayerPetal;
     clump: boolean;
     creationTick: number;
     followNormalRotation = true;
     isFriendly = true;
+    poison: { dps: number, ticks: number} | null;
 
     holdingRadius = new OneDimensionalVector(0,20,0);
-    constructor(arena: Arena, player: Player, outerPos: number, innerPos: number, pos: number, rarity: number, petalDefinition: PetalDefinition) {
+    constructor(arena: Arena, player: Player, outerPos: number, innerPos: number, pos: number, rarity: number, petal: PlayerPetal) {
+        const petalDefinition = petal.definition;
         super(arena, player.pos.x, player.pos.y, petalDefinition.radius, 0);
 
         this.petal = new PetalComponent(this, petalDefinition.id, rarity);
@@ -36,10 +37,11 @@ export default class Petal extends Entity {
         this.outerPos = outerPos;
         this.innerPos = innerPos;
         
-        this.petalDefinition = petalDefinition;
         this.count = petalDefinition.repeat? petalDefinition.repeat[rarity]: 1;
         this.damage = petalDefinition.damage * PETAL_RARITY_MULTIPLIER[rarity] / this.count;
+        this.poison = petalDefinition.poison ?? null;
         this.clump = petalDefinition.clump || false;
+        this.petalDefinition = petal;
         
         this.creationTick = this._arena._tick;
     }
@@ -52,7 +54,7 @@ export default class Petal extends Entity {
     doOrbitMechanics() {
         const input = this.player.owner.input.input;
         let hoverRadius = 75;
-        if (this.petalDefinition.preventExtend) {
+        if (this.petalDefinition.definition.preventExtend) {
             if (input & 32) hoverRadius = 37.5;
         } else {
             if (input & 16) hoverRadius = 150;
@@ -67,14 +69,11 @@ export default class Petal extends Entity {
     onCollide(ent: Entity) {
         if (ent.isFriendly !== this.isFriendly) {
             if (this._arena._tick - this.health.lastDamaged > 2) {
-                this.health.health -= ent.damage;
+                this.doDamage(ent.damage);
                 this.health.lastDamaged = this._arena._tick;
             }
         }
-        if (this.health.health < 0.0001) {
-            this.health.health = 0;
-            this.delete();
-        }
+        if (this.health.health === 0) this.delete();
     }
     delete() {
         this.player.onPetalLoss(this.outerPos, this.innerPos);

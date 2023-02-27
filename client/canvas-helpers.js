@@ -181,11 +181,11 @@ function drawPetal(id, ctx) {
     }
 }
 function drawPetalAsStatic(id, rarity) {
-    if (petalCanvas[(id - 1) * 8 + rarity])  ctx.drawImage(petalCanvas[(id - 1) * 8 + rarity], -25, -25);
+    if (petalCanvas[(id - 1) * 8 + rarity])  ctx.drawImage(petalCanvas[(id - 1) * 8 + rarity], -30, -30);
     else {
-        petalCanvas[(id - 1) * 8 + rarity] = new OffscreenCanvas(50,50);
+        petalCanvas[(id - 1) * 8 + rarity] = new OffscreenCanvas(60,60);
         const tempCtx = petalCanvas[(id - 1) * 8 + rarity].getContext('2d');
-        tempCtx.translate(25,25);
+        tempCtx.translate(30,30);
         if (id === 2 && rarity > 0) {
             const repeat = [2,2,3,3,5,5,7][rarity-1];
             for (let n = 0; n < repeat; n++) {
@@ -207,7 +207,7 @@ function drawPetalAsStatic(id, rarity) {
                     tempCtx.save()
                     tempCtx.translate(10,0);
                     tempCtx.rotate(PI_2 / 2);
-                    drawPetal(id,tempCtx);
+                    drawPetal(id, tempCtx);
                     tempCtx.restore();
                     tempCtx.rotate(PI_2 / 5);
                 } 
@@ -476,6 +476,7 @@ function drawLoadoutPetal(id, rarity, cd, hp) {
     ctx.strokeStyle = getStroke(ctx.fillStyle);
     ctx.lineWidth = 10;
     ctx.lineJoin = 'round';
+    ctx.save();
     ctx.beginPath();
     ctx.rect(-30,-30,60,60);
     ctx.stroke();
@@ -491,6 +492,7 @@ function drawLoadoutPetal(id, rarity, cd, hp) {
         ctx.beginPath();
         ctx.fillRect(-30,-30,60,60*(1-hp/255));
     }
+    ctx.restore();
     ctx.fillStyle = '#ffffff';
     ctx.strokeStyle = '#000000';
     ctx.font = '1px Ubuntu';

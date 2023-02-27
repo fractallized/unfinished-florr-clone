@@ -50,3 +50,8 @@ export const spliceOut = (arr: any[], val: any) => {
 export const isWithin = (val: number, start: number, end: number) => {
     return val >= start && val <= end;
 }
+export const minAngleDifference = (angle1: number, angle2: number) => {
+    const first = Math.abs(angle1 - angle2) % PI_2;
+    const second = PI_2 - (Math.abs(angle1 - angle2) % PI_2);
+    return Math.min(first, second);
+}

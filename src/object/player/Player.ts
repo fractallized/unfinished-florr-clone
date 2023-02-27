@@ -7,15 +7,15 @@ import Client from "../Client";
 import Arena from "../../game/Arena";
 import { HealthComponent, PlayerInfoComponent } from "../Components";
 
-interface PlayerPetal {
+export interface PlayerPetal {
     id: number,
     rarity: number,
     petal: Petal | null,
     cdTick: number,
     cooldown: number,
     definition: PetalDefinition,
+    seed: number
 }
-
 export default class Player extends Entity {
     static BASE_ROTATION_SPEED = 0.1;
     static BASE_DAMAGE = 25;
@@ -82,6 +82,7 @@ export default class Player extends Entity {
         if (id === 0) return this.calculateSpecials();
         const definition = PETAL_DEFINITIONS[id];
         const repeat = definition.repeat ? definition.repeat[rarity]: 1;
+        const seed = Math.random();
         for (let n = 0; n < repeat; n++) {
             if (definition.noSpawn) {
                 this.equipped[pos].push({
@@ -91,6 +92,7 @@ export default class Player extends Entity {
                     cdTick: 0,
                     cooldown: 1,
                     definition,
+                    seed
                 });
                 continue;
             }
@@ -101,6 +103,7 @@ export default class Player extends Entity {
                 cdTick: 0,
                 cooldown: definition.cooldown,
                 definition,
+                seed
             });
             if (n === 0 || !definition.clump) ++this.numSpacesAlloc;
         }
@@ -121,7 +124,7 @@ export default class Player extends Entity {
                 if (!petal.definition.clump || inner === 0) ++rotPos;
                 if (petal.cdTick < petal.cooldown) ++petal.cdTick;
                 else if (!petal.petal) {
-                    petal.petal = new (petal.definition.petal)(this._arena, this, outer, inner, rotPos, petal.rarity, petal.definition)
+                    petal.petal = new (petal.definition.petal)(this._arena, this, outer, inner, rotPos, petal.rarity, petal)
                     this._arena.add(petal.petal);
                 } else {
                     healthSum += petal.petal.health.health / petal.petal.health.maxHealth;
@@ -183,14 +186,11 @@ export default class Player extends Entity {
         if (this._arena._tick - this.creationTick < 50) return;
         if (ent.isFriendly !== this.isFriendly) {
             if (this._arena._tick - this.health.lastDamaged > 2) {
-                this.health.health -= ent.damage;
+                this.doDamage(ent.damage);
                 this.health.lastDamaged = this._arena._tick;
             }
         }
-        if (this.health.health < 0.0001) {
-            this.health.health = 0;
-            this.delete();
-        }
+        if (this.health.health === 0) this.delete();
     }
     delete() {
         if (this.owner.player === this) {

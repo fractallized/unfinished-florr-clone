@@ -15,7 +15,11 @@ export interface PetalDefinition {
     preventExtend?: boolean,
     repeat?: number[];
     fovMultiplier?: number[],
-    rotationSpeedAddition?: number[]
+    rotationSpeedAddition?: number[],
+    poison?: {
+        dps: number,
+        ticks: number
+    }
 }
 const PETAL_DEFINITIONS: Record<number, PetalDefinition> = {
     1: {
@@ -102,10 +106,14 @@ const PETAL_DEFINITIONS: Record<number, PetalDefinition> = {
     10: {
         id: 10, //iris
         radius: 6,
-        damage: 5,
+        damage: 1,
         health: 5,
         cooldown: 150,
-        petal: Petal
+        petal: Petal,
+        poison: {
+            dps: 0.2,
+            ticks: 50
+        }
     },
     11: {
         id: 11, //missile (special petal)
@@ -115,8 +123,6 @@ const PETAL_DEFINITIONS: Record<number, PetalDefinition> = {
         cooldown: 40,
         petal: Missile,
         preventExtend: true,
-        repeat: [1,1,1,1,1,3,5,5],
-        clump: true
     }
 }
 export default PETAL_DEFINITIONS;
