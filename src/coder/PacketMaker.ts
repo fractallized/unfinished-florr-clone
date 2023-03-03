@@ -43,7 +43,7 @@ function compileCreate(w: Writer, entity: AbstractEntity) {
     }
     if (entity.style) {
         w.u8(3);
-        w.u8(entity.style.color);
+        w.u8(entity.style.flags);
         w.u8(entity.style.opacity * 255);
     }
     if (entity.health && !entity.petal) {
@@ -95,7 +95,7 @@ function compileUpdate(w: Writer, entity: AbstractEntity, camera: Client) {
         if (entity.arena.state[1] & 1) { w.u8(9); w.vi(entity.arena.height); }
     }
     if (entity.style) {
-        if (entity.style.state[0] & 1) { w.u8(10); w.u8(entity.style.color); }
+        if (entity.style.state[0] & 1) { w.u8(10); w.u8(entity.style.flags); }
         if (entity.style.state[1] & 1) { w.u8(11); w.u8(entity.style.opacity * 255); }
     }
     if (entity.health && !entity.petal) {

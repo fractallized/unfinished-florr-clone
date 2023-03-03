@@ -219,22 +219,22 @@ export class ArenaComponent implements Component {
 }
 export class StyleComponent implements Component {
     values: {
-        color: number,
+        flags: number,
         opacity: number
     }
     entity: AbstractEntity;
     state: Uint8Array;
-    constructor(entity: AbstractEntity, color: number, opacity: number) {
+    constructor(entity: AbstractEntity, flags: number, opacity: number) {
         this.values = {
-            color, opacity
+            flags, opacity
         }
         this.entity = entity;
         this.state = new Uint8Array(2);
     }
-    get color() { return this.values.color }
+    get flags() { return this.values.flags }
     get opacity() { return this.values.opacity }
 
-    set color(v) { if (this.values.color === v) return; this.entity.state |= 1; this.state[0] |= 1; this.values.color = v; }
+    set flags(v) { if (this.values.flags === v) return; this.entity.state |= 1; this.state[0] |= 1; this.values.flags = v; }
     set opacity(v) { if (this.values.opacity === v) return; this.entity.state |= 1; this.state[1] |= 1; this.values.opacity = v; }
     
     reset() { this.state.fill(0) }
