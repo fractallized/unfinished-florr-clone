@@ -14,7 +14,7 @@ export default class Drop extends Entity {
     canCollide = false;
     constructor(arena: Arena, x: number, y: number, r: number, moveAngle: number, dropDefinition: any) {
         super(arena, x, y, r, 0);
-        this.style.color = 1;
+        
         this.drop = new DropComponent(this,dropDefinition.id,dropDefinition.rarity); //id,rar
 
         this.angle = new OneDimensionalVector(0,3.8,0);
