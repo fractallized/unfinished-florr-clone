@@ -484,11 +484,13 @@ function drawLoadoutPetal(id, rarity, cd, hp) {
     ctx.fill();
     ctx.clip();
     ctx.fillStyle = '#00000040';
-    ctx.beginPath();
-    ctx.moveTo(0,0);
-    ctx.arc(0,0,50, -PI_2 / 4 + 6 * cd * PI_2 / 255, -PI_2 / 4 + 5 * cd * PI_2 / 255);
-    ctx.closePath();
-    ctx.fill();
+    if (cd < 255) {
+        ctx.beginPath();
+        ctx.moveTo(0,0);
+        ctx.arc(0,0,50, -PI_2 / 4 + 6 * cd * PI_2 / 255, -PI_2 / 4 + 5 * cd * PI_2 / 255);
+        ctx.closePath();
+        ctx.fill();
+    }
     if (hp) {
         ctx.beginPath();
         ctx.fillRect(-30,-30,60,60*(1-hp/255));

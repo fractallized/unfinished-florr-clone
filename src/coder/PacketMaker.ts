@@ -1,4 +1,4 @@
-import Inventory from "../game/Inventory";
+import { Inventory } from "../object/Components";
 import AbstractEntity from "../object/AbstractEntity";
 import Client from "../object/Client";
 import Writer from "./Writer";
@@ -31,8 +31,8 @@ function compileCreate(w: Writer, entity: AbstractEntity) {
     }
     if (entity.camera) {
         w.u8(1);
-        w.vi(entity.camera.x);
-        w.vi(entity.camera.y);
+        w.f32(entity.camera.x);
+        w.f32(entity.camera.y);
         w.f32(entity.camera.fov);
         w.vu(entity.camera.player);
     }
@@ -85,8 +85,8 @@ function compileUpdate(w: Writer, entity: AbstractEntity, camera: Client) {
         if (entity.pos.state[3] & 1) { w.u8(3); w.f32(entity.pos.radius) }
     }
     if (entity.camera) {
-        if (entity.camera.state[0] & 1) { w.u8(4); w.vi(entity.camera.x); }
-        if (entity.camera.state[1] & 1) { w.u8(5); w.vi(entity.camera.y); }
+        if (entity.camera.state[0] & 1) { w.u8(4); w.f32(entity.camera.x); }
+        if (entity.camera.state[1] & 1) { w.u8(5); w.f32(entity.camera.y); }
         if (entity.camera.state[2] & 1) { w.u8(6); w.f32(entity.camera.fov); }
         if (entity.camera.state[3] & 1) { w.u8(7); w.vu(entity.camera.player); }
     }

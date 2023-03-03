@@ -11,7 +11,6 @@ export default class Missile extends Petal {
     static SHOOT_DELAY = 15;
     isShot = false;
     shootTick = 0;
-    followNormalRotation = false;
 
     constructor(arena: Arena, player: Player, outerPos: number, innerPos: number, pos: number, rarity: number, petal: PlayerPetal) {
         super(arena, player, outerPos, innerPos, pos, rarity, petal);
@@ -20,6 +19,7 @@ export default class Missile extends Petal {
         if (this.pendingDelete) return super.tick();
         if (this._arena._tick - this.creationTick > Missile.SHOOT_DELAY && !this.isShot && this.player.owner.input.input & 16) {
             this.isShot = true;
+            this.followNormalRotation = false;
             this.shootTick = this._arena._tick;
             this.player.onPetalLoss(this.outerPos, this.innerPos);
             if (this.petal.rarity > 4) this.findTarget();

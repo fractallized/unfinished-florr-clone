@@ -1,5 +1,7 @@
 import AbstractEntity from "./AbstractEntity.js";
 import { VectorLike } from "./Vector.js";
+import { RARITY_COUNT } from "../consts/Helpers.js";
+
 type ComponentType = number | string | StateArray;
 type TypedArray = Uint8Array;
 interface Component {
@@ -25,6 +27,35 @@ class StateArray {
         this.state[n] |= 1;
         this.component.state[this.componentIndex] |= 1;
         this.values[n] = v;
+    }
+}
+
+export class Inventory {
+    values: Int32Array;
+    state: Uint8Array;
+    grandState = 2;
+    constructor() {
+        this.values = new Int32Array(RARITY_COUNT * 100);
+        this.state = new Uint8Array(this.values.length);
+    }
+    reset() {
+        this.state.fill(0);
+        this.grandState = 0;
+    }
+    get(n: number) {
+        return this.values[n];
+    }
+    set(n: number, v: number) {
+        if (this.values[n] === v) return;
+        this.state[n] |= 1;
+        this.grandState |= 1;
+        this.values[n] = v;
+    }
+    add(n: number, i: number) {
+        if (i === 0) return;
+        this.state[n] |= 1;
+        this.grandState |= 1;
+        this.values[n] += i;
     }
 }
 export class PositionComponent implements Component, VectorLike {

@@ -55,7 +55,10 @@ const drawEntity = (ent) => {
     else if (ent.playerInfo) drawPlayer(ent);
     else drawPortal(ent);
 }
+let last = 0;
 const loop = _ => {
+    console.log(performance.now() - last + "ms");
+    last = performance.now();
     cameraEnt = arenaEnt = playerEnt = null;
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;

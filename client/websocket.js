@@ -2,7 +2,6 @@ let r;
 ws.onmessage = async (e) => {
     const packet = new Uint8Array(await e.data.arrayBuffer());
     r = new Reader(packet);
-    console.log(packet.length, " length update packet");
     switch(r.u8()) {
         case 1: parseEntPacket(); break;
         case 254: entities = {}; break;
@@ -35,8 +34,8 @@ function parseEntPacket() {
                         break;
                     case 1:
                         entities[id].camera = {
-                            x: r.vi(),
-                            y: r.vi(),
+                            x: r.f32(),
+                            y: r.f32(),
                             fov: r.f32(),
                             player: r.vu()
                         }
@@ -122,9 +121,9 @@ function parseEntPacket() {
                     case 3:
                         entities[id].pos.radius = r.f32(); break;
                     case 4:
-                        entities[id].camera.x = r.vi(); break;
+                        entities[id].camera.x = r.f32(); break;
                     case 5:
-                        entities[id].camera.y = r.vi(); break;
+                        entities[id].camera.y = r.f32(); break;
                     case 6:
                         entities[id].camera.fov = r.f32(); break;
                     case 7:

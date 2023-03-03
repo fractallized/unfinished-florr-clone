@@ -8,6 +8,8 @@ import Arena from "../../game/Arena";
 export default class Petal extends Entity {
     static BASE_FRICTION = 0.5;
     static BASE_WEIGHT = 0.01;
+    
+    ROTATION_FIRMNESS = 0.5;
 
     petal: PetalComponent;
     health: HealthComponent;
@@ -21,11 +23,10 @@ export default class Petal extends Entity {
     petalDefinition: PlayerPetal;
     clump: boolean;
     creationTick: number;
-    followNormalRotation = true;
     isFriendly = true;
     poison: { dps: number, ticks: number} | null;
-
-    holdingRadius = new OneDimensionalVector(0,20,0);
+    holdingRadius = 0;
+    followNormalRotation = true;
     constructor(arena: Arena, player: Player, outerPos: number, innerPos: number, pos: number, rarity: number, petal: PlayerPetal) {
         const petalDefinition = petal.definition;
         super(arena, player.pos.x, player.pos.y, petalDefinition.radius, 0);
@@ -56,19 +57,18 @@ export default class Petal extends Entity {
         super.tick();
     }
     doOrbitMechanics() {
-        const input = this.player.owner.input.input;
-        let hoverRadius = 75;
-        if (this.petalDefinition.definition.preventExtend) {
-            if (input & 32) hoverRadius = 37.5;
-        } else {
-            if (input & 16) hoverRadius = 150;
-            else if (input & 32) hoverRadius = 37.5;
+        if (this.followNormalRotation) {
+            const input = this.player.owner.input.input;
+            this.holdingRadius = 75;
+            if (this.petalDefinition.definition.preventExtend) {
+                if (input & 32) this.holdingRadius = 37.5;
+            } else {
+                if (input & 16) this.holdingRadius = 150;
+                else if (input & 32) this.holdingRadius = 37.5;
+            }
         }
-        this.holdingRadius.accel = (hoverRadius - this.holdingRadius.pos) * 0.08;
-        this.holdingRadius.vel *= 0.8;
-        this.holdingRadius.tick();
-        if (this.clump) this.accel.set2(Vector.fromPolar(this.holdingRadius.pos, this.player.rotationAngle + this.rotationPos * PI_2 / this.player.numSpacesAlloc).add(Vector.fromPolar(10, this.innerPos * PI_2 / this.count + this.player.rotationAngle * 0.2)).add(this.player.pos).sub(this.pos));
-        else this.accel.set2(Vector.fromPolar(this.holdingRadius.pos, this.player.rotationAngle + this.rotationPos * PI_2 / this.player.numSpacesAlloc).add(this.player.pos).sub(this.pos));
+        if (this.clump) this.accel.set2(Vector.fromPolar(this.holdingRadius, this.player.rotationAngle + this.rotationPos * PI_2 / this.player.numSpacesAlloc).add(Vector.fromPolar(10, this.innerPos * PI_2 / this.count + this.player.rotationAngle * 0.2)).add(this.player.pos).sub(this.pos)).scale(this.ROTATION_FIRMNESS);
+        else this.accel.set2(Vector.fromPolar(this.holdingRadius, this.player.rotationAngle + this.rotationPos * PI_2 / this.player.numSpacesAlloc).add(this.player.pos).sub(this.pos)).scale(this.ROTATION_FIRMNESS);
     }
     onCollide(ent: Entity) {
         if (ent.isFriendly !== this.isFriendly) {
