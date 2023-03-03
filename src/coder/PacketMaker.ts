@@ -46,7 +46,7 @@ function compileCreate(w: Writer, entity: AbstractEntity) {
         w.u8(entity.style.color);
         w.u8(entity.style.opacity * 255);
     }
-    if (entity.health && !entity.petal && !entity.drop) {
+    if (entity.health && !entity.petal) {
         w.u8(4);
         w.u8(255 * entity.health.health / entity.health.maxHealth);
     }

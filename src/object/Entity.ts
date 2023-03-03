@@ -3,7 +3,7 @@ import Arena from "../game/Arena";
 import { HealthComponent, PositionComponent, StyleComponent } from "./Components";
 import AbstractEntity from "./AbstractEntity";
 
-class PoisonManager {
+class Poison {
     at = 0;
     duration = 0;
     dps = 0;
@@ -37,7 +37,6 @@ export default class Entity extends AbstractEntity {
     canCollide = true;
     pos: PositionComponent;
     style: StyleComponent;
-    health: HealthComponent = new HealthComponent(this,0);
     deleteAnimation: DeletionAnimation;
     gridBounds = [0,0,0,0];
     damage = 0;
@@ -89,10 +88,10 @@ export default class Entity extends AbstractEntity {
     }
     onCollide(entity: Entity) {}
     doDamage(x: number) {
-        this.health.health = Math.max(this.health.health - x, 0);
+        if (this.health) this.health.health = Math.max(this.health.health - x, 0);
     }
     healSelf (x: number) {
-        this.health.health = Math.min(this.health.health + x, this.health.maxHealth);
+        if (this.health) this.health.health = Math.min(this.health.health + x, this.health.maxHealth);
     }
 }
 

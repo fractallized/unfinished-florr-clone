@@ -1,3 +1,4 @@
+window.devicePixelRatio = 1;
 const PI_2 = Math.PI * 2;
 function drawPortal(portal) {
     if (!portal.CLIENT_RENDER_TICK) portal.CLIENT_RENDER_TICK = 0;

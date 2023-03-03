@@ -6,6 +6,9 @@ import Player, { PlayerPetal } from "./Player";
 import Arena from "../../game/Arena";
 
 export default class Petal extends Entity {
+    static BASE_FRICTION = 0.5;
+    static BASE_WEIGHT = 0.01;
+
     petal: PetalComponent;
     health: HealthComponent;
     player: Player;
@@ -30,18 +33,19 @@ export default class Petal extends Entity {
         this.petal = new PetalComponent(this, petalDefinition.id, rarity);
         this.health = new HealthComponent(this, petalDefinition.health * PETAL_RARITY_MULTIPLIER[rarity]);
         
-        this.weight = 0.01;
-        this.friction = 0.5;
+        this.weight = Petal.BASE_WEIGHT;
+        this.friction = Petal.BASE_FRICTION;
+
         this.player = player;
         this.rotationPos = pos;
         this.outerPos = outerPos;
         this.innerPos = innerPos;
+        this.petalDefinition = petal;
         
         this.count = petalDefinition.repeat? petalDefinition.repeat[rarity]: 1;
         this.damage = petalDefinition.damage * PETAL_RARITY_MULTIPLIER[rarity] / this.count;
         this.poison = petalDefinition.poison ?? null;
         this.clump = petalDefinition.clump || false;
-        this.petalDefinition = petal;
         
         this.creationTick = this._arena._tick;
     }
@@ -60,7 +64,7 @@ export default class Petal extends Entity {
             if (input & 16) hoverRadius = 150;
             else if (input & 32) hoverRadius = 37.5;
         }
-        this.holdingRadius.accel = (hoverRadius - this.holdingRadius.pos) * 0.04;
+        this.holdingRadius.accel = (hoverRadius - this.holdingRadius.pos) * 0.08;
         this.holdingRadius.vel *= 0.8;
         this.holdingRadius.tick();
         if (this.clump) this.accel.set2(Vector.fromPolar(this.holdingRadius.pos, this.player.rotationAngle + this.rotationPos * PI_2 / this.player.numSpacesAlloc).add(Vector.fromPolar(10, this.innerPos * PI_2 / this.count + this.player.rotationAngle * 0.2)).add(this.player.pos).sub(this.pos));

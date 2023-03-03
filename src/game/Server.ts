@@ -18,12 +18,12 @@ export default class GameServer {
         this.maps[0].setZones([{
             x: 0, y: 0, w: 3000, h: 3000,
             spawnTable: {
-                MOB_CAP: 2,
+                MOB_CAP: 10,
                 BASE_CHANCE: 0.3,
                 MOB_CHANCE: {
                     1: 0.2, 2: 0.2, 3: 0.2, 4: 0.2, 5: 0.2,
                 },
-                RARITY_CHANCE: [0,0,0,0,0,0,0.5,0.5]
+                RARITY_CHANCE: [0.3,0.2,0.15,0.1,0.1,0.05,0.05,0.05]
             }
         }]);
 

@@ -67,6 +67,7 @@ export default class Client extends AbstractEntity {
     }
     swapPetals(pos1: number, pos2: number) {
         //no need for petal count validation
+        if (pos1 === pos2) return; //no need to swap lol
         const [i1, r1] = this.equipped.slice(pos1 * 2, pos1 * 2 + 2);
         const [i2, r2] = this.equipped.slice(pos2 * 2, pos2 * 2 + 2);
         if (this.player) {
