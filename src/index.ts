@@ -7,7 +7,7 @@ const PORT = parseInt(process.env.PORT || "8080");
 
 const server = http.createServer((req, res) => {
       let file: string | null = null;
-      let contentType = "text/html"
+      let contentType = "text/html";
       switch (req.url) {
           case "/":
               file = "./client/index.html";
@@ -17,20 +17,20 @@ const server = http.createServer((req, res) => {
               file = "./client/index.js";
               contentType = "application/javascript";
               break;
-          case "/input.js":
-              file = "./client/input.js";
+          case "/ClientEntitySimulation.js":
+              file = "./client/ClientEntitySimulation.js";
               contentType = "application/javascript";
               break;
-          case "/client-render.js":
-              file = "./client/client-render.js";
+          case "/Protocol.js":
+              file = "./client/Protocol.js";
               contentType = "application/javascript";
               break;
-          case "/canvas-helpers.js":
-              file = "./client/canvas-helpers.js";
+          case "/Helpers.js":
+              file = "./client/Helpers.js";
               contentType = "application/javascript";
               break;
-          case "/websocket.js":
-            file = "./client/websocket.js";
+          case "/CanvasRender.js":
+            file = "./client/CanvasRender.js";
             contentType = "application/javascript";
             break;
           case "/fonts.css":

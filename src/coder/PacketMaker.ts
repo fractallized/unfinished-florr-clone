@@ -91,8 +91,8 @@ function compileUpdate(w: Writer, entity: AbstractEntity, camera: Client) {
         if (entity.camera.state[3] & 1) { w.u8(7); w.vu(entity.camera.player); }
     }
     if (entity.arena) {
-        if (entity.arena.state[0] & 1) { w.u8(8); w.vi(entity.arena.width); }
-        if (entity.arena.state[1] & 1) { w.u8(9); w.vi(entity.arena.height); }
+        if (entity.arena.state[0] & 1) { w.u8(8); w.vu(entity.arena.width); }
+        if (entity.arena.state[1] & 1) { w.u8(9); w.vu(entity.arena.height); }
     }
     if (entity.style) {
         if (entity.style.state[0] & 1) { w.u8(10); w.u8(entity.style.flags); }
