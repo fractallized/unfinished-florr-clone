@@ -12,7 +12,7 @@ export default class GameServer {
         this.clients = new Set();
         this.maps = [
             new Arena(this,3000,3000,0,'Spawn'),
-            new Arena(this,3000,3000,1,'Easy Garden'),
+            new Arena(this,400,400,1,'Easy Garden'),
             new Arena(this,3000,3000,2,'Medium Garden')
         ];
         this.maps[0].setZones([{
@@ -23,9 +23,9 @@ export default class GameServer {
                 MOB_CHANCE: {
                     1: 0.2, 2: 0.2, 3: 0.2, 4: 0.2, 5: 0.2,
                 },
-                RARITY_CHANCE: [0.3,0.2,0.15,0.1,0.1,0.05,0.05,0.05]
+                RARITY_CHANCE: [0.8,0.15,0.05]
             }
-        }]);
+        }]).setPortals([[50,50,100,100,1]]);
 
         setInterval(() => {
             for (const map of this.maps) if (map.clients.size) map.tick();

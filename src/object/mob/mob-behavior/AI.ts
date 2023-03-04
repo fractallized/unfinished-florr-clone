@@ -9,5 +9,5 @@ export default class AI {
         this.mob = mob;
     }
     tick() {}
-    onDamage(ent: Entity) {}
+    onDamage(_: Entity) {}
 }

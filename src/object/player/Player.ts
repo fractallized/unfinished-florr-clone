@@ -188,6 +188,7 @@ export default class Player extends Entity {
             if (this._arena._tick - this.health.lastDamaged > 2) {
                 this.doDamage(ent.damage);
                 this.health.lastDamaged = this._arena._tick;
+                this.style.flags ^= 2;
             }
         }
         if (this.health.health === 0) this.delete();

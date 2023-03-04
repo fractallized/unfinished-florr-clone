@@ -9,7 +9,7 @@ export default class Petal extends Entity {
     static BASE_FRICTION = 0.5;
     static BASE_WEIGHT = 0.01;
     
-    ROTATION_FIRMNESS = 0.5;
+    ROTATION_FIRMNESS = 0.4;
 
     petal: PetalComponent;
     health: HealthComponent;
@@ -24,7 +24,7 @@ export default class Petal extends Entity {
     clump: boolean;
     creationTick: number;
     isFriendly = true;
-    poison: { dps: number, ticks: number} | null;
+    poison: { dpt: number, ticks: number} | null;
     holdingRadius = 0;
     followNormalRotation = true;
     constructor(arena: Arena, player: Player, outerPos: number, innerPos: number, pos: number, rarity: number, petal: PlayerPetal) {
@@ -75,6 +75,7 @@ export default class Petal extends Entity {
             if (this._arena._tick - this.health.lastDamaged > 2) {
                 this.doDamage(ent.damage);
                 this.health.lastDamaged = this._arena._tick;
+                this.style.flags ^= 2;
             }
         }
         if (this.health.health === 0) this.delete();

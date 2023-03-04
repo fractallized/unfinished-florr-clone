@@ -34,13 +34,13 @@ const drawEntity = (ent) => {
     if (ent.health) {    
         ent.health.lerpHP += 0.2 * (ent.health.health - ent.health.lerpHP);
         ctx.strokeStyle = '#111111';
-        ctx.lineWidth = 4;
+        ctx.lineWidth = 6;
         ctx.beginPath();
         ctx.moveTo(-r*1.5,r*1.1+15);
         ctx.lineTo(r*1.5,r*1.1+15);
         ctx.stroke();
         ctx.strokeStyle = '#00bb00';
-        ctx.lineWidth = 3.2;
+        ctx.lineWidth = 4.8;
         ctx.beginPath();
         ctx.moveTo(-r*1.5,r*1.1+15);
         ctx.lineTo(-r*1.5+3*ent.health.lerpHP/255*r,r*1.1+15);
@@ -55,13 +55,13 @@ const drawEntity = (ent) => {
     else if (ent.playerInfo) drawPlayer(ent);
     else drawPortal(ent);
 }
-let last = 0;
+let start = performance.now();
+let ct = 1;
 const loop = _ => {
-    console.log(performance.now() - last + "ms");
-    last = performance.now();
-    cameraEnt = arenaEnt = playerEnt = null;
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+    cameraEnt = arenaEnt = playerEnt = null;
+
     staticScale = Math.max(canvas.width/1920,canvas.height/1080);
     if (!entities.hasOwnProperty('arena') || !entities.hasOwnProperty('camera')) {
         ctx.font = '50px Ubuntu';
@@ -82,7 +82,7 @@ const loop = _ => {
         scale = staticScale * cameraEnt.camera.lerpFov;
         ctx.fillStyle = arenaPattern;
         ctx.strokeStyle = '#471a1a';
-        ctx.lineWidth = 200;
+        ctx.lineWidth = 2000;
         ctx.setTransform(scale,0,0,scale,canvas.width/2,canvas.height/2);
         ctx.translate(-cameraEnt.camera.lerpX,-cameraEnt.camera.lerpY);
         ctx.beginPath();

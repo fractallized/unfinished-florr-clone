@@ -15,9 +15,9 @@ export default class NeutralAI1 extends PassiveAI1 {
             this.target = null;
             return;
         }
-        this.input.setTarget(Vector.sub(this.target.pos, this.mob.pos).normalize().scale(this.mob.aggroSpeed * 5.8));
-        this.input.tick();
-        this.mob.vel.set2(this.input);
+        this.input.set2(Vector.sub(this.target.pos, this.mob.pos).normalize().scale(this.mob.aggroSpeed));
+        //this.input.tick();
+        this.mob.accel.set2(this.input);
         this.mob.pos.angle = this.input.angle ?? this.mob.pos.angle;
     }
     onDamage(ent: Entity) {

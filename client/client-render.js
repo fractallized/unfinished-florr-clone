@@ -35,13 +35,6 @@ const angleLerp = (curr, target, pct) => {
     curr = curr * (1 - pct) + target * pct;
     if (curr > PI_2 / 2) curr -= PI_2;
     return curr;
-    /*
-    curr = (curr + PI_2) % PI_2;
-    target = (target + PI_2) % PI_2;
-    curr = curr * (1 - pct) + target * pct;
-    if (curr > PI_2 / 2) curr -= PI_2;
-    return curr;
-    */
 }
 function getStroke(color, black = 0.64) {
     return "#" +

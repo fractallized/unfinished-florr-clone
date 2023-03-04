@@ -9,8 +9,8 @@ import Petal from "../player/Petal";
 import { MobDefinition } from "../../consts/MobDefinitions";
 //TODO: AI
 export default class Mob extends Entity {
-    passiveSpeed = 4; //in bursts
-    aggroSpeed = 2;
+    passiveSpeed = 2; //in bursts
+    aggroSpeed = 1.7;
     zone: SpawnZone;
     lastIdle = -1;
     loot: Record<number, number[][]>;
@@ -45,6 +45,7 @@ export default class Mob extends Entity {
             else if (ent instanceof Petal) this.ai.onDamage(ent.player);
             this.doDamage(ent.damage);
             this.health.lastDamaged = this._arena._tick;
+            this.style.flags ^= 2;
         }
         if (this.health.health === 0) this.delete();
     }
@@ -60,7 +61,7 @@ export default class Mob extends Entity {
             this._arena.add(new Drop(this._arena, this.pos.x, this.pos.y, 40, n * PI_2 / drops.length, {
                 id: drops[n][0],
                 rarity: drops[n][1]
-            }));
+            }, drops.length > 1));
         }
         return super.delete();
     }

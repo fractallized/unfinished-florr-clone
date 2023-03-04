@@ -9,6 +9,7 @@ export interface PetalDefinition {
     health: number,
     cooldown: number,
     petal: typeof Petal,
+    
     clump?: boolean,
     heal?: number,
     noSpawn?: boolean,
@@ -17,7 +18,7 @@ export interface PetalDefinition {
     fovMultiplier?: number[],
     rotationSpeedAddition?: number[],
     poison?: {
-        dps: number,
+        dpt: number,
         ticks: number
     }
 }
@@ -111,7 +112,7 @@ const PETAL_DEFINITIONS: Record<number, PetalDefinition> = {
         cooldown: 150,
         petal: Petal,
         poison: {
-            dps: 0.2,
+            dpt: 0.2,
             ticks: 50
         }
     },
