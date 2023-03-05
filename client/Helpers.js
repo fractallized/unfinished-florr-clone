@@ -3,8 +3,9 @@ const lerp = (start, end, t) => {
     t = Math.max(Math.min(t, 1), 0);
     return start + (end - start) * t;
 };
-const lerpTime = (last) => (performance.now() - last) / MSPT;
+const lerpTime = (last, length) => (performance.now() - last) / length;
 const angleLerp = (curr, target, pct) => {
+    pct = Math.max(Math.min(pct, 1), 0);
     if (Math.abs(curr - target) > PI_2 / 2) {
         if (target > curr) curr += PI_2;
         else target += PI_2;
@@ -101,12 +102,20 @@ canvas.onmousedown = async (e) => {
     e.preventDefault();
     if (e.button === 0) attack |= 1;
     else defend |= 1;
+    if (clientRender.selected) return;
+    for (const ent of Object.values(clientRender.entities)) {
+        if (Math.abs(ent.pos.x - e.clientX) > ent.pos.radius) continue;
+        if (Math.abs(ent.pos.y - e.clientY) > ent.pos.radius) continue;
+        return ent.onmousedown(e);
+    }
 }
 canvas.onmousemove = async (e) => {
     e.preventDefault();
+    clientRender.selected && clientRender.selected.onmousemove(e);
 }
 canvas.onmouseup = async (e) => {
     e.preventDefault();
     if (e.button === 0) attack &= ~1;
     else defend &= ~1; 
+    clientRender.selected && clientRender.selected.onmouseup(e);
 }

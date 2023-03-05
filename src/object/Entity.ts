@@ -1,7 +1,8 @@
 import Vector from "./Vector";
 import Arena from "../game/Arena";
-import { HealthComponent, PositionComponent, StyleComponent } from "./Components";
+import { PositionComponent, StyleComponent } from "./Components";
 import AbstractEntity from "./AbstractEntity";
+import { PI_2 } from "../consts/Helpers";
 
 class Poison {
     at = 0;
@@ -52,6 +53,7 @@ export default class Entity extends AbstractEntity {
     }
     tick() {
         if (!this._arena) return;
+        this.pos.angle %= PI_2
         this.vel.scale(this.friction);
         this.vel.add(this.accel);
         this.pos.add(this.vel);

@@ -34,11 +34,11 @@ export default class Client extends AbstractEntity {
         this.server = server;
         this.ws = ws;
 
-        this.inventory.add((11 - 1) * 8 + 7, 10);
+        this.inventory.add((11 - 1) * 8 + 0, 10);
         this.inventory.add((3 - 1) * 8 + 7, 1);
         this.inventory.add((7 - 1) * 8 + 7, 1);
         this.inventory.add((9 - 1) * 8 + 7, 1);
-        for (let n = 0; n < 10; ++n) this.setPetal(n, 11, 7);
+        for (let n = 0; n < 10; ++n) this.setPetal(n, 11, 0);
         this.ws.onmessage = (req: any) => this.onmessage(req);
         this.ws.onclose = () => {
             console.log("client left")

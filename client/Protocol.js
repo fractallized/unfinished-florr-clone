@@ -164,8 +164,11 @@ function parseEntPacket() {
                         break;
                     case 20:
                         if (entity.player)
-                            while ((pos = r.u8()) !== 255)
-                                entity.player.petalsEquipped[pos] = r.u8();
+                            while ((pos = r.u8()) !== 255) {
+                                const change = (entity.player.petalsEquipped[pos] = r.u8());
+                                if ((pos & 1) === 0 && clientRender.entities[pos >> 1] && change === 0) delete clientRender.entities[pos >> 1];
+                                else if ((pos & 1) === 0 && !clientRender.entities[pos >> 1]) clientRender.entities[pos >> 1] = new LoadoutPetal(pos >> 1, entity.player.numEquipped);
+                            }
                         break;
                     case 21:
                         if (entity.player)

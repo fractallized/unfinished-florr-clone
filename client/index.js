@@ -1,5 +1,6 @@
 function drawEnt(ent) {
     if (!ent.pos) return;
+    ctx.save();
     ctx.setTransform(scale,0,0,scale,canvas.width/2,canvas.height/2);
     ctx.translate(ent.pos.x-cameraEnt.camera.x, ent.pos.y-cameraEnt.camera.y);
     ctx.rotate(ent.pos.angle);
@@ -9,6 +10,7 @@ function drawEnt(ent) {
     else if (ent.mob) drawMobAsEnt(ent);
     else if (ent.drop) drawDrop(ent);
     else drawPortal(ent);
+    ctx.restore();
 }
 (function animate() {
     window.devicePixelRatio = 1;
@@ -32,6 +34,15 @@ function drawEnt(ent) {
         ctx.fillRect(0,0,entities[1].arena.width,entities[1].arena.height);
         for (const ent of Object.values(entities)) drawEnt(ent);
         //render the game
+        playerEnt = entities[cameraEnt.camera.player] || null;
+        if (playerEnt) {
+            let press = null;
+            for (const ent of Object.values(clientRender.entities)) {
+                if (!ent.mousedown) ent.draw();
+                else press = ent;
+            }
+            press && press.draw();
+        }
     }
     if (ws.readyState === 1) ws.send(new Uint8Array([1,input | (attack << 4) | (defend << 5)]))
     requestAnimationFrame(animate);

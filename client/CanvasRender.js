@@ -1,7 +1,7 @@
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 let staticScale = 1, scale = 1;
-let clientRender = {};
+
 let cameraEnt, playerEnt;
 const PI_2 = Math.PI * 2;
 const petalCanvas = new Array(100).fill(null);
@@ -476,6 +476,7 @@ function drawPlayer(player) {
     ctx.restore();
 }
 function drawLoadoutPetal(id, rarity, cd, hp) {
+    if (!id) return;
     ctx.fillStyle = getColorByRarity(rarity);
     ctx.strokeStyle = getStroke(ctx.fillStyle);
     ctx.lineWidth = 10;
