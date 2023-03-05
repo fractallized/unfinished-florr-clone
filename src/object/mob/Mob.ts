@@ -55,7 +55,7 @@ export default class Mob extends Entity {
         const drops: Array<[number, number]> = [];
         for (const id of Object.keys(this.loot)) {
             const rar = FROM_TABLE(this.loot[parseInt(id)][this.mob.rarity]);
-            if (rar) drops.push([parseInt(id), rar - 1]);
+            if (rar > -1) drops.push([parseInt(id), rar]);
         }
         for (let n = 0; n < drops.length; ++n) {
             this._arena.add(new Drop(this._arena, this.pos.x, this.pos.y, 40, n * PI_2 / drops.length, {

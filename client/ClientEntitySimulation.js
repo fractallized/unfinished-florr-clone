@@ -1,6 +1,14 @@
 "use strict";
 let clientRender = { entities: {}, selected: null };
-
+class ExponentialLerpValue {
+    constructor(v, pct) {
+        this.value = v;
+        this.at = v;
+        this.pct = pct;
+    }
+    set(v) { this.value = v }
+    get lerp() { this.at += this.pct * (this.value - this.at); return this.at; }
+}
 class LerpValue {
     constructor(v) {
         this.last = this.value = v;
@@ -51,7 +59,7 @@ class CameraComponent {
         this.values = {
             x: new LerpValue(r.f32()),
             y: new LerpValue(r.f32()),
-            fov: new LerpValue(r.f32()),
+            fov: new ExponentialLerpValue(r.f32(), 0.2),
             player: r.vu()
         };
     }
@@ -119,15 +127,6 @@ class PlayerComponent {
             if (this.petalsEquipped[n * 2]) clientRender.entities[n] = new LoadoutPetal(n, this.numEquipped);
         }
     }
-}
-class ExponentialLerpValue {
-    constructor(v, pct) {
-        this.value = v;
-        this.at = v;
-        this.pct = pct;
-    }
-    set(v) { this.value = v }
-    get lerp() { this.at += this.pct * (this.value - this.at); return this.at; }
 }
 class ClientEntityPositionComponent {
     constructor(x, y, r) {
