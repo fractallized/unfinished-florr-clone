@@ -193,7 +193,7 @@ function parseEntPacket() {
             }
         }
     }
-    adjustInventory();
+    //adjustInventory();
     if (!r.has()) { if (adjustInv) adjustInventory(); return; }
     let at = -1;
     let pos = r.vu();

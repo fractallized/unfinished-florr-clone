@@ -1,5 +1,5 @@
 "use strict";
-let clientRender = { entities: {}, selected: null, inventory: new Int32Array(100) };
+let clientRender = { static: {}, entities: {}, selected: null, inventory: new Int32Array(100) };
 class ExponentialLerpValue {
     constructor(v, pct) {
         this.value = v;
@@ -154,6 +154,29 @@ class ClientEntity {
     }
     draw() {}
 }
+class Background extends ClientEntity {
+    constructor(x,y,w,h) {
+        super(x,y,0);
+        this.baseX = x;
+        this.baseY = y;
+        this.width = w;
+        this.height = h;
+    }
+    keepPosition() {
+        this.pos.x = this.baseX * staticScale;
+        this.pos.y = this.baseY * staticScale;
+    }
+    draw() {
+        this.keepPosition();
+        ctx.fillStyle = '#aaaaaa';
+        ctx.strokeStyle = '#555555';
+        ctx.lineJoin = 'round';
+        ctx.lineWidth = 15;
+        ctx.setTransform(staticScale,0,0,staticScale,this.pos.x,this.pos.y);
+        ctx.strokeRect(0,0,this.width,this.height);
+        ctx.fillRect(0,0,this.width,this.height);
+    }
+}
 class IntermediatePetal extends ClientEntity {
     settled = -1;
     lastSettled = -1000;
@@ -211,7 +234,7 @@ class IntermediatePetal extends ClientEntity {
     }
     draw() {
         if (!playerEnt) return;
-        const { numEquipped, petalsEquipped, petalHealths, petalCooldowns } = playerEnt.player;
+        const { numEquipped, petalsEquipped } = playerEnt.player;
         this.totalEquipped = numEquipped;
         ctx.setTransform(staticScale*this.pos.radius/30,0,0,staticScale*this.pos.radius/30,this.pos.x,this.pos.y);
         ctx.globalAlpha = 1;
@@ -229,7 +252,7 @@ class IntermediatePetal extends ClientEntity {
 }
 class InventoryPetal extends ClientEntity {
     constructor(id, rarity, count, invPos) {
-        super((100 + 75 * (invPos & 7)) * staticScale,(100 + 75 * (invPos >> 3)) * staticScale,0);
+        super((100 + 75 * (invPos % 5)) * staticScale,(100 + 75 * ((invPos / 5) | 0)) * staticScale,0);
         this.id = id;
         this.rarity = rarity;
         this.count = count;
@@ -240,15 +263,16 @@ class InventoryPetal extends ClientEntity {
         clientRender.entities[-1] = new IntermediatePetal(this);
     }
     keepPosition() {
-        this.pos.x = (100 + 75 * (this.invPos & 7)) * staticScale//(25 + (this.invPos % 6) * 60) * staticScale;
-        this.pos.y = (100 + 75 * (this.invPos >> 3)) * staticScale//canvas.height + ( - 200) * staticScale;
+        this.pos.x = (100 + 75 * (this.invPos % 5)) * staticScale//(25 + (this.invPos % 6) * 60) * staticScale;
+        this.pos.y = (100 + 75 * ((this.invPos / 5) | 0)) * staticScale//canvas.height + ( - 200) * staticScale;
     }
     draw() {
         this.keepPosition();
         ctx.setTransform(staticScale*this.pos.radius/30,0,0,staticScale*this.pos.radius/30,this.pos.x,this.pos.y);
         ctx.globalAlpha = 1;
         drawLoadoutPetal(this.id, this.rarity, 255, 0);
-        ctx.translate(24,-24);
+        if (this.count === 1) return;
+        ctx.translate(24,-18);
         ctx.rotate(0.5);
         ctx.textAlign = 'center';
         ctx.textBaseline = 'center';
@@ -350,3 +374,4 @@ class LoadoutPetal extends ClientEntity {
         else drawLoadoutPetal(petalsEquipped[this.loadoutPos * 2], petalsEquipped[this.loadoutPos * 2 + 1], 255, 0);
     }
 }
+clientRender.static.A = new Background(25,25,450,800);

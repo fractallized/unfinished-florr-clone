@@ -68,6 +68,7 @@ function drawEnt(ent) {
         //render the game
         playerEnt = entities[cameraEnt.camera.player] || null;
         if (playerEnt) {
+            for (const ent of Object.values(clientRender.static)) ent.draw();
             let press = null;
             for (const ent of Object.values(clientRender.entities)) {
                 if (!ent.mousedown) ent.draw();
