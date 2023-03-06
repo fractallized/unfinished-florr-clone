@@ -1,5 +1,5 @@
 "use strict";
-let clientRender = { entities: {}, selected: null };
+let clientRender = { entities: {}, selected: null, inventory: new Int32Array(100) };
 class ExponentialLerpValue {
     constructor(v, pct) {
         this.value = v;
@@ -93,7 +93,7 @@ class ArenaComponent {
 }
 class HealthComponent {
     constructor() {
-        this._health = new LerpValue(r.u8());
+        this._health = new ExponentialLerpValue(r.u8(), 0.2);
     }
     get health() { return this._health.lerp; }
     set health(v) { this._health.set(v); }
@@ -149,14 +149,117 @@ class ClientEntityPositionComponent {
 class ClientEntity {
     mousedown = false;
     hover = false;
-    settled = false;
     constructor(x,y,r) {
         this.pos = new ClientEntityPositionComponent(x,y,r);
     }
     draw() {}
 }
+class IntermediatePetal extends ClientEntity {
+    settled = -1;
+    lastSettled = -1000;
+    constructor(spawnedFrom) {
+        super(spawnedFrom.pos.x, spawnedFrom.pos.y, spawnedFrom.pos.radius);
+        this.spawnedFrom = spawnedFrom;
+        this.mousedown = true;
+        this.id = spawnedFrom.id;
+        this.rarity = spawnedFrom.rarity;
+        this.totalEquipped = 10; //need fix;
+        clientRender.selected = this;
+        this.pos.radius = 50;
+    }
+    onmousemove(e) {
+        let midY = canvas.height - staticScale * 135;
+        if (Math.abs(midY - e.clientY) <= 50 * staticScale) {
+            for (let n = 0; n < this.totalEquipped; n++) {
+                if (n === this.loadoutPos) continue;
+                const midX = canvas.width/2 + staticScale * (n - this.totalEquipped * 0.5 + 0.5) * 100;
+                if (Math.abs(e.clientX - midX) > 50 * staticScale) continue;
+                this.pos.x = midX;
+                this.pos.y = midY;
+                this.pos.radius = 40;
+                this.settled = n;
+                return;
+            }
+        }
+        midY = canvas.height - staticScale * 45;
+        if (Math.abs(midY - e.clientY) <= 40 * staticScale) {
+            for (let n = this.totalEquipped; n < this.totalEquipped*2; n++) {
+                if (n === this.loadoutPos) continue;
+                const midX = canvas.width/2 + staticScale * (n - this.totalEquipped * 1.5 + 0.5) * 80;
+                if (Math.abs(e.clientX - midX) > 40 * staticScale) continue;
+                this.pos.x = midX;
+                this.pos.y = midY;
+                this.pos.radius = 30;
+                this.settled = n;
+                return;
+            }
+        }
+        this.settled = -1;
+        this.pos.x = e.clientX;
+        this.pos.y = e.clientY;
+        this.pos.radius = 50;
+    }
+    onmouseup(e) {
+        clientRender.selected = null;
+        this.mousedown = false;
+        this.lastSettled = performance.now();
+        if (this.settled === -1) {
+            this.pos.x = this.spawnedFrom.pos.x;
+            this.pos.y = this.spawnedFrom.pos.y;
+        } else {
+            ws.send(new Uint8Array([2,this.settled,this.id,this.rarity]));
+        }
+    }
+    draw() {
+        ctx.setTransform(staticScale*this.pos.radius/30,0,0,staticScale*this.pos.radius/30,this.pos.x,this.pos.y);
+        ctx.globalAlpha = 1;
+        if (this.settled === -1) {
+            ctx.rotate(Math.sin(this.pos.angle) * 0.1);
+            this.pos.angle += 0.2;
+        }
+        if (this.mousedown) drawLoadoutPetal(this.id, this.rarity, 255, 0);
+        else { 
+            drawLoadoutPetal(this.id, this.rarity, 0.01, 0);
+            if (performance.now() - this.lastSettled > 1000) delete clientRender.entities[-1];
+        }
+    }
+}
+class InventoryPetal extends ClientEntity {
+    constructor(id, rarity, count, invPos) {
+        super((100 + 75 * (invPos & 7)) * staticScale,(100 + 75 * (invPos >> 3)) * staticScale,0);
+        this.id = id;
+        this.rarity = rarity;
+        this.count = count;
+        this.invPos = invPos;
+        this.pos.radius = 30;
+    }
+    onmousedown(e) {
+        clientRender.entities[-1] = new IntermediatePetal(this);
+    }
+    keepPosition() {
+        this.pos.x = (100 + 75 * (this.invPos & 7)) * staticScale//(25 + (this.invPos % 6) * 60) * staticScale;
+        this.pos.y = (100 + 75 * (this.invPos >> 3)) * staticScale//canvas.height + ( - 200) * staticScale;
+    }
+    draw() {
+        this.keepPosition();
+        ctx.setTransform(staticScale*this.pos.radius/30,0,0,staticScale*this.pos.radius/30,this.pos.x,this.pos.y);
+        ctx.globalAlpha = 1;
+        drawLoadoutPetal(this.id, this.rarity, 255, 0);
+        ctx.translate(24,-24);
+        ctx.rotate(0.5);
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'center';
+        ctx.font = '15px Ubuntu';
+        ctx.lineWidth = 3;
+        ctx.fillStyle = '#ffffff';
+        ctx.strokeStyle = '#000000';
+        ctx.strokeText(`x${this.count}`,0,0);
+        ctx.fillText(`x${this.count}`,0,0);
+    }
+}
 class LoadoutPetal extends ClientEntity {
     lastSettled = -1000;
+    settled = -1;
     constructor(loadoutPos, totalEquipped) {
         if (loadoutPos < totalEquipped) { super(canvas.width/2 + staticScale * (loadoutPos - totalEquipped * 0.5 + 0.5) * 100,canvas.height - staticScale * 135,0); this.pos.radius = 40; }
         else { super(canvas.width/2 + staticScale * (loadoutPos - totalEquipped * 1.5 + 0.5) * 80,canvas.height - staticScale * 45, 0); this.pos.radius = 30; }

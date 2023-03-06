@@ -36,7 +36,7 @@ ws.onmessage = async (e) => {
     }
 };
 function parseEntPacket() {
-    let id;
+    let id, adjustInv = false;
     while ((id = r.vu()))
         if (entities[id])
             delete entities[id];
@@ -73,6 +73,7 @@ function parseEntPacket() {
                         break;
                     case 8:
                         entities[id].player = new PlayerComponent;
+                        adjustInv = true;
                         break;
                 }
             }
@@ -172,6 +173,7 @@ function parseEntPacket() {
                                     clientRender.entities[pos >> 1].lastSettled = -1000;
                                 }
                             }
+                            adjustInv = true;
                         break;
                     case 21:
                         if (entity.player)
@@ -189,6 +191,35 @@ function parseEntPacket() {
                         break;
                 }
             }
+        }
+    }
+    if (!r.has()) { if (adjustInv) adjustInventory(); return; }
+    let at = -1;
+    let pos = r.vu();
+    while(pos && r.has()) {
+        clientRender.inventory[at += pos] = r.vu();
+        pos = r.vu();
+    }
+    adjustInventory();
+}
+function adjustInventory() {
+    const _inv = [...clientRender.inventory];
+    /*
+    const loadout = entities[clientRender.camera].player.petalsEquipped;
+    for (let n = 0; n < 40; n += 2) {
+        if (!loadout[n]) continue;
+        --_inv[(loadout[n] - 1) * 8 + loadout[n+1]];
+    }
+    */
+    let pos = 0;
+    for (let n = 0; n < 100; n++) {
+        const hash = n | (1 << 16);
+        if (_inv[n] === 0 && clientRender.entities[hash]) delete clientRender.entities[hash];
+        else if (_inv[n] !== 0) {
+            if (!clientRender.entities[hash]) clientRender.entities[hash] = new InventoryPetal((n>>3)+1,n&7,_inv[n],pos);
+            clientRender.entities[hash].count = _inv[n];
+            clientRender.entities[hash].invPos = pos;
+            ++pos;
         }
     }
 }

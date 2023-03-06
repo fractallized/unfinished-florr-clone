@@ -3,8 +3,40 @@ function drawEnt(ent) {
     ctx.save();
     ctx.setTransform(scale,0,0,scale,canvas.width/2,canvas.height/2);
     ctx.translate(ent.pos.x-cameraEnt.camera.x, ent.pos.y-cameraEnt.camera.y);
-    ctx.rotate(ent.pos.angle);
     ctx.globalAlpha = ent.style.opacity / 255;
+    const r = ent.pos.radius;
+    if (ent.mob) {
+        ctx.fillStyle = getColorByRarity(ent.mob.rarity);
+        const text = getNameByRarity(ent.mob.rarity);
+        const name = MOB_NAMES[ent.mob.id - 1];
+        ctx.strokeStyle = '#000000';
+        ctx.textAlign = 'right';
+        ctx.font = `15px Ubuntu`;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.strokeText(text, r*1.5, r*1.1+30);
+        ctx.fillText(text, r*1.5, r*1.1+30);
+        ctx.fillStyle = '#ffffff';
+        ctx.textAlign = 'left';
+        ctx.beginPath();
+        ctx.strokeText(name, -r*1.5, r*1.1+8);
+        ctx.fillText(name, -r*1.5, r*1.1+8);
+    }
+    if (ent.health) {    
+        ctx.strokeStyle = '#111111';
+        ctx.lineWidth = 6;
+        ctx.beginPath();
+        ctx.moveTo(-r*1.5,r*1.1+15);
+        ctx.lineTo(r*1.5,r*1.1+15);
+        ctx.stroke();
+        ctx.strokeStyle = '#00bb00';
+        ctx.lineWidth = 4.8;
+        ctx.beginPath();
+        ctx.moveTo(-r*1.5,r*1.1+15);
+        ctx.lineTo(-r*1.5+3*ent.health.health/255*r,r*1.1+15);
+        ctx.stroke();
+    }
+    ctx.rotate(ent.pos.angle);
     if (ent.player) drawPlayer(ent);
     else if (ent.petal) drawPetalAsEnt(ent);
     else if (ent.mob) drawMobAsEnt(ent);
