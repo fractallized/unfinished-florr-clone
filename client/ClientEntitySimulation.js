@@ -171,7 +171,6 @@ class IntermediatePetal extends ClientEntity {
         let midY = canvas.height - staticScale * 135;
         if (Math.abs(midY - e.clientY) <= 50 * staticScale) {
             for (let n = 0; n < this.totalEquipped; n++) {
-                if (n === this.loadoutPos) continue;
                 const midX = canvas.width/2 + staticScale * (n - this.totalEquipped * 0.5 + 0.5) * 100;
                 if (Math.abs(e.clientX - midX) > 50 * staticScale) continue;
                 this.pos.x = midX;
@@ -184,7 +183,6 @@ class IntermediatePetal extends ClientEntity {
         midY = canvas.height - staticScale * 45;
         if (Math.abs(midY - e.clientY) <= 40 * staticScale) {
             for (let n = this.totalEquipped; n < this.totalEquipped*2; n++) {
-                if (n === this.loadoutPos) continue;
                 const midX = canvas.width/2 + staticScale * (n - this.totalEquipped * 1.5 + 0.5) * 80;
                 if (Math.abs(e.clientX - midX) > 40 * staticScale) continue;
                 this.pos.x = midX;
@@ -206,21 +204,26 @@ class IntermediatePetal extends ClientEntity {
         if (this.settled === -1) {
             this.pos.x = this.spawnedFrom.pos.x;
             this.pos.y = this.spawnedFrom.pos.y;
+            this.pos.radius = 0;
         } else {
             ws.send(new Uint8Array([2,this.settled,this.id,this.rarity]));
         }
     }
     draw() {
+        if (!playerEnt) return;
+        const { numEquipped, petalsEquipped, petalHealths, petalCooldowns } = playerEnt.player;
+        this.totalEquipped = numEquipped;
         ctx.setTransform(staticScale*this.pos.radius/30,0,0,staticScale*this.pos.radius/30,this.pos.x,this.pos.y);
         ctx.globalAlpha = 1;
-        if (this.settled === -1) {
+        if (this.settled === -1 && this.mousedown) {
             ctx.rotate(Math.sin(this.pos.angle) * 0.1);
             this.pos.angle += 0.2;
         }
         if (this.mousedown) drawLoadoutPetal(this.id, this.rarity, 255, 0);
         else { 
-            drawLoadoutPetal(this.id, this.rarity, 0.01, 0);
-            if (performance.now() - this.lastSettled > 1000) delete clientRender.entities[-1];
+            if (this.settled !== -1) drawLoadoutPetal(this.id, this.rarity, 0.01, 0);
+            else drawLoadoutPetal(this.id, this.rarity, 255, 0);
+            if (performance.now() - this.lastSettled > 1000 || (petalsEquipped[this.settled * 2] === this.id && petalsEquipped[this.settled * 2 + 1] === this.rarity)) delete clientRender.entities[-1];
         }
     }
 }

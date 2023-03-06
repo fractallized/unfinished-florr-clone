@@ -3,7 +3,7 @@ import * as WebSocket from "ws";
 import * as fs from "fs";
 
 import GameServer from "./game/Server";
-const PORT = parseInt(process.env.PORT || "8080");
+const PORT = parseInt(process.env.PORT || "3001");
 
 const server = http.createServer((req, res) => {
       let file: string | null = null;

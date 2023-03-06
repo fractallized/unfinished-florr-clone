@@ -193,6 +193,7 @@ function parseEntPacket() {
             }
         }
     }
+    adjustInventory();
     if (!r.has()) { if (adjustInv) adjustInventory(); return; }
     let at = -1;
     let pos = r.vu();
@@ -204,13 +205,11 @@ function parseEntPacket() {
 }
 function adjustInventory() {
     const _inv = [...clientRender.inventory];
-    /*
-    const loadout = entities[clientRender.camera].player.petalsEquipped;
+    const loadout = entities[entities[clientRender.camera].camera.player].player.petalsEquipped;
     for (let n = 0; n < 40; n += 2) {
         if (!loadout[n]) continue;
         --_inv[(loadout[n] - 1) * 8 + loadout[n+1]];
     }
-    */
     let pos = 0;
     for (let n = 0; n < 100; n++) {
         const hash = n | (1 << 16);
