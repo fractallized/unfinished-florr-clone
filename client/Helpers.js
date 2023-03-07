@@ -73,6 +73,9 @@ window.onkeydown = async ({ code }) => {
             break;
         case "Enter":
             if (ws.readyState === 1) ws.send(new Uint8Array([0]));
+            break;
+        case "KeyZ":
+            clientRender.static.inventoryBG.baseX = -450 - clientRender.static.inventoryBG.baseX;
     }
 }
 window.onkeyup = async ({ code }) => {
@@ -104,8 +107,8 @@ canvas.onmousedown = async (e) => {
     else defend |= 1;
     if (clientRender.selected) return;
     for (const ent of Object.values(clientRender.entities)) {
-        if (Math.abs(ent.pos.x - e.clientX) > ent.pos.radius) continue;
-        if (Math.abs(ent.pos.y - e.clientY) > ent.pos.radius) continue;
+        if (Math.abs(ent.x - e.clientX) > ent.pos.radius) continue;
+        if (Math.abs(ent.y - e.clientY) > ent.pos.radius) continue;
         return ent.onmousedown(e);
     }
 }

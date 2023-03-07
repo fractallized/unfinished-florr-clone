@@ -152,6 +152,8 @@ class ClientEntity {
     constructor(x,y,r) {
         this.pos = new ClientEntityPositionComponent(x,y,r);
     }
+    get x() { return this.pos.x }
+    get y() { return this.pos.y }
     draw() {}
 }
 class Background extends ClientEntity {
@@ -181,7 +183,7 @@ class IntermediatePetal extends ClientEntity {
     settled = -1;
     lastSettled = -1000;
     constructor(spawnedFrom) {
-        super(spawnedFrom.pos.x, spawnedFrom.pos.y, spawnedFrom.pos.radius);
+        super(spawnedFrom.x, spawnedFrom.y, spawnedFrom.pos.radius);
         this.spawnedFrom = spawnedFrom;
         this.mousedown = true;
         this.id = spawnedFrom.id;
@@ -225,8 +227,8 @@ class IntermediatePetal extends ClientEntity {
         this.mousedown = false;
         this.lastSettled = performance.now();
         if (this.settled === -1) {
-            this.pos.x = this.spawnedFrom.pos.x;
-            this.pos.y = this.spawnedFrom.pos.y;
+            this.pos.x = this.spawnedFrom.x;
+            this.pos.y = this.spawnedFrom.y;
             this.pos.radius = 0;
         } else {
             ws.send(new Uint8Array([2,this.settled,this.id,this.rarity]));
@@ -252,23 +254,25 @@ class IntermediatePetal extends ClientEntity {
 }
 class InventoryPetal extends ClientEntity {
     constructor(id, rarity, count, invPos) {
-        super((100 + 75 * (invPos % 5)) * staticScale,(100 + 75 * ((invPos / 5) | 0)) * staticScale,0);
+        super((clientRender.static.inventoryBG.pos.x + 75 * (1 + invPos % 5)) * staticScale,(clientRender.static.inventoryBG.pos.y + 75 * (1 + (invPos / 5) | 0)) * staticScale,0);
         this.id = id;
         this.rarity = rarity;
         this.count = count;
         this.invPos = invPos;
         this.pos.radius = 30;
     }
-    onmousedown(e) {
+    get x() { return this.pos.values.x.value }
+    get y() { return this.pos.values.y.value }
+    onmousedown() {
         clientRender.entities[-1] = new IntermediatePetal(this);
     }
     keepPosition() {
-        this.pos.x = (100 + 75 * (this.invPos % 5)) * staticScale//(25 + (this.invPos % 6) * 60) * staticScale;
-        this.pos.y = (100 + 75 * ((this.invPos / 5) | 0)) * staticScale//canvas.height + ( - 200) * staticScale;
+        this.pos.x = clientRender.static.inventoryBG.pos.x + (75 * (this.invPos % 5 + 1)) * staticScale//(25 + (this.invPos % 6) * 60) * staticScale;
+        this.pos.y = clientRender.static.inventoryBG.pos.y + (75 * (1 + (this.invPos / 5) | 0)) * staticScale//canvas.height + ( - 200) * staticScale;
     }
     draw() {
         this.keepPosition();
-        ctx.setTransform(staticScale*this.pos.radius/30,0,0,staticScale*this.pos.radius/30,this.pos.x,this.pos.y);
+        ctx.setTransform(staticScale*this.pos.radius/30,0,0,staticScale*this.pos.radius/30,this.x,this.y);
         ctx.globalAlpha = 1;
         drawLoadoutPetal(this.id, this.rarity, 255, 0);
         if (this.count === 1) return;
@@ -374,4 +378,4 @@ class LoadoutPetal extends ClientEntity {
         else drawLoadoutPetal(petalsEquipped[this.loadoutPos * 2], petalsEquipped[this.loadoutPos * 2 + 1], 255, 0);
     }
 }
-clientRender.static.A = new Background(25,25,450,800);
+clientRender.static.inventoryBG = new Background(25,400,450,300);
